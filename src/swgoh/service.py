@@ -3,7 +3,15 @@ from __future__ import annotations
 
 from .config import Settings, get_settings
 from .models import Player
-from .recommend import FleetReport, ModReport, analyze_fleet, analyze_roster, load_priority_config
+from .recommend import (
+    FleetReport,
+    ModReport,
+    SquadReport,
+    analyze_fleet,
+    analyze_roster,
+    analyze_squads,
+    load_priority_config,
+)
 from .sources import build_source
 from .sources.cache import FileCache
 
@@ -32,3 +40,7 @@ class SwgohService:
     def fleet_report(self, ally_code: str | None = None) -> FleetReport:
         player = self.get_player(ally_code)
         return analyze_fleet(player)
+
+    def squad_report(self, ally_code: str | None = None) -> SquadReport:
+        player = self.get_player(ally_code)
+        return analyze_squads(player)

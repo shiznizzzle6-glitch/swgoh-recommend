@@ -12,7 +12,7 @@
 #           rest need 2.)  Example: [Speed, Critical Chance] == 4 speed + 2 crit.
 #   note:   optional free-text guidance surfaced in the report.
 
-DARTHVADER:
+VADER:  # Darth Vader (base_id is VADER, not DARTHVADER)
   weight: 2.0
   arrow: Speed
   sets: [Critical Chance, Critical Damage]

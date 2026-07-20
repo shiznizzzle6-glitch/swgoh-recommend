@@ -15,8 +15,8 @@ def _cfg():
 
 def test_bundled_priority_config_loads():
     cfg = load_priority_config()
-    assert "DARTHVADER" in cfg
-    assert cfg["DARTHVADER"]["arrow"] == "Speed"
+    assert "VADER" in cfg
+    assert cfg["VADER"]["arrow"] == "Speed"
 
 
 def test_well_modded_priority_unit_has_no_issues(well_modded_vader):

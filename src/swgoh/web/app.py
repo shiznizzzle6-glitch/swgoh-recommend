@@ -61,6 +61,52 @@ def fleet(request: Request, ally_code: str | None = Query(default=None)) -> HTML
     )
 
 
+@app.get("/squads", response_class=HTMLResponse)
+def squads(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().squad_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "squads.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/squads")
+def api_squads(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().squad_report(ally_code)
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "squads": [
+                {
+                    "name": s.name,
+                    "tier": s.tier,
+                    "tags": s.tags,
+                    "status": s.status,
+                    "readiness": s.readiness,
+                    "owned": s.owned_count,
+                    "size": len(s.members),
+                    "objectives": [
+                        {"kind": o.kind, "detail": o.detail, "priority": round(o.priority, 1)}
+                        for o in s.objectives
+                    ],
+                }
+                for s in report.squads
+            ],
+        }
+    )
+
+
 @app.get("/api/fleet")
 def api_fleet(ally_code: str | None = Query(default=None)) -> JSONResponse:
     report = _service().fleet_report(ally_code)

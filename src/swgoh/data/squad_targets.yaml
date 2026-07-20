@@ -1,0 +1,60 @@
+# Known-useful squads for guild contribution, curated (early 2026) and fully
+# user-editable. base_ids verified against game data. First member is the leader.
+#
+# tags (where the squad earns its keep):
+#   raid_krayt : Krayt Dragon raid scoring
+#   raid_naboo : Battle for Naboo raid
+#   tb         : Territory Battles (faction/combat requirements)
+#   tw         : Territory War offense/defense
+#   gac        : Grand Arena / squad arena
+#   unlock     : unlocks/gears toward a key character (see note)
+#
+# tier: S / A / B rough strength/usefulness.
+
+- name: Bad Batch
+  tier: S
+  tags: [gac, tw, tb]
+  members: [BADBATCHHUNTER, BADBATCHWRECKER, BADBATCHTECH, BADBATCHECHO, BADBATCHOMEGA]
+  note: >
+    Self-sufficient, punishing squad — excellent GAC/TW and strong in TB combat.
+    You already have Hunter and Wrecker maxed; Tech is the main gap.
+
+- name: Bounty Hunters
+  tier: S
+  tags: [raid_krayt, tw, gac]
+  members: [JANGOFETT, BOBAFETT, BOSSK, CADBANE, DENGAR]
+  note: >
+    Core Krayt Dragon raid team and broadly strong. Bonus: gearing Bossk also
+    powers Hound's Tooth for your Fleet plan — double value.
+
+- name: Phoenix
+  tier: A
+  tags: [tb, unlock]
+  members: [HERASYNDULLAS3, EZRABRIDGERS3, SABINEWRENS3, KANANJARRUSS3, CHOPPERS3]
+  note: >
+    The classic route to unlock Grand Admiral Thrawn (a top Fleet capital pilot)
+    and useful in Territory Battles. You're most of the way there.
+
+- name: Nightsisters
+  tier: A
+  tags: [gac, tw, raid_krayt]
+  members: [MOTHERTALZIN, ASAJVENTRESS, DAKA, TALIA, NIGHTSISTERZOMBIE]
+  note: >
+    High-value GAC/TW squad with strong sustain and revives; also contributes to
+    Krayt. Asajj is already built — the rest mostly need gear.
+
+- name: Empire (Palpatine)
+  tier: A
+  tags: [tw, tb, gac]
+  members: [EMPERORPALPATINE, VADER, GRANDADMIRALTHRAWN, GRANDMOFFTARKIN, ROYALGUARD]
+  note: >
+    Flexible Empire core for Territory War/Battles. Thrawn and Palpatine need
+    gear, but you own the whole squad.
+
+- name: Inquisitorius
+  tier: A
+  tags: [gac, tw]
+  members: [GRANDINQUISITOR, FIFTHBROTHER, SEVENTHSISTER, SECONDSISTER, NINTHSISTER]
+  note: >
+    Fast, relentless GAC/TW squad. You have Fifth Brother and Seventh Sister at
+    g13 — the Grand Inquisitor (leader) and the Sisters are the build.

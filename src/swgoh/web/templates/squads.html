@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Squads{% endblock %}
+{% block form_action %}/squads{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <p class="note" style="margin:.2rem 0 1.2rem">
+    Squads for guild contribution, closest-to-fieldable first. Tags show where each
+    one earns its keep (raids, TW, TB, GAC). Build the ones marked
+    <span class="st Ready">Ready</span>/<span class="st Close">Close</span> first.
+  </p>
+
+  {% for s in report.squads %}
+    <article class="squad">
+      <div class="top">
+        <span class="nm">{{ s.name }}</span>
+        <span class="st {{ s.status }}">{{ s.status }}</span>
+        <span class="pill">tier {{ s.tier }}</span>
+        {% for t in s.tags %}<span class="tag">{{ t.replace('_',' ') }}</span>{% endfor %}
+        <span class="spacer"></span>
+        <span class="muted">{{ s.owned }}/{{ s.members|length }} owned · {{ s.readiness|round|int }}% built</span>
+      </div>
+      <div class="bar"><i style="width:{{ s.readiness|round|int }}%"></i></div>
+      <div class="shiplist">
+        {% for m in s.members %}
+          <span class="chip">{% if m.is_leader %}★ {% endif %}{{ m.name }}
+            {% if m.owned %}<span class="muted">{{ m.stars }}★ g{{ m.gear_level }}{% if m.relic_level %} r{{ m.relic_level }}{% endif %}</span>
+            {% else %}<span style="color:var(--bad)">need</span>{% endif %}</span>
+        {% endfor %}
+      </div>
+      {% if s.objectives %}
+        <div style="margin-top:.4rem">
+          {% for o in s.objectives[:4] %}
+            <div class="note" style="margin:.15rem 0">{{ loop.index }}. {{ o.detail }}</div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="note" style="color:var(--good)">Fully built — ready to field. 🎉</div>
+      {% endif %}
+      {% if s.note %}<div class="note" style="font-style:italic;margin-top:.4rem">{{ s.note }}</div>{% endif %}
+    </article>
+  {% endfor %}
+{% endblock %}
