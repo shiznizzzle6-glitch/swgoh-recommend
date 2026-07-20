@@ -134,7 +134,26 @@ class SwgohGgSource(DataSource):
             if cached is not None:
                 return cached
         url = f"{self.base_url}/player/{ally_code}/"
-        resp = httpx.get(url, timeout=self.timeout, headers={"Accept": "application/json"})
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+            ),
+        }
+        resp = httpx.get(url, timeout=self.timeout, headers=headers)
+
+        # swgoh.gg now sits behind Cloudflare's JS challenge, which returns an
+        # HTML interstitial (often HTTP 403) that plain HTTP clients can't solve.
+        content_type = resp.headers.get("content-type", "")
+        looks_like_html = "text/html" in content_type or resp.text.lstrip().startswith("<")
+        if resp.status_code == 403 or looks_like_html:
+            raise RuntimeError(
+                "swgoh.gg blocked this request with a Cloudflare challenge "
+                f"(HTTP {resp.status_code}). Its public API is no longer reachable "
+                "from non-browser clients. Use the Comlink data source instead "
+                "(set SWGOH_DATA_SOURCE=comlink). See the README."
+            )
         resp.raise_for_status()
         payload = resp.json()
         if self.cache:

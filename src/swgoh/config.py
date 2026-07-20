@@ -36,11 +36,12 @@ class Settings:
 
 def get_settings() -> Settings:
     cache_dir = Path(os.getenv("SWGOH_CACHE_DIR", ".cache")).expanduser()
+    # Hardcoded default ally code; override anytime with SWGOH_ALLY_CODE.
     return Settings(
-        ally_code=_clean_ally_code(os.getenv("SWGOH_ALLY_CODE")),
+        ally_code=_clean_ally_code(os.getenv("SWGOH_ALLY_CODE", "474168985")),
         data_source=os.getenv("SWGOH_DATA_SOURCE", "swgoh_gg").strip().lower(),
-        swgoh_gg_base_url=os.getenv("SWGOH_GG_BASE_URL", "https://api.swgoh.gg").rstrip("/"),
-        comlink_url=os.getenv("SWGOH_COMLINK_URL", "http://localhost:3000").rstrip("/"),
+        swgoh_gg_base_url=os.getenv("SWGOH_GG_BASE_URL", "https://swgoh.gg/api").rstrip("/"),
+        comlink_url=os.getenv("SWGOH_COMLINK_URL", "http://localhost:3200").rstrip("/"),
         cache_dir=cache_dir,
         cache_ttl_seconds=int(os.getenv("SWGOH_CACHE_TTL", "3600")),
     )

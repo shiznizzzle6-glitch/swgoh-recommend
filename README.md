@@ -54,12 +54,28 @@ box on the dashboard.
 
 ## Data sources
 
-- **swgoh_gg** (default): free public API, no auth. Uses your public swgoh.gg
-  profile. Fastest to start.
-- **comlink**: richest data straight from game servers, but you must run
-  [swgoh-comlink](https://github.com/swgoh-utils/swgoh-comlink). Set
-  `SWGOH_DATA_SOURCE=comlink` and `SWGOH_COMLINK_URL`. The adapter is
-  best-effort — validate mod-level detail against your instance.
+- **comlink** (recommended): richest data straight from the game servers, and
+  **not affected by Cloudflare**. Requires running
+  [swgoh-comlink](https://github.com/swgoh-utils/swgoh-comlink) locally (Docker).
+  No game credentials needed — your ally code alone is enough.
+- **swgoh_gg**: the free public API. **Currently gated by Cloudflare's JS
+  challenge**, which returns a 403 to non-browser clients (curl, this app),
+  regardless of User-Agent — so it can't be used programmatically right now. The
+  adapter detects this and raises a clear error pointing you to Comlink. Kept in
+  place in case swgoh.gg reopens programmatic access or you add a browser-based
+  fetch. Note the old `api.swgoh.gg` host is dead; the API now lives at
+  `https://swgoh.gg/api`.
+
+### Comlink quickstart (Docker required)
+
+```bash
+docker compose -f docker-compose.comlink.yml up -d   # starts on :3200
+# in .env:  SWGOH_DATA_SOURCE=comlink   SWGOH_COMLINK_URL=http://localhost:3200
+swgoh-web
+```
+
+The Comlink adapter's mod-level decoding (set/slot/rarity from `definitionId`)
+is best-effort — validate it against your instance once data is flowing.
 
 ## Customize the recommendations
 

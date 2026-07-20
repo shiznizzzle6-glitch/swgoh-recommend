@@ -1,0 +1,21 @@
+# Turn-key swgoh-comlink instance for this project.
+#
+#   docker compose -f docker-compose.comlink.yml up -d
+#
+# Then set SWGOH_DATA_SOURCE=comlink and SWGOH_COMLINK_URL=http://localhost:3200
+# in your .env. No game credentials are required — your ally code is enough.
+#
+# Comlink talks directly to the game servers, so it is not affected by the
+# Cloudflare gating that now blocks swgoh.gg's public API.
+services:
+  comlink:
+    image: ghcr.io/swgoh-utils/swgoh-comlink:latest
+    container_name: swgoh-comlink
+    restart: unless-stopped
+    ports:
+      - "3200:3000"
+    environment:
+      # Optional HMAC signing; leave unset for local personal use.
+      # ACCESS_KEY: ""
+      # SECRET_KEY: ""
+      APP_NAME: swgoh-recommend
