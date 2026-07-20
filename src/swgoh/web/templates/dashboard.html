@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Mod Report{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <section class="cards">
+    <div class="card"><div class="k">Units analyzed</div><div class="v">{{ report.unit_reports|length }}</div></div>
+    <div class="card"><div class="k">Total mods</div><div class="v">{{ report.total_mods }}</div></div>
+    <div class="card"><div class="k">Unleveled mods</div><div class="v" style="color:var(--warn)">{{ report.unleveled_mods }}</div></div>
+    <div class="card"><div class="k">Sub-5-dot mods</div><div class="v" style="color:var(--bad)">{{ report.low_rarity_mods }}</div></div>
+  </section>
+
+  <h2 style="margin:.2rem 0 1rem">Characters needing mod work</h2>
+
+  {% if not report.flagged_units %}
+    <div class="unit empty">No mod issues found on your analyzed characters. Nicely modded. 🎉</div>
+  {% endif %}
+
+  {% for r in report.flagged_units %}
+    <article class="unit">
+      <div class="row">
+        <span class="name">{{ r.unit.name }}</span>
+        {% if r.is_priority %}<span class="badge prio">priority ×{{ '%g' % r.weight }}</span>{% endif %}
+        <span class="badge">G{{ r.unit.gear_level }}{% if r.unit.relic_level %} · R{{ r.unit.relic_level }}{% endif %}</span>
+        <span class="badge speed">{{ '%g' % r.total_speed }} spd</span>
+        <span class="spacer"></span>
+        <span class="score">score {{ '%g' % r.score }}</span>
+      </div>
+      <ul class="issues">
+        {% for i in r.issues %}
+          <li class="{{ 'sev-high' if i.severity >= 4 else 'sev-mid' }}">{{ i.detail }}</li>
+        {% endfor %}
+      </ul>
+      {% if r.note %}<div class="note">{{ r.note }}</div>{% endif %}
+    </article>
+  {% endfor %}
+{% endblock %}

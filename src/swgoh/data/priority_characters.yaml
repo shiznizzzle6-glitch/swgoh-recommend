@@ -1,0 +1,95 @@
+# Curated per-character mod guidance. Fully user-editable.
+#
+# base_id values come from swgoh.gg (e.g. the DARTHVADER in
+# swgoh.gg/characters/darth-vader/). Add or correct entries freely.
+#
+# Fields per character:
+#   weight: importance multiplier for ranking (higher = shown first). Default 1.
+#   arrow:  preferred Arrow (slot 2) primary stat. Default "Speed".
+#   sets:   set bonuses the character should have COMPLETED. Valid set names:
+#           Speed, Offense, Health, Defense, Critical Chance, Critical Damage,
+#           Potency, Tenacity.  (Speed/Offense/Crit Damage need 4 mods; the
+#           rest need 2.)  Example: [Speed, Critical Chance] == 4 speed + 2 crit.
+#   note:   optional free-text guidance surfaced in the report.
+
+DARTHVADER:
+  weight: 2.0
+  arrow: Speed
+  sets: [Critical Chance, Critical Damage]
+  note: Speed + crit for fast Culling Blade damage.
+
+GRANDADMIRALTHRAWN:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Potency]
+  note: Speed and potency so Fracture lands and he goes first.
+
+COMMANDERLUKESKYWALKER:
+  weight: 1.5
+  arrow: Speed
+  sets: [Speed, Offense]
+
+JEDIKNIGHTLUKE:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Health]
+
+GENERALSKYWALKER:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Health]
+
+PADMEAMIDALA:
+  weight: 1.5
+  arrow: Speed
+  sets: [Speed, Health]
+
+LORDVADER:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Potency]
+
+SUPREMELEADERKYLOREN:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Offense]
+
+JABBATHEHUTT:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Potency]
+
+GLREY:
+  weight: 2.0
+  arrow: Speed
+  sets: [Speed, Health]
+
+BASTILASHAN:
+  weight: 1.2
+  arrow: Speed
+  sets: [Speed, Potency]
+
+DARTHREVAN:
+  weight: 1.5
+  arrow: Speed
+  sets: [Speed, Potency]
+
+JEDIKNIGHTREVAN:
+  weight: 1.5
+  arrow: Speed
+  sets: [Speed, Health]
+
+EMPERORPALPATINE:
+  weight: 1.2
+  arrow: Speed
+  sets: [Speed, Potency]
+
+GRANDMASTERYODA:
+  weight: 1.0
+  arrow: Speed
+  sets: [Speed, Potency]
+
+ADMIRALRADDUS:
+  weight: 1.5
+  arrow: Speed
+  sets: [Speed, Health]

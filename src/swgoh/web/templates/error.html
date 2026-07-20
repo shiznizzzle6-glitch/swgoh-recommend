@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Error — SWGOH Recommendations{% endblock %}
+{% block content %}
+  <article class="unit">
+    <div class="name" style="color:var(--bad)">Couldn't load {{ ally_code }}</div>
+    <p class="note">{{ error }}</p>
+    <p class="note">
+      Check the ally code is correct, that the profile is public on swgoh.gg,
+      and (for Comlink) that your instance is reachable.
+    </p>
+  </article>
+{% endblock %}

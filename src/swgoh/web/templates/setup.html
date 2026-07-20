@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Setup — SWGOH Recommendations{% endblock %}
+{% block content %}
+  <article class="unit">
+    <div class="name">Enter your ally code to get started</div>
+    <p class="note">
+      Type your ally code in the box above (digits only, e.g. <code>123456789</code>)
+      and press Load, or set <code>SWGOH_ALLY_CODE</code> in your <code>.env</code>.
+    </p>
+    <p class="note">Current data source: <code>{{ data_source }}</code>.</p>
+  </article>
+{% endblock %}
