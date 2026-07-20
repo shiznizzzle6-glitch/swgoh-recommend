@@ -1,0 +1,760 @@
+{
+ "ARC170CLONESERGEANT": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "CLONESERGEANTPHASEI"
+  ]
+ },
+ "ARC170REX": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "CT7567"
+  ]
+ },
+ "BLADEOFDORIN": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "PLOKOON"
+  ]
+ },
+ "BWINGREBEL": {
+  "capital": false,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "CAPTAINDROGAN"
+  ]
+ },
+ "CAPITALCHIMAERA": {
+  "capital": true,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GRANDADMIRALTHRAWN"
+  ]
+ },
+ "CAPITALEXECUTOR": {
+  "capital": true,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "ADMIRALPIETT"
+  ]
+ },
+ "CAPITALFINALIZER": {
+  "capital": true,
+  "factions": [
+   "firstorder"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GENERALHUX"
+  ]
+ },
+ "CAPITALFINALIZER_EVENT": {
+  "capital": true,
+  "factions": [
+   "firstorder"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GENERALHUX_EVENT"
+  ]
+ },
+ "CAPITALJEDICRUISER": {
+  "capital": true,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "MACEWINDU"
+  ]
+ },
+ "CAPITALLEVIATHAN": {
+  "capital": true,
+  "factions": [
+   "sithempire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "DARTHREVAN"
+  ]
+ },
+ "CAPITALMALEVOLENCE": {
+  "capital": true,
+  "factions": [
+   "separatist"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GRIEVOUS"
+  ]
+ },
+ "CAPITALMONCALAMARICRUISER": {
+  "capital": true,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "ADMIRALACKBAR"
+  ]
+ },
+ "CAPITALNEGOTIATOR": {
+  "capital": true,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "GENERALKENOBI"
+  ]
+ },
+ "CAPITALPROFUNDITY": {
+  "capital": true,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "ADMIRALRADDUS"
+  ]
+ },
+ "CAPITALRADDUS": {
+  "capital": true,
+  "factions": [
+   "resistance"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "AMILYNHOLDO"
+  ]
+ },
+ "CAPITALRADDUS_EVENT": {
+  "capital": true,
+  "factions": [
+   "resistance"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "AMILYNHOLDO_RADDUS"
+  ]
+ },
+ "CAPITALSTARDESTROYER": {
+  "capital": true,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GRANDMOFFTARKIN"
+  ]
+ },
+ "COMEUPPANCE": {
+  "capital": false,
+  "factions": [
+   "resistance"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "ZORIIBLISS_V2"
+  ]
+ },
+ "COMMANDSHUTTLE": {
+  "capital": false,
+  "factions": [
+   "firstorder"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "KYLOREN",
+   "PHASMA",
+   "FIRSTORDERTROOPER"
+  ]
+ },
+ "EBONHAWK": {
+  "capital": false,
+  "factions": [
+   "oldrepublic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "CARTHONASI",
+   "T3_M4"
+  ]
+ },
+ "EMPERORSSHUTTLE": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "EMPERORPALPATINE",
+   "ROYALGUARD"
+  ]
+ },
+ "FIRSTORDERTIEECHELON": {
+  "capital": false,
+  "factions": [
+   "firstorder"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "FIRSTORDEROFFICERMALE"
+  ]
+ },
+ "FOTF_DEVASTATOR": {
+  "capital": true,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "",
+  "pilots": [
+   "FOTF_VADER"
+  ]
+ },
+ "FURYCLASSINTERCEPTOR": {
+  "capital": false,
+  "factions": [
+   "sithempire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "DARTHMALGUS"
+  ]
+ },
+ "GAUNTLETSTARFIGHTER": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GARSAXON",
+   "IMPERIALSUPERCOMMANDO"
+  ]
+ },
+ "GEONOSIANSTARFIGHTER1": {
+  "capital": false,
+  "factions": [
+   "separatist"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "SUNFAC"
+  ]
+ },
+ "GEONOSIANSTARFIGHTER2": {
+  "capital": false,
+  "factions": [
+   "separatist"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GEONOSIANSOLDIER"
+  ]
+ },
+ "GEONOSIANSTARFIGHTER3": {
+  "capital": false,
+  "factions": [
+   "separatist"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GEONOSIANSPY"
+  ]
+ },
+ "GHOST": {
+  "capital": false,
+  "factions": [
+   "phoenix",
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "HERASYNDULLAS3",
+   "KANANJARRUSS3",
+   "ZEBS3"
+  ]
+ },
+ "HOUNDSTOOTH": {
+  "capital": false,
+  "factions": [],
+  "alignment": "dark",
+  "pilots": [
+   "BOSSK"
+  ]
+ },
+ "HYENABOMBER": {
+  "capital": false,
+  "factions": [
+   "separatist",
+   "separatist_droid"
+  ],
+  "alignment": "dark",
+  "pilots": []
+ },
+ "IG2000": {
+  "capital": false,
+  "factions": [],
+  "alignment": "dark",
+  "pilots": [
+   "IG88"
+  ]
+ },
+ "JEDISTARFIGHTERAHSOKATANO": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "AHSOKATANO"
+  ]
+ },
+ "JEDISTARFIGHTERANAKIN": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "ANAKINKNIGHT"
+  ]
+ },
+ "JEDISTARFIGHTERCONSULAR": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "JEDIKNIGHTCONSULAR"
+  ]
+ },
+ "JKL_GR75": {
+  "capital": true,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "",
+  "pilots": [
+   "JKL_PILOT"
+  ]
+ },
+ "MARAUDER": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "BADBATCHTECH",
+   "BADBATCHHUNTER",
+   "BADBATCHWRECKER"
+  ]
+ },
+ "MG100STARFORTRESSSF17": {
+  "capital": false,
+  "factions": [
+   "resistance"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "ROSETICO",
+   "RESISTANCETROOPER"
+  ]
+ },
+ "MILLENNIUMFALCON": {
+  "capital": false,
+  "factions": [
+   "millennium",
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "HANSOLO",
+   "CHEWBACCALEGENDARY"
+  ]
+ },
+ "MILLENNIUMFALCONEP7": {
+  "capital": false,
+  "factions": [
+   "millennium",
+   "resistance"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "REY",
+   "FINN"
+  ]
+ },
+ "MILLENNIUMFALCONPRISTINE": {
+  "capital": false,
+  "factions": [
+   "millennium"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "YOUNGLANDO",
+   "L3_37"
+  ]
+ },
+ "OUTRIDER": {
+  "capital": false,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "DASHRENDAR"
+  ]
+ },
+ "PHANTOM2": {
+  "capital": false,
+  "factions": [
+   "phoenix",
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "SABINEWRENS3",
+   "EZRABRIDGERS3",
+   "CHOPPERS3"
+  ]
+ },
+ "PUNISHINGONE": {
+  "capital": false,
+  "factions": [],
+  "alignment": "dark",
+  "pilots": [
+   "DENGAR"
+  ]
+ },
+ "RAVENSCLAW": {
+  "capital": false,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "KYLEKATARN"
+  ]
+ },
+ "RAZORCREST": {
+  "capital": false,
+  "factions": [],
+  "alignment": "light",
+  "pilots": [
+   "THEMANDALORIANBESKARARMOR"
+  ]
+ },
+ "ROGUEONESHIP": {
+  "capital": false,
+  "factions": [
+   "rebels",
+   "rogue_one"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "BODHIROOK",
+   "PAO"
+  ]
+ },
+ "SCYTHE": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "GRANDINQUISITOR",
+   "FIFTHBROTHER"
+  ]
+ },
+ "SITHBOMBER": {
+  "capital": false,
+  "factions": [
+   "sithempire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "SITHMARAUDER"
+  ]
+ },
+ "SITHFIGHTER": {
+  "capital": false,
+  "factions": [
+   "sithempire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "SITHASSASSIN"
+  ]
+ },
+ "SITHINFILTRATOR": {
+  "capital": false,
+  "factions": [],
+  "alignment": "dark",
+  "pilots": [
+   "MAUL"
+  ]
+ },
+ "SITHSUPREMACYCLASS": {
+  "capital": false,
+  "factions": [
+   "sithempire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "SITHTROOPER"
+  ]
+ },
+ "SLAVE1": {
+  "capital": false,
+  "factions": [],
+  "alignment": "dark",
+  "pilots": [
+   "BOBAFETT"
+  ]
+ },
+ "TIEADVANCED": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "VADER"
+  ]
+ },
+ "TIEBOMBERIMPERIAL": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": []
+ },
+ "TIEDAGGER": {
+  "capital": false,
+  "factions": [
+   "firstorder"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "FOSITHTROOPER"
+  ]
+ },
+ "TIEDEFENDER": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "IDENVERSIOEMPIRE"
+  ]
+ },
+ "TIEFIGHTERFIRSTORDER": {
+  "capital": false,
+  "factions": [
+   "firstorder",
+   "foties"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "FIRSTORDERTIEPILOT"
+  ]
+ },
+ "TIEFIGHTERFOSF": {
+  "capital": false,
+  "factions": [
+   "firstorder",
+   "foties"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "FIRSTORDERSPECIALFORCESPILOT"
+  ]
+ },
+ "TIEFIGHTERIMPERIAL": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "TIEFIGHTERPILOT"
+  ]
+ },
+ "TIEINTERCEPTOR": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "SECONDSISTER"
+  ]
+ },
+ "TIEREAPER": {
+  "capital": false,
+  "factions": [
+   "empire"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "DEATHTROOPER",
+   "SHORETROOPER"
+  ]
+ },
+ "TIESILENCER": {
+  "capital": false,
+  "factions": [
+   "firstorder"
+  ],
+  "alignment": "dark",
+  "pilots": [
+   "KYLORENUNMASKED"
+  ]
+ },
+ "UMBARANSTARFIGHTER": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "CT5555"
+  ]
+ },
+ "UWINGROGUEONE": {
+  "capital": false,
+  "factions": [
+   "rebels",
+   "rogue_one"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "CASSIANANDOR",
+   "JYNERSO",
+   "K2SO"
+  ]
+ },
+ "UWINGSCARIF": {
+  "capital": false,
+  "factions": [
+   "rebels",
+   "rogue_one"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "BISTAN",
+   "SCARIFREBEL"
+  ]
+ },
+ "VULTUREDROID": {
+  "capital": false,
+  "factions": [
+   "separatist",
+   "separatist_droid"
+  ],
+  "alignment": "dark",
+  "pilots": []
+ },
+ "VULTUREDROID_tb": {
+  "capital": false,
+  "factions": [
+   "separatist"
+  ],
+  "alignment": "dark",
+  "pilots": []
+ },
+ "XANADUBLOOD": {
+  "capital": false,
+  "factions": [],
+  "alignment": "dark",
+  "pilots": [
+   "CADBANE"
+  ]
+ },
+ "XWINGBLACKONE": {
+  "capital": false,
+  "factions": [
+   "resistance",
+   "resistancexwings"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "POE"
+  ]
+ },
+ "XWINGRED2": {
+  "capital": false,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "WEDGEANTILLES"
+  ]
+ },
+ "XWINGRED3": {
+  "capital": false,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "BIGGSDARKLIGHTER"
+  ]
+ },
+ "XWINGRESISTANCE": {
+  "capital": false,
+  "factions": [
+   "resistance",
+   "resistancexwings"
+  ],
+  "alignment": "light",
+  "pilots": [
+   "RESISTANCEPILOT"
+  ]
+ },
+ "YWINGCLONEWARS": {
+  "capital": false,
+  "factions": [
+   "republic"
+  ],
+  "alignment": "light",
+  "pilots": []
+ },
+ "YWINGREBEL": {
+  "capital": false,
+  "factions": [
+   "rebels"
+  ],
+  "alignment": "light",
+  "pilots": []
+ }
+}
