@@ -6,28 +6,37 @@
   <section class="cards">
     <div class="card"><div class="k">Ships owned</div><div class="v">{{ report.owned_ships }}</div></div>
     <div class="card"><div class="k">Capital ships</div><div class="v">{{ report.owned_capitals }}</div></div>
-    <div class="card"><div class="k">Recommended fleet</div><div class="v" style="font-size:1.2rem">{{ report.best.faction|capitalize if report.best else '—' }}</div></div>
+    <div class="card"><div class="k">Build toward</div><div class="v" style="font-size:1.1rem">{{ report.recommended.name if report.recommended else '—' }}</div></div>
+    <div class="card"><div class="k">Readiness</div><div class="v">{{ report.recommended.readiness|round|int if report.recommended else 0 }}%</div></div>
   </section>
 
-  {% if not report.best %}
-    <div class="unit empty">No ships found in your roster yet. Unlock some ships to get a Fleet plan.</div>
+  {% if not report.recommended %}
+    <div class="unit empty">No fleet targets available.</div>
   {% else %}
-    <h2 style="margin:.2rem 0 .3rem">Your strongest fleet to build toward</h2>
+    {% set rec = report.recommended %}
+    <h2 style="margin:.2rem 0 .3rem">Build toward: {{ rec.name }} <span class="pill">tier {{ rec.tier }}</span></h2>
     <div class="fleet-head">
-      <span class="cap">{{ report.best.capital.name }}</span>
+      <span class="cap">{{ rec.capital.name }}</span>
       <span class="pill">capital</span>
-      <span class="muted">{{ report.best.faction|capitalize }} · pilot {{ report.best.capital.best_pilot.name if report.best.capital.best_pilot }}
-        (g{{ report.best.capital.best_pilot.gear_level if report.best.capital.best_pilot else 0 }})</span>
+      {% if rec.capital.best_pilot %}<span class="muted">pilot {{ rec.capital.best_pilot.name }}
+        (g{{ rec.capital.best_pilot.gear_level }}{% if rec.capital.best_pilot.relic_level %} r{{ rec.capital.best_pilot.relic_level }}{% endif %}){% if not rec.capital.owned %} — not owned{% endif %}</span>{% endif %}
     </div>
+    {% if rec.note %}<p class="note" style="margin:-.4rem 0 1rem">{{ rec.note }}</p>{% endif %}
+
     <div class="shiplist">
-      {% for s in report.best.ships %}
-        <span class="chip">{{ s.name }} · {{ s.stars }}★
-          {% if s.best_pilot %}<span class="muted">(g{{ s.best_pilot.gear_level }})</span>{% endif %}</span>
+      {% for s in rec.core %}
+        <span class="chip">★ {{ s.name }}
+          {% if s.owned %}<span class="muted">{{ s.stars }}★{% if s.best_pilot and s.best_pilot.owned %} g{{ s.best_pilot.gear_level }}{% endif %}</span>
+          {% else %}<span style="color:var(--bad)">need</span>{% endif %}</span>
+      {% endfor %}
+      {% for s in rec.support %}
+        <span class="chip" style="opacity:.75">{{ s.name }}
+          {% if s.owned %}<span class="muted">{{ s.stars }}★</span>{% else %}<span style="color:var(--warn)">need</span>{% endif %}</span>
       {% endfor %}
     </div>
 
-    <h2 style="margin:1rem 0 .6rem">Next objectives</h2>
-    {% for o in report.best.objectives %}
+    <h2 style="margin:1rem 0 .6rem">Your build path (do these in order)</h2>
+    {% for o in rec.objectives[:12] %}
       <div class="obj">
         <span class="rank">{{ loop.index }}</span>
         <div>
@@ -37,15 +46,24 @@
       </div>
     {% endfor %}
 
-    {% if report.alternatives %}
-      <h2 style="margin:1.4rem 0 .6rem">Other viable fleets</h2>
-      {% for p in report.alternatives %}
+    {% if report.current_best_ships %}
+      <h2 style="margin:1.4rem 0 .3rem">Strongest ships you can field right now</h2>
+      <p class="note" style="margin:0 0 .6rem">Mix these under your best capital while you build toward the target above — no faction penalty in Fleet.</p>
+      <div class="shiplist">
+        {% for s in report.current_best_ships %}
+          <span class="chip">{{ s.name }} <span class="muted">{{ s.stars }}★{% if s.best_pilot and s.best_pilot.owned %} g{{ s.best_pilot.gear_level }}{% endif %}</span></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if report.other_targets %}
+      <h2 style="margin:1.4rem 0 .6rem">Other targets</h2>
+      {% for p in report.other_targets %}
         <div class="obj">
-          <span class="rank">{{ loop.index }}</span>
+          <span class="rank">{{ p.tier }}</span>
           <div>
-            <div><strong>{{ p.capital.name }}</strong> — {{ p.faction|capitalize }}
-              ({{ p.ships|length }} ships)</div>
-            <span class="muted">Top objective: {{ p.objectives[0].detail if p.objectives else 'ready' }}</span>
+            <div><strong>{{ p.name }}</strong> — {{ p.readiness|round|int }}% ready</div>
+            <span class="muted">Top step: {{ p.objectives[0].detail if p.objectives else 'ready to field' }}</span>
           </div>
         </div>
       {% endfor %}

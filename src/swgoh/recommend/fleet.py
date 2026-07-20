@@ -1,38 +1,49 @@
-"""Data-driven Fleet build-priority engine.
+"""Meta-target-driven Fleet build-priority engine.
 
-Given a roster, it finds your strongest *coherent* fleet (an owned capital ship
-plus owned ships of the same faction) and ranks concrete build objectives. The
-guiding insight: a ship's combat power scales with its **pilot's** gear/relic,
-so gearing the right pilots — not starring ships — is the real lever. Objectives
-are ranked by leverage, capital pilot first.
+Rather than grouping ships by faction (Fleet arena has no same-faction bonus and
+mixing is fine), this matches your roster against a curated set of
+known-effective meta fleets (`fleet_targets.yaml`) and ranks the build path to
+the one you're closest to fielding well.
 
-Everything here is derived from your roster + the bundled ship reference; no
-hand-picked "meta" is assumed, so it reflects what *you* own and have invested.
+Key mechanic baked in: a ship's power comes from its *pilot's* character stats
+(gear, relic, stars, and mods — though notably NOT mod speed, which doesn't
+affect ships). So objectives center on gearing the right pilots and building the
+keystone ships, capital pilot first.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from importlib import resources
+from pathlib import Path
+from typing import Any
 
 from ..models import Player
 from ..names import display_name
 from ..ships import ship_data
 
-# A fleet pilot is "ready" at this gear level; capitals are held a notch higher.
 PILOT_GEAR_TARGET = 12
 CAPITAL_GEAR_TARGET = 12
-# A full arena fleet is a capital plus this many ships (starters + reinforcements).
-FLEET_SIZE = 6
 
-# Objective priorities (higher = do sooner).
-PRIO_CAPITAL_PILOT = 10
-PRIO_UNLOCK_PILOT = 7
-PRIO_INCOMPLETE_FLEET = 5
-PRIO_STAR_SHIP = 1
+TIER_WEIGHT = {"S": 3.0, "A": 2.0, "B": 1.0}
+
+# Objective base priorities (higher = do sooner).
+PRIO_CAPITAL_PILOT = 12
+PRIO_CORE_TOP = 10          # first/most-important core ship
+PRIO_SUPPORT = 3
 
 
 def _pilot_score(gear: int, relic: int) -> float:
-    """Rough investment proxy for how much a pilot boosts its ship."""
     return gear + relic * 1.5
+
+
+def load_fleet_targets(path: str | Path | None = None) -> list[dict[str, Any]]:
+    import yaml
+
+    if path is not None:
+        text = Path(path).read_text(encoding="utf-8")
+    else:
+        text = resources.files("swgoh.data").joinpath("fleet_targets.yaml").read_text("utf-8")
+    return list(yaml.safe_load(text) or [])
 
 
 @dataclass
@@ -53,21 +64,29 @@ class PilotStatus:
 class ShipStatus:
     base_id: str
     name: str
+    owned: bool
     stars: int
     is_capital: bool
-    factions: list[str]
     pilots: list[PilotStatus]
 
     @property
     def best_pilot(self) -> PilotStatus | None:
         owned = [p for p in self.pilots if p.owned]
-        return max(owned, key=lambda p: p.score) if owned else (self.pilots[0] if self.pilots else None)
+        if owned:
+            return max(owned, key=lambda p: p.score)
+        return self.pilots[0] if self.pilots else None
 
     @property
-    def strength(self) -> float:
-        best = self.best_pilot
-        pilot = best.score if best else 0.0
-        return pilot + self.stars * 0.5
+    def power_frac(self) -> float:
+        """0..1 estimate of how built this ship is (ownership, stars, pilot gear)."""
+        if not self.owned:
+            return 0.0
+        pilot = self.best_pilot
+        if not pilot or not pilot.owned:
+            return 0.15  # ship owned but pilot missing -> barely usable
+        gear = min(1.0, _pilot_score(pilot.gear_level, pilot.relic_level) / 18.0)
+        star = self.stars / 7
+        return 0.4 * star + 0.6 * gear
 
 
 @dataclass
@@ -79,24 +98,28 @@ class Objective:
 
 
 @dataclass
-class FleetPlan:
-    faction: str
+class FleetTargetPlan:
+    name: str
+    tier: str
+    note: str
     capital: ShipStatus
-    ships: list[ShipStatus]
+    core: list[ShipStatus]
+    support: list[ShipStatus]
+    readiness: float = 0.0  # 0..100
     objectives: list[Objective] = field(default_factory=list)
 
     @property
-    def score(self) -> float:
-        cap = self.capital.strength * 2 if self.capital else 0.0
-        return cap + sum(s.strength for s in self.ships)
+    def value(self) -> float:
+        return self.readiness * TIER_WEIGHT.get(self.tier, 1.0)
 
 
 @dataclass
 class FleetReport:
     player_name: str
     ally_code: str
-    best: FleetPlan | None
-    alternatives: list[FleetPlan] = field(default_factory=list)
+    recommended: FleetTargetPlan | None
+    other_targets: list[FleetTargetPlan] = field(default_factory=list)
+    current_best_ships: list[ShipStatus] = field(default_factory=list)
     owned_ships: int = 0
     owned_capitals: int = 0
 
@@ -120,123 +143,131 @@ def _ship_status(base_id: str, player: Player) -> ShipStatus:
     return ShipStatus(
         base_id=base_id,
         name=display_name(base_id),
+        owned=ship_unit is not None,
         stars=ship_unit.stars if ship_unit else 0,
         is_capital=bool(info.get("capital")),
-        factions=list(info.get("factions", [])),
         pilots=pilots,
     )
 
 
-def _objectives_for(plan: FleetPlan) -> list[Objective]:
+def _ship_objectives(ship: ShipStatus, base_priority: float, role: str) -> list[Objective]:
+    objs: list[Objective] = []
+    pilot = ship.best_pilot
+    if not ship.owned:
+        who = f" (pilot {pilot.name})" if pilot else ""
+        objs.append(
+            Objective(
+                "unlock_ship",
+                f"Unlock {ship.name}{who} — {role} of this fleet",
+                base_priority,
+                ship.base_id,
+            )
+        )
+        return objs
+    if pilot and not pilot.owned:
+        objs.append(
+            Objective(
+                "unlock_pilot",
+                f"Unlock {pilot.name} to field {ship.name}",
+                base_priority,
+                pilot.base_id,
+            )
+        )
+    elif pilot and pilot.gear_level < PILOT_GEAR_TARGET:
+        objs.append(
+            Objective(
+                "gear_pilot",
+                f"Gear {pilot.name} to g{PILOT_GEAR_TARGET}+ (now g{pilot.gear_level}) "
+                f"to strengthen {ship.name}",
+                base_priority - 1 + (PILOT_GEAR_TARGET - pilot.gear_level) * 0.3,
+                pilot.base_id,
+            )
+        )
+    if ship.owned and ship.stars and ship.stars < 7:
+        objs.append(
+            Objective(
+                "star_ship",
+                f"Star up {ship.name} ({ship.stars}★ → 7★)",
+                base_priority - 3 + (7 - ship.stars) * 0.2,
+                ship.base_id,
+            )
+        )
+    return objs
+
+
+def _build_plan(target: dict[str, Any], player: Player) -> FleetTargetPlan:
+    capital = _ship_status(target["capital"], player)
+    core = [_ship_status(b, player) for b in target.get("core", [])]
+    support = [_ship_status(b, player) for b in target.get("support", [])]
+
+    core_frac = sum(s.power_frac for s in core) / len(core) if core else 0.0
+    support_frac = sum(s.power_frac for s in support) / len(support) if support else 0.0
+    readiness = 100 * (0.35 * capital.power_frac + 0.45 * core_frac + 0.20 * support_frac)
+
+    plan = FleetTargetPlan(
+        name=target.get("name", target["capital"]),
+        tier=str(target.get("tier", "B")),
+        note=str(target.get("note") or "").strip(),
+        capital=capital,
+        core=core,
+        support=support,
+        readiness=round(readiness, 1),
+    )
+
     objectives: list[Objective] = []
-
-    # 1. Capital pilot is the linchpin of the fleet.
-    cap_pilot = plan.capital.best_pilot if plan.capital else None
-    if cap_pilot:
-        if not cap_pilot.owned:
-            objectives.append(
-                Objective(
-                    "unlock_pilot",
-                    f"Unlock {cap_pilot.name} to pilot your capital ship {plan.capital.name}",
-                    PRIO_CAPITAL_PILOT,
-                    cap_pilot.base_id,
-                )
-            )
-        elif cap_pilot.gear_level < CAPITAL_GEAR_TARGET:
-            objectives.append(
-                Objective(
-                    "gear_capital_pilot",
-                    f"Gear {cap_pilot.name} (capital pilot) to g{CAPITAL_GEAR_TARGET}+ "
-                    f"(currently g{cap_pilot.gear_level}) — biggest single boost to {plan.capital.name}",
-                    PRIO_CAPITAL_PILOT + (CAPITAL_GEAR_TARGET - cap_pilot.gear_level),
-                    cap_pilot.base_id,
-                )
-            )
-
-    # 2. Fleet ships: missing pilots block the ship; under-geared pilots weaken it.
-    for ship in plan.ships:
-        best = ship.best_pilot
-        if best is None:
-            continue
-        if not best.owned:
-            objectives.append(
-                Objective(
-                    "unlock_pilot",
-                    f"Unlock {best.name} to field {ship.name}",
-                    PRIO_UNLOCK_PILOT,
-                    best.base_id,
-                )
-            )
-        elif best.gear_level < PILOT_GEAR_TARGET:
-            objectives.append(
-                Objective(
-                    "gear_pilot",
-                    f"Gear {best.name} to g{PILOT_GEAR_TARGET}+ (currently g{best.gear_level}) "
-                    f"to strengthen {ship.name}",
-                    3 + (PILOT_GEAR_TARGET - best.gear_level),
-                    best.base_id,
-                )
-            )
-
-    # 3. Fleet too small to fill reinforcements.
-    if len(plan.ships) < FLEET_SIZE:
+    cap_pilot = capital.best_pilot
+    if not capital.owned:
+        objectives.append(
+            Objective("unlock_ship", f"Unlock capital ship {capital.name}", PRIO_CAPITAL_PILOT, capital.base_id)
+        )
+    elif cap_pilot and not cap_pilot.owned:
+        objectives.append(
+            Objective("unlock_pilot", f"Unlock {cap_pilot.name} to pilot {capital.name}", PRIO_CAPITAL_PILOT, cap_pilot.base_id)
+        )
+    elif cap_pilot and cap_pilot.gear_level < CAPITAL_GEAR_TARGET:
         objectives.append(
             Objective(
-                "incomplete_fleet",
-                f"You own only {len(plan.ships)} {plan.faction} ship(s) besides the capital; "
-                f"unlock more to fill a full {FLEET_SIZE}-ship fleet",
-                PRIO_INCOMPLETE_FLEET,
+                "gear_capital_pilot",
+                f"Gear {cap_pilot.name} to g{CAPITAL_GEAR_TARGET}+ (now g{cap_pilot.gear_level}) "
+                f"— capital pilot, biggest single boost",
+                PRIO_CAPITAL_PILOT + (CAPITAL_GEAR_TARGET - cap_pilot.gear_level) * 0.3,
+                cap_pilot.base_id,
             )
         )
 
-    # 4. Low-star ships (minor).
-    for ship in plan.ships:
-        if ship.stars and ship.stars < 5:
-            objectives.append(
-                Objective(
-                    "star_ship",
-                    f"Star up {ship.name} ({ship.stars}★)",
-                    PRIO_STAR_SHIP + (5 - ship.stars) * 0.5,
-                    ship.base_id,
-                )
-            )
+    for i, ship in enumerate(core):
+        objectives += _ship_objectives(ship, PRIO_CORE_TOP - i, "core")
+    for ship in support:
+        objectives += _ship_objectives(ship, PRIO_SUPPORT, "support")
 
     objectives.sort(key=lambda o: o.priority, reverse=True)
-    return objectives
+    plan.objectives = objectives
+    return plan
 
 
-def analyze_fleet(player: Player) -> FleetReport:
+def analyze_fleet(player: Player, targets: list[dict[str, Any]] | None = None) -> FleetReport:
+    if targets is None:
+        targets = load_fleet_targets()
+
     data = ship_data()
     owned_ship_ids = [u.base_id for u in player.units if u.base_id in data]
     owned_capitals = [b for b in owned_ship_ids if data[b].get("capital")]
-    owned_regular = [b for b in owned_ship_ids if not data[b].get("capital")]
 
-    # Best capital per faction (by pilot investment).
-    capital_by_faction: dict[str, ShipStatus] = {}
-    for cap_id in owned_capitals:
-        cs = _ship_status(cap_id, player)
-        for fac in cs.factions or ["unaligned"]:
-            cur = capital_by_faction.get(fac)
-            if cur is None or cs.strength > cur.strength:
-                capital_by_faction[fac] = cs
+    plans = [_build_plan(t, player) for t in targets]
+    plans.sort(key=lambda p: p.value, reverse=True)
 
-    plans: list[FleetPlan] = []
-    for fac, capital in capital_by_faction.items():
-        fac_ships = [
-            _ship_status(b, player) for b in owned_regular if fac in data[b].get("factions", [])
-        ]
-        fac_ships.sort(key=lambda s: s.strength, reverse=True)
-        plan = FleetPlan(faction=fac, capital=capital, ships=fac_ships[:FLEET_SIZE])
-        plan.objectives = _objectives_for(plan)
-        plans.append(plan)
-
-    plans.sort(key=lambda p: p.score, reverse=True)
+    # "What can I field right now" — strongest owned ships regardless of faction.
+    owned_regular = [
+        _ship_status(b, player) for b in owned_ship_ids if not data[b].get("capital")
+    ]
+    owned_regular.sort(key=lambda s: s.power_frac, reverse=True)
 
     return FleetReport(
         player_name=player.name,
         ally_code=player.ally_code,
-        best=plans[0] if plans else None,
-        alternatives=plans[1:3],
+        recommended=plans[0] if plans else None,
+        other_targets=plans[1:],
+        current_best_ships=owned_regular[:7],
         owned_ships=len(owned_regular),
         owned_capitals=len(owned_capitals),
     )

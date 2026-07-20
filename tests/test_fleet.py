@@ -1,4 +1,4 @@
-"""Tests for the Fleet build-priority engine (offline, injected ship data)."""
+"""Tests for the meta-target-driven Fleet engine (offline, injected data)."""
 from __future__ import annotations
 
 import pytest
@@ -8,12 +8,17 @@ from swgoh.recommend import fleet as fleet_mod
 from swgoh.recommend.fleet import analyze_fleet
 
 FAKE_SHIPS = {
-    "CAP_EMP": {"capital": True, "factions": ["empire"], "pilots": ["TARKIN"]},
-    "SHIP_A": {"capital": False, "factions": ["empire"], "pilots": ["VADERPILOT"]},
-    "SHIP_B": {"capital": False, "factions": ["empire"], "pilots": ["TIEPILOT"]},
-    "CAP_REB": {"capital": True, "factions": ["rebels"], "pilots": ["ACKBAR"]},
-    "SHIP_R": {"capital": False, "factions": ["rebels"], "pilots": ["WEDGE"]},
+    "CAP_S": {"capital": True, "pilots": ["PILOT_S"]},
+    "CAP_A": {"capital": True, "pilots": ["PILOT_A"]},
+    "KEY1": {"capital": False, "pilots": ["P1"]},
+    "KEY2": {"capital": False, "pilots": ["P2"]},
+    "SUP1": {"capital": False, "pilots": ["P3"]},
 }
+
+TARGETS = [
+    {"name": "S Fleet", "capital": "CAP_S", "tier": "S", "core": ["KEY1", "KEY2"], "support": ["SUP1"]},
+    {"name": "A Fleet", "capital": "CAP_A", "tier": "A", "core": ["KEY1"], "support": []},
+]
 
 
 @pytest.fixture(autouse=True)
@@ -26,53 +31,62 @@ def fleet_player():
     return Player(
         name="Admiral", ally_code="1",
         units=[
-            Unit("CAP_EMP", "Executrix", stars=5),
-            Unit("SHIP_A", "TIE Advanced", stars=5),
-            Unit("SHIP_B", "TIE Fighter", stars=4),
-            Unit("CAP_REB", "Home One", stars=5),
-            Unit("SHIP_R", "X-wing", stars=3),
-            Unit("TARKIN", "Tarkin", gear_level=10),
-            Unit("VADERPILOT", "Vader", gear_level=12),
-            Unit("TIEPILOT", "TIE Pilot", gear_level=8),
-            Unit("ACKBAR", "Ackbar", gear_level=9),
-            Unit("WEDGE", "Wedge", gear_level=8),
+            Unit("CAP_S", "Cap S", stars=6),
+            Unit("CAP_A", "Cap A", stars=6),
+            Unit("KEY1", "Key One", stars=5),
+            Unit("SUP1", "Support One", stars=5),
+            Unit("PILOT_S", "Pilot S", gear_level=8),
+            Unit("PILOT_A", "Pilot A", gear_level=13, relic_level=3),
+            Unit("P1", "Pilot One", gear_level=10),
+            Unit("P3", "Pilot Three", gear_level=8),
+            # P2 (KEY2's pilot) and KEY2 itself are NOT owned.
         ],
     )
 
 
-def test_best_fleet_is_most_invested_faction(fleet_player):
-    report = analyze_fleet(fleet_player)
-    assert report.best is not None
-    assert report.best.faction == "empire"
-    assert report.best.capital.base_id == "CAP_EMP"
-    assert report.owned_ships == 3   # SHIP_A, SHIP_B, SHIP_R
-    assert report.owned_capitals == 2
+def test_higher_tier_target_is_recommended(fleet_player):
+    report = analyze_fleet(fleet_player, TARGETS)
+    assert report.recommended is not None
+    assert report.recommended.name == "S Fleet"
+    assert report.recommended.tier == "S"
 
 
 def test_capital_pilot_gear_is_top_objective(fleet_player):
-    report = analyze_fleet(fleet_player)
-    top = report.best.objectives[0]
-    assert top.kind == "gear_capital_pilot"   # Tarkin g10 < target
-    assert "Tarkin" in top.detail
+    report = analyze_fleet(fleet_player, TARGETS)
+    assert report.recommended.objectives[0].kind == "gear_capital_pilot"
 
 
-def test_objectives_cover_undergeared_pilot_and_small_fleet(fleet_player):
-    report = analyze_fleet(fleet_player)
-    kinds = {o.kind for o in report.best.objectives}
-    assert "gear_pilot" in kinds          # TIE Pilot g8
-    assert "incomplete_fleet" in kinds    # only 2 empire ships < 6
+def test_missing_core_ship_becomes_unlock_objective(fleet_player):
+    report = analyze_fleet(fleet_player, TARGETS)
+    kinds = {o.kind for o in report.recommended.objectives}
+    unlock_targets = {o.target_base_id for o in report.recommended.objectives if o.kind == "unlock_ship"}
+    assert "unlock_ship" in kinds
+    assert "KEY2" in unlock_targets   # unowned core ship
+    assert "gear_pilot" in kinds      # P1/P3 under gear target
 
 
-def test_alternatives_include_other_capitals(fleet_player):
-    report = analyze_fleet(fleet_player)
-    alt_factions = {p.faction for p in report.alternatives}
-    assert "rebels" in alt_factions
+def test_readiness_reflects_investment(fleet_player):
+    report = analyze_fleet(fleet_player, TARGETS)
+    # Both targets have some readiness; the recommended one is a real 0<r<100.
+    assert 0 < report.recommended.readiness < 100
 
 
-def test_missing_pilot_becomes_unlock_objective(fleet_player):
-    # Drop a ship's pilot (keeps Empire the best fleet) -> unlock objective.
-    fleet_player.units = [u for u in fleet_player.units if u.base_id != "TIEPILOT"]
-    report = analyze_fleet(fleet_player)
-    assert report.best.faction == "empire"
-    unlock = [o for o in report.best.objectives if o.kind == "unlock_pilot"]
-    assert any(o.target_base_id == "TIEPILOT" for o in unlock)
+def test_current_best_ships_lists_owned_noncapitals(fleet_player):
+    report = analyze_fleet(fleet_player, TARGETS)
+    base_ids = [s.base_id for s in report.current_best_ships]
+    assert "KEY1" in base_ids          # owned, geared pilot -> strongest
+    assert "CAP_S" not in base_ids     # capitals excluded from this list
+    assert report.owned_capitals == 2
+
+
+def test_bundled_targets_load_and_reference_real_ids():
+    from swgoh.recommend.fleet import load_fleet_targets
+    from swgoh.ships import ship_data
+
+    targets = load_fleet_targets()
+    assert targets
+    ships = ship_data()
+    for t in targets:
+        assert t["capital"] in ships and ships[t["capital"]]["capital"]
+        for b in t.get("core", []) + t.get("support", []):
+            assert b in ships, f"{b} not a known ship base_id"

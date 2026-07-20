@@ -1,0 +1,42 @@
+# Known-effective Fleet-arena build targets. Curated from the Fleet meta
+# (early 2026) and fully user-editable. base_ids/pilots are verified against
+# game data (see scripts/refresh_ship_data.py and unit_names.json).
+#
+# Per target:
+#   capital: capital-ship base_id (its pilot is looked up from ship data)
+#   tier:    S / A / B  — rough arena strength
+#   core:    the ships that define the fleet, ordered by importance (most first)
+#   support: strong additional ships / reinforcements
+#   note:    free-text guidance shown in the report
+#
+# Hound's Tooth (HOUNDSTOOTH) is the single strongest ship in the meta and shows
+# up in nearly every top fleet — hence it's core almost everywhere.
+
+- name: Endurance (defensive)
+  capital: CAPITALJEDICRUISER     # Endurance — pilot Mace Windu
+  tier: S
+  core: [HOUNDSTOOTH, UWINGSCARIF]
+  support: [TIEFIGHTERIMPERIAL, ARC170CLONESERGEANT, YWINGREBEL, XANADUBLOOD, SLAVE1]
+  note: >
+    Endurance wins by outlasting — healing, crit immunity, protection up — and
+    pairs famously with Hound's Tooth. Strongest option if your capital pilot
+    (Mace Windu) is already geared.
+
+- name: Executrix (offense)
+  capital: CAPITALSTARDESTROYER    # Executrix — pilot Grand Moff Tarkin
+  tier: S
+  core: [HOUNDSTOOTH, UWINGSCARIF, TIEFIGHTERIMPERIAL]
+  support: [TIEADVANCED, TIEREAPER, XANADUBLOOD, IG2000, SLAVE1]
+  note: >
+    Tarkin destroys enemy ships and feeds turn meter back to your attackers.
+    Hound's Tooth + Bistan's U-wing + Imperial TIE Fighter is a core that can
+    auto-resolve many enemy fleets.
+
+- name: Chimaera (Empire)
+  capital: CAPITALCHIMAERA         # Chimaera — pilot Grand Admiral Thrawn
+  tier: A
+  core: [HOUNDSTOOTH, TIEADVANCED, TIEFIGHTERIMPERIAL]
+  support: [TIEBOMBERIMPERIAL, TIEREAPER, TIESILENCER]
+  note: >
+    Imperial ships under Thrawn. High ceiling but needs Thrawn geared up to
+    perform; strong once his stats are there.

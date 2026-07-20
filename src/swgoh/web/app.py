@@ -67,10 +67,10 @@ def api_fleet(ally_code: str | None = Query(default=None)) -> JSONResponse:
 
     def plan_json(p):
         return {
-            "faction": p.faction,
+            "name": p.name,
+            "tier": p.tier,
             "capital": p.capital.name,
-            "score": round(p.score, 1),
-            "ships": [s.name for s in p.ships],
+            "readiness": p.readiness,
             "objectives": [
                 {"kind": o.kind, "detail": o.detail, "priority": round(o.priority, 1)}
                 for o in p.objectives
@@ -83,8 +83,9 @@ def api_fleet(ally_code: str | None = Query(default=None)) -> JSONResponse:
             "ally_code": report.ally_code,
             "owned_ships": report.owned_ships,
             "owned_capitals": report.owned_capitals,
-            "best": plan_json(report.best) if report.best else None,
-            "alternatives": [plan_json(p) for p in report.alternatives],
+            "recommended": plan_json(report.recommended) if report.recommended else None,
+            "other_targets": [plan_json(p) for p in report.other_targets],
+            "current_best_ships": [s.name for s in report.current_best_ships],
         }
     )
 
