@@ -47,13 +47,26 @@ COMLINK_SET: dict[int, str] = {
 }
 
 
-def _stat_value(stat: dict[str, Any]) -> float:
-    # Comlink reports scaled integers; secondary "statValue" is already usable
-    # for speed/flat stats. Percent stats come back as scaled ints (e.g. 10000
-    # == 1%), so we scale those down.
-    raw = stat.get("statValue") or stat.get("value") or 0
+def _stat_human_value(inner: dict[str, Any], is_percent: bool) -> float:
+    """Convert a Comlink stat's scaled integer into its human value.
+
+    Comlink stores stat magnitudes as `unscaledDecimalValue` scaled by 1e8, e.g.
+    a +30 speed arrow is "3000000000" (3000000000 / 1e8 == 30). For percent
+    stats that quotient is a fraction (0.01936), so it's multiplied by 100 to
+    get percent points (1.936%). `statValueDecimal` (scaled by 1e4) is the
+    fallback if the unscaled value is absent.
+    """
+    raw = inner.get("unscaledDecimalValue")
+    if raw is not None:
+        base = _to_float(raw) / 1e8
+    else:
+        base = _to_float(inner.get("statValueDecimal")) / 1e4
+    return base * 100 if is_percent else base
+
+
+def _to_float(value: Any) -> float:
     try:
-        return float(raw)
+        return float(value)
     except (TypeError, ValueError):
         return 0.0
 
@@ -64,10 +77,9 @@ def _parse_stat(stat: dict[str, Any]) -> SecondaryStat | None:
     if stat_id not in COMLINK_STAT:
         return None
     name, is_percent = COMLINK_STAT[stat_id]
-    value = _stat_value(inner)
-    if is_percent:
-        value = value / 1e6  # scaled percent -> percent points
-    return SecondaryStat(name=name, value=round(value, 2), is_percent=is_percent)
+    value = round(_stat_human_value(inner, is_percent), 2)
+    rolls = int(stat.get("statRolls") or 1)
+    return SecondaryStat(name=name, value=value, is_percent=is_percent, rolls=rolls)
 
 
 def _parse_mod(raw: dict[str, Any]) -> Mod | None:
