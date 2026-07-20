@@ -20,6 +20,8 @@ from pathlib import Path
 from typing import Any
 
 from ..models import Player, Unit
+from ..names import display_name
+from ..ships import ships_piloted_by
 
 # Severity weights per issue kind. Tune freely.
 SEV_UNDERMODDED = 3
@@ -61,6 +63,7 @@ class UnitModReport:
     recommended_arrow: str
     note: str
     fully_modded: bool = False
+    pilot_of: list[str] = field(default_factory=list)
     issues: list[Issue] = field(default_factory=list)
 
     @property
@@ -115,6 +118,7 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
     mods = unit.mods
     maxed = sum(1 for m in mods if m.level >= MAXED_MOD_LEVEL)
     fully_modded = len(mods) == 6 and maxed >= MIN_MAXED_FOR_MODDED
+    pilot_of = [display_name(s) for s in ships_piloted_by(unit.base_id)]
 
     report = UnitModReport(
         unit=unit,
@@ -124,6 +128,7 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
         recommended_arrow=recommended_arrow,
         note=str(cfg.get("note") or ""),
         fully_modded=fully_modded,
+        pilot_of=pilot_of,
     )
 
     if not fully_modded:
@@ -150,11 +155,16 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
                 Issue("low_rarity", f"{m.slot_name} mod is {m.rarity}-dot (aim for 5-6)", SEV_LOW_RARITY)
             )
 
+    # For a non-priority unit that's purely a ship pilot, Speed-focused advice is
+    # misleading — Speed doesn't help its ship, and it isn't a configured ground
+    # unit. Skip the generic Speed flags (the pilot note explains why).
+    skip_speed_advice = (not is_priority) and bool(pilot_of)
+
     # Arrow primary: Speed is best for the vast majority of units. Configured
     # units can override the target (and are flagged more firmly).
     arrow = unit.mod_in_slot(2)
     want_arrow = recommended_arrow if is_priority else "Speed"
-    if arrow and want_arrow and arrow.primary_name != want_arrow:
+    if arrow and want_arrow and arrow.primary_name != want_arrow and not skip_speed_advice:
         qualifier = "recommended" if is_priority else "usually best"
         report.issues.append(
             Issue(
@@ -183,7 +193,7 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
             )
 
     speed_threshold = LOW_SPEED_THRESHOLD if is_priority else GENERIC_LOW_SPEED_THRESHOLD
-    if report.total_speed < speed_threshold:
+    if report.total_speed < speed_threshold and not skip_speed_advice:
         report.issues.append(
             Issue(
                 "low_speed",

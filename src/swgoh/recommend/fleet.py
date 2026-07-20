@@ -23,6 +23,8 @@ from ..ships import ship_data
 
 PILOT_GEAR_TARGET = 12
 CAPITAL_GEAR_TARGET = 12
+MOD_LEVELED_LEVEL = 12       # a mod at this level+ contributes its stats to the ship
+MOD_COVERAGE_TARGET = 0.8    # fraction of 6 mods leveled to count a pilot "modded"
 
 TIER_WEIGHT = {"S": 3.0, "A": 2.0, "B": 1.0}
 
@@ -54,10 +56,20 @@ class PilotStatus:
     stars: int = 0
     gear_level: int = 0
     relic_level: int = 0
+    mods_leveled: int = 0  # count of this pilot's mods at MOD_LEVELED_LEVEL+
 
     @property
     def score(self) -> float:
         return _pilot_score(self.gear_level, self.relic_level) if self.owned else 0.0
+
+    @property
+    def mod_coverage(self) -> float:
+        """0..1 — how much of a full 6-mod set is leveled (contributes to the ship)."""
+        return min(1.0, self.mods_leveled / 6) if self.owned else 0.0
+
+    @property
+    def geared(self) -> bool:
+        return self.owned and self.gear_level >= PILOT_GEAR_TARGET
 
 
 @dataclass
@@ -78,7 +90,12 @@ class ShipStatus:
 
     @property
     def power_frac(self) -> float:
-        """0..1 estimate of how built this ship is (ownership, stars, pilot gear)."""
+        """0..1 estimate of how built this ship is.
+
+        Ship power comes from the pilot's character stats — gear/relic AND mods
+        (mods contribute everything except Speed, which doesn't affect ships) —
+        plus the ship's own stars.
+        """
         if not self.owned:
             return 0.0
         pilot = self.best_pilot
@@ -86,7 +103,7 @@ class ShipStatus:
             return 0.15  # ship owned but pilot missing -> barely usable
         gear = min(1.0, _pilot_score(pilot.gear_level, pilot.relic_level) / 18.0)
         star = self.stars / 7
-        return 0.4 * star + 0.6 * gear
+        return 0.3 * star + 0.5 * gear + 0.2 * pilot.mod_coverage
 
 
 @dataclass
@@ -130,6 +147,9 @@ def _ship_status(base_id: str, player: Player) -> ShipStatus:
     pilots = []
     for pilot_id in info.get("pilots", []):
         pu = player.unit(pilot_id)
+        mods_leveled = (
+            sum(1 for m in pu.mods if m.level >= MOD_LEVELED_LEVEL) if pu else 0
+        )
         pilots.append(
             PilotStatus(
                 base_id=pilot_id,
@@ -138,6 +158,7 @@ def _ship_status(base_id: str, player: Player) -> ShipStatus:
                 stars=pu.stars if pu else 0,
                 gear_level=pu.gear_level if pu else 0,
                 relic_level=pu.relic_level if pu else 0,
+                mods_leveled=mods_leveled,
             )
         )
     return ShipStatus(
@@ -180,6 +201,18 @@ def _ship_objectives(ship: ShipStatus, base_priority: float, role: str) -> list[
                 f"Gear {pilot.name} to g{PILOT_GEAR_TARGET}+ (now g{pilot.gear_level}) "
                 f"to strengthen {ship.name}",
                 base_priority - 1 + (PILOT_GEAR_TARGET - pilot.gear_level) * 0.3,
+                pilot.base_id,
+            )
+        )
+    elif pilot and pilot.geared and pilot.mod_coverage < MOD_COVERAGE_TARGET:
+        # Geared but under-modded: the ship is leaving pilot stats on the table.
+        objs.append(
+            Objective(
+                "mod_pilot",
+                f"Mod {pilot.name} for offense/survivability "
+                f"({pilot.mods_leveled}/6 mods leveled) to boost {ship.name} — "
+                f"Speed mods don't help ships",
+                base_priority - 2,
                 pilot.base_id,
             )
         )

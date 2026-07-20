@@ -113,6 +113,25 @@ def test_fully_modded_ranks_above_undermodded(player):
     assert fm == sorted(fm, reverse=True)
 
 
+def test_pure_pilot_unit_suppresses_speed_advice_and_notes_ship():
+    # BOSSK crews Hound's Tooth. As a non-priority pilot with a non-Speed arrow,
+    # the misleading Speed advice is suppressed and a pilot note is attached.
+    from tests.conftest import make_mod
+
+    mods = [make_mod(i, "Offense", primary=("Health", 5.88)) for i in range(1, 7)]
+    mods[1] = make_mod(2, "Offense", primary=("Protection", 24.0))  # non-Speed arrow
+    mods[0] = make_mod(1, "Offense", rarity=4, primary=("Offense", 5.88))  # keeps it flagged
+    bossk = Unit(base_id="BOSSK", name="Bossk", gear_level=13, mods=mods)
+    report = analyze_roster(Player("c", "1", [bossk]), _cfg())
+    assert len(report.unit_reports) == 1
+    r = report.unit_reports[0]
+    kinds = {i.kind for i in r.issues}
+    assert "arrow_primary" not in kinds   # suppressed for a pure pilot
+    assert "low_speed" not in kinds       # suppressed for a pure pilot
+    assert "low_rarity" in kinds          # real issue still flagged
+    assert r.pilot_of                      # notes that Bossk pilots a ship
+
+
 def test_completed_sets_math():
     from tests.conftest import full_speed_arrow_mods
 

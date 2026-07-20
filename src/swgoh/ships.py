@@ -34,3 +34,21 @@ def pilots_of(base_id: str) -> list[str]:
 
 def factions_of(base_id: str) -> list[str]:
     return list(ship_data().get(base_id, {}).get("factions", []))
+
+
+@lru_cache(maxsize=1)
+def _pilot_index() -> dict[str, list[str]]:
+    """Reverse map: pilot character base_id -> ship base_ids they crew."""
+    index: dict[str, list[str]] = {}
+    for ship_id, info in ship_data().items():
+        for pilot_id in info.get("pilots", []):
+            index.setdefault(pilot_id, []).append(ship_id)
+    return index
+
+
+def is_pilot(base_id: str) -> bool:
+    return base_id in _pilot_index()
+
+
+def ships_piloted_by(base_id: str) -> list[str]:
+    return list(_pilot_index().get(base_id, []))

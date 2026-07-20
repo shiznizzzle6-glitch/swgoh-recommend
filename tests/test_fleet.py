@@ -65,6 +65,37 @@ def test_missing_core_ship_becomes_unlock_objective(fleet_player):
     assert "gear_pilot" in kinds      # P1/P3 under gear target
 
 
+def test_geared_but_unmodded_pilot_gets_mod_objective():
+    # A geared core pilot with no leveled mods should get a "mod_pilot" step.
+    player = Player(
+        name="a", ally_code="1",
+        units=[
+            Unit("CAP_S", "Cap", stars=6),
+            Unit("KEY1", "Key", stars=6),
+            Unit("PILOT_S", "ps", gear_level=13),
+            Unit("P1", "p1", gear_level=13),   # geared, zero mods
+        ],
+    )
+    report = analyze_fleet(player, [TARGETS[0]])
+    mod_targets = {o.target_base_id for o in report.recommended.objectives if o.kind == "mod_pilot"}
+    assert "P1" in mod_targets
+
+
+def test_pilot_mods_raise_ship_power(monkeypatch):
+    from swgoh.models import Mod
+    from swgoh.recommend.fleet import _ship_status
+
+    def player_with(mod_levels):
+        pilot = Unit("P1", "p1", gear_level=12)
+        pilot.mods = [Mod(slot=i + 1, set_name="Offense", rarity=5, level=lv, tier=5,
+                          primary_name="Offense", primary_value=5.0) for i, lv in enumerate(mod_levels)]
+        return Player("a", "1", [Unit("KEY1", "K", stars=6), pilot])
+
+    unmodded = _ship_status("KEY1", player_with([])).power_frac
+    modded = _ship_status("KEY1", player_with([15] * 6)).power_frac
+    assert modded > unmodded
+
+
 def test_readiness_reflects_investment(fleet_player):
     report = analyze_fleet(fleet_player, TARGETS)
     # Both targets have some readiness; the recommended one is a real 0<r<100.

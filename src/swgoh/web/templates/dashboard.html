@@ -31,6 +31,7 @@
         {% endfor %}
       </ul>
       {% if r.note %}<div class="note">{{ r.note }}</div>{% endif %}
+      {% if r.pilot_of %}<div class="note">Also pilots {{ r.pilot_of|join(', ') }} — for its ship, mod for offense/survivability (Speed doesn't help ships).</div>{% endif %}
     </article>
   {% endfor %}
 {% endblock %}

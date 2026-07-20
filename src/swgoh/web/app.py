@@ -109,6 +109,7 @@ def api_mods(ally_code: str | None = Query(default=None)) -> JSONResponse:
                     "is_priority": r.is_priority,
                     "score": round(r.score, 1),
                     "total_speed": r.total_speed,
+                    "pilot_of": r.pilot_of,
                     "issues": [
                         {"kind": i.kind, "detail": i.detail, "severity": i.severity}
                         for i in r.issues
