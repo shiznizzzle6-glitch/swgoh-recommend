@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Fleet Plan{% endblock %}
+{% block form_action %}/fleet{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <section class="cards">
+    <div class="card"><div class="k">Ships owned</div><div class="v">{{ report.owned_ships }}</div></div>
+    <div class="card"><div class="k">Capital ships</div><div class="v">{{ report.owned_capitals }}</div></div>
+    <div class="card"><div class="k">Recommended fleet</div><div class="v" style="font-size:1.2rem">{{ report.best.faction|capitalize if report.best else '—' }}</div></div>
+  </section>
+
+  {% if not report.best %}
+    <div class="unit empty">No ships found in your roster yet. Unlock some ships to get a Fleet plan.</div>
+  {% else %}
+    <h2 style="margin:.2rem 0 .3rem">Your strongest fleet to build toward</h2>
+    <div class="fleet-head">
+      <span class="cap">{{ report.best.capital.name }}</span>
+      <span class="pill">capital</span>
+      <span class="muted">{{ report.best.faction|capitalize }} · pilot {{ report.best.capital.best_pilot.name if report.best.capital.best_pilot }}
+        (g{{ report.best.capital.best_pilot.gear_level if report.best.capital.best_pilot else 0 }})</span>
+    </div>
+    <div class="shiplist">
+      {% for s in report.best.ships %}
+        <span class="chip">{{ s.name }} · {{ s.stars }}★
+          {% if s.best_pilot %}<span class="muted">(g{{ s.best_pilot.gear_level }})</span>{% endif %}</span>
+      {% endfor %}
+    </div>
+
+    <h2 style="margin:1rem 0 .6rem">Next objectives</h2>
+    {% for o in report.best.objectives %}
+      <div class="obj">
+        <span class="rank">{{ loop.index }}</span>
+        <div>
+          <div>{{ o.detail }}</div>
+          <span class="pill">{{ o.kind.replace('_',' ') }}</span>
+        </div>
+      </div>
+    {% endfor %}
+
+    {% if report.alternatives %}
+      <h2 style="margin:1.4rem 0 .6rem">Other viable fleets</h2>
+      {% for p in report.alternatives %}
+        <div class="obj">
+          <span class="rank">{{ loop.index }}</span>
+          <div>
+            <div><strong>{{ p.capital.name }}</strong> — {{ p.faction|capitalize }}
+              ({{ p.ships|length }} ships)</div>
+            <span class="muted">Top objective: {{ p.objectives[0].detail if p.objectives else 'ready' }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+{% endblock %}

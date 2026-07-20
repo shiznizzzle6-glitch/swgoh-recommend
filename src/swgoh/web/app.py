@@ -42,6 +42,53 @@ def dashboard(request: Request, ally_code: str | None = Query(default=None)) -> 
     )
 
 
+@app.get("/fleet", response_class=HTMLResponse)
+def fleet(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().fleet_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "fleet.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/fleet")
+def api_fleet(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().fleet_report(ally_code)
+
+    def plan_json(p):
+        return {
+            "faction": p.faction,
+            "capital": p.capital.name,
+            "score": round(p.score, 1),
+            "ships": [s.name for s in p.ships],
+            "objectives": [
+                {"kind": o.kind, "detail": o.detail, "priority": round(o.priority, 1)}
+                for o in p.objectives
+            ],
+        }
+
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "owned_ships": report.owned_ships,
+            "owned_capitals": report.owned_capitals,
+            "best": plan_json(report.best) if report.best else None,
+            "alternatives": [plan_json(p) for p in report.alternatives],
+        }
+    )
+
+
 @app.get("/api/mods")
 def api_mods(ally_code: str | None = Query(default=None)) -> JSONResponse:
     report = _service().mod_report(ally_code)
