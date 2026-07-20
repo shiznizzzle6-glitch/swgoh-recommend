@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ report.player_name }} — Mod Report{% endblock %}
+{% block form_action %}/mods{% endblock %}
 {% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
 {% block content %}
   <section class="cards">

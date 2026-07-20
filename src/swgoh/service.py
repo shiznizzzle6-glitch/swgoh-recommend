@@ -7,9 +7,11 @@ from .recommend import (
     FleetReport,
     ModReport,
     SquadReport,
+    TonightPlan,
     analyze_fleet,
     analyze_roster,
     analyze_squads,
+    build_tonight_plan,
     load_priority_config,
 )
 from .sources import build_source
@@ -44,3 +46,11 @@ class SwgohService:
     def squad_report(self, ally_code: str | None = None) -> SquadReport:
         player = self.get_player(ally_code)
         return analyze_squads(player)
+
+    def tonight_plan(self, ally_code: str | None = None) -> TonightPlan:
+        """Fetch the roster once and merge all analyzers into one ranked plan."""
+        player = self.get_player(ally_code)
+        mods = analyze_roster(player, self._priority_config)
+        fleet = analyze_fleet(player)
+        squads = analyze_squads(player)
+        return build_tonight_plan(mods, fleet, squads)

@@ -21,6 +21,25 @@ def _service() -> SwgohService:
 
 
 @app.get("/", response_class=HTMLResponse)
+def tonight(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        plan = _service().tonight_plan(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "tonight.html", {"plan": plan, "ally_code": code}
+    )
+
+
+@app.get("/mods", response_class=HTMLResponse)
 def dashboard(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
     settings = get_settings()
     code = ally_code or settings.ally_code
@@ -39,6 +58,28 @@ def dashboard(request: Request, ally_code: str | None = Query(default=None)) -> 
         )
     return templates.TemplateResponse(
         request, "dashboard.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/tonight")
+def api_tonight(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    plan = _service().tonight_plan(ally_code)
+    return JSONResponse(
+        {
+            "player": plan.player_name,
+            "ally_code": plan.ally_code,
+            "units": [
+                {
+                    "base_id": u.base_id,
+                    "name": u.name,
+                    "score": u.score,
+                    "headline": u.headline,
+                    "kind": u.primary_kind,
+                    "sources": u.sources,
+                }
+                for u in plan.units
+            ],
+        }
     )
 
 

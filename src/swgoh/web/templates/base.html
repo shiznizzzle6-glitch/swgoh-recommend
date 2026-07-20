@@ -90,7 +90,8 @@
   <header>
     <h1><span class="accent">SWGOH</span> Recommendations</h1>
     <nav class="nav">
-      <a href="/{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Mods</a>
+      <a href="/{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Tonight</a>
+      <a href="/mods{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Mods</a>
       <a href="/fleet{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Fleet</a>
       <a href="/squads{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Squads</a>
     </nav>
