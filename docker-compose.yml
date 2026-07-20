@@ -1,0 +1,33 @@
+# Full stack for the VM: Comlink (data) + the web dashboard.
+# The laptop just points a browser at http://<vm-ip>:8000 — nothing else needed
+# on the laptop. The web app reaches Comlink over the internal Docker network,
+# so Comlink never has to be exposed to your LAN (though it is below, on 3200,
+# for debugging convenience).
+#
+#   docker compose up -d --build
+#
+services:
+  comlink:
+    image: ghcr.io/swgoh-utils/swgoh-comlink:latest
+    container_name: swgoh-comlink
+    restart: unless-stopped
+    environment:
+      APP_NAME: swgoh-recommend
+      # Optional HMAC signing; leave unset for a private/local instance.
+      # ACCESS_KEY: ""
+      # SECRET_KEY: ""
+    ports:
+      - "3200:3000"   # optional; handy for `curl <vm-ip>:3200/...` while debugging
+
+  web:
+    build: .
+    container_name: swgoh-web
+    restart: unless-stopped
+    depends_on:
+      - comlink
+    environment:
+      SWGOH_DATA_SOURCE: comlink
+      SWGOH_COMLINK_URL: http://comlink:3000   # internal service name + port
+      SWGOH_ALLY_CODE: "474168985"
+    ports:
+      - "8000:8000"   # the dashboard — open http://<vm-ip>:8000 from any browser

@@ -78,12 +78,16 @@ def healthz() -> dict[str, str]:
 
 
 def main() -> None:
+    import os
+
     import uvicorn
 
     settings = get_settings()
+    host = os.getenv("SWGOH_WEB_HOST", "127.0.0.1")
+    port = int(os.getenv("SWGOH_WEB_PORT", "8000"))
     print(f"SWGOH dashboard starting (source={settings.data_source}).")
-    print("Open http://127.0.0.1:8000")
-    uvicorn.run("swgoh.web.app:app", host="127.0.0.1", port=8000, reload=False)
+    print(f"Open http://{host}:{port}")
+    uvicorn.run("swgoh.web.app:app", host=host, port=port, reload=False)
 
 
 if __name__ == "__main__":
