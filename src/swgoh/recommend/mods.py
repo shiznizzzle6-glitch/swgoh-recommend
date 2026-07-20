@@ -1,9 +1,16 @@
 """Rules-based mod analysis.
 
-This is a "mod hygiene + priority" engine, not scraped meta advice. It flags
-objectively-improvable mod situations (unleveled mods, sub-5-dot mods, empty
-slots, non-Speed arrows, wrong sets vs your curated config) and ranks which
-characters most need attention, weighted by how much you care about them.
+This is a "mod hygiene + priority" engine, not scraped meta advice. It ranks
+which characters most need mod *work you'd actually do*, weighted by how much
+you care about them (your `priority_characters.yaml`).
+
+The key design choice: a unit is either **undermodded** (few mods, or mostly
+low-level ones — you clearly haven't invested, so it collapses to a single
+low-urgency flag) or **fully modded** (6 mods, mostly maxed — now the granular
+tuning analysis is worth doing: wrong set, non-Speed arrow, low speed, a stray
+unleveled/low-rarity mod). Non-priority units only surface if they're both
+invested in and improvable, so parked Galactic-Legend-requirement units with
+junk mods don't drown out your real squads.
 """
 from __future__ import annotations
 
@@ -15,18 +22,27 @@ from typing import Any
 from ..models import Player, Unit
 
 # Severity weights per issue kind. Tune freely.
-SEV_MISSING_MOD = 4
-SEV_UNLEVELED = 3
+SEV_UNDERMODDED = 3
+SEV_UNLEVELED = 2
 SEV_LOW_RARITY = 2
-SEV_ARROW_PRIMARY = 3
-SEV_SET_MISMATCH = 2
+SEV_ARROW_PRIMARY = 3          # against a unit's configured recommended arrow
+SEV_ARROW_PRIMARY_GENERIC = 2  # non-Speed arrow with no config (advisory)
+SEV_SET_MISMATCH = 3
 SEV_LOW_SPEED = 3
 
-# A priority unit with less than this much total mod speed is under-modded.
-LOW_SPEED_THRESHOLD = 40.0
+# Weight applied to units not in your priority config (priority units use their
+# configured weight, typically 1.0-2.0), so your chosen characters rank above
+# incidental ones.
+NONPRIORITY_WEIGHT = 0.5
 
-# Only analyze units at or above this gear level unless they're in the config.
-DEFAULT_MIN_GEAR = 11
+# "Fully modded" == 6 mods with at least this many at MAXED_MOD_LEVEL+.
+MAXED_MOD_LEVEL = 12
+MIN_MAXED_FOR_MODDED = 4
+
+# Total mod speed below which a fully-modded unit is flagged. Configured
+# (priority) units are held to a higher bar than incidental fully-modded ones.
+LOW_SPEED_THRESHOLD = 40.0
+GENERIC_LOW_SPEED_THRESHOLD = 15.0
 
 
 @dataclass
@@ -44,6 +60,7 @@ class UnitModReport:
     recommended_sets: list[str]
     recommended_arrow: str
     note: str
+    fully_modded: bool = False
     issues: list[Issue] = field(default_factory=list)
 
     @property
@@ -65,22 +82,9 @@ class ModReport:
     player_name: str
     ally_code: str
     unit_reports: list[UnitModReport]
-
-    @property
-    def total_mods(self) -> int:
-        return sum(len(r.unit.mods) for r in self.unit_reports)
-
-    @property
-    def unleveled_mods(self) -> int:
-        return sum(
-            1 for r in self.unit_reports for m in r.unit.mods if not m.is_maxed
-        )
-
-    @property
-    def low_rarity_mods(self) -> int:
-        return sum(
-            1 for r in self.unit_reports for m in r.unit.mods if m.rarity < 5
-        )
+    total_mods: int = 0
+    unleveled_mods: int = 0
+    low_rarity_mods: int = 0
 
     @property
     def flagged_units(self) -> list[UnitModReport]:
@@ -106,7 +110,12 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
     cfg = cfg or {}
     recommended_sets = [str(s) for s in (cfg.get("sets") or [])]
     recommended_arrow = str(cfg.get("arrow") or "Speed")
-    weight = float(cfg.get("weight", 1.0))
+    weight = float(cfg.get("weight", 1.0)) if is_priority else NONPRIORITY_WEIGHT
+
+    mods = unit.mods
+    maxed = sum(1 for m in mods if m.level >= MAXED_MOD_LEVEL)
+    fully_modded = len(mods) == 6 and maxed >= MIN_MAXED_FOR_MODDED
+
     report = UnitModReport(
         unit=unit,
         is_priority=is_priority,
@@ -114,16 +123,25 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
         recommended_sets=recommended_sets,
         recommended_arrow=recommended_arrow,
         note=str(cfg.get("note") or ""),
+        fully_modded=fully_modded,
     )
 
-    mods = unit.mods
-    if len(mods) < 6:
+    if not fully_modded:
+        # Not invested yet: one low-urgency flag rather than a pile of noise.
         report.issues.append(
-            Issue("missing_mod", f"Only {len(mods)}/6 mods equipped", SEV_MISSING_MOD * (6 - len(mods)))
+            Issue(
+                "undermodded",
+                f"Not fully modded ({len(mods)}/6 mods, {maxed} at level {MAXED_MOD_LEVEL}+)",
+                SEV_UNDERMODDED,
+            )
         )
+        return report
 
+    # Fully modded: the granular, actionable tuning analysis. Per-mod checks
+    # apply to every fully-modded unit; a level-12+ mod counts as done (that's
+    # the "modded" bar), so only genuinely-behind mods are flagged.
     for m in mods:
-        if not m.is_maxed:
+        if m.level < MAXED_MOD_LEVEL:
             report.issues.append(
                 Issue("unleveled", f"{m.slot_name} mod at level {m.level}/15", SEV_UNLEVELED)
             )
@@ -132,43 +150,47 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
                 Issue("low_rarity", f"{m.slot_name} mod is {m.rarity}-dot (aim for 5-6)", SEV_LOW_RARITY)
             )
 
-    if is_priority:
-        arrow = unit.mod_in_slot(2)
-        if arrow and recommended_arrow and arrow.primary_name != recommended_arrow:
+    # Arrow primary: Speed is best for the vast majority of units. Configured
+    # units can override the target (and are flagged more firmly).
+    arrow = unit.mod_in_slot(2)
+    want_arrow = recommended_arrow if is_priority else "Speed"
+    if arrow and want_arrow and arrow.primary_name != want_arrow:
+        qualifier = "recommended" if is_priority else "usually best"
+        report.issues.append(
+            Issue(
+                "arrow_primary",
+                f"Arrow primary is {arrow.primary_name}; {want_arrow} {qualifier}",
+                SEV_ARROW_PRIMARY if is_priority else SEV_ARROW_PRIMARY_GENERIC,
+            )
+        )
+
+    # Set mismatch only applies where we have a curated recommendation.
+    if is_priority and recommended_sets:
+        have: dict[str, int] = {}
+        for s in unit.completed_sets():
+            have[s] = have.get(s, 0) + 1
+        want: dict[str, int] = {}
+        for s in recommended_sets:
+            want[s] = want.get(s, 0) + 1
+        missing = [s for s, n in want.items() if have.get(s, 0) < n]
+        if missing:
             report.issues.append(
                 Issue(
-                    "arrow_primary",
-                    f"Arrow primary is {arrow.primary_name}; {recommended_arrow} recommended",
-                    SEV_ARROW_PRIMARY,
+                    "set_mismatch",
+                    f"Missing recommended set(s): {', '.join(missing)}",
+                    SEV_SET_MISMATCH,
                 )
             )
 
-        if recommended_sets:
-            completed = unit.completed_sets()
-            have = dict()
-            for s in completed:
-                have[s] = have.get(s, 0) + 1
-            want: dict[str, int] = {}
-            for s in recommended_sets:
-                want[s] = want.get(s, 0) + 1
-            missing = [s for s, n in want.items() if have.get(s, 0) < n]
-            if missing:
-                report.issues.append(
-                    Issue(
-                        "set_mismatch",
-                        f"Missing recommended set(s): {', '.join(missing)}",
-                        SEV_SET_MISMATCH,
-                    )
-                )
-
-        if mods and report.total_speed < LOW_SPEED_THRESHOLD:
-            report.issues.append(
-                Issue(
-                    "low_speed",
-                    f"Only {report.total_speed:g} speed from mods (under {LOW_SPEED_THRESHOLD:g})",
-                    SEV_LOW_SPEED,
-                )
+    speed_threshold = LOW_SPEED_THRESHOLD if is_priority else GENERIC_LOW_SPEED_THRESHOLD
+    if report.total_speed < speed_threshold:
+        report.issues.append(
+            Issue(
+                "low_speed",
+                f"Only {report.total_speed:g} speed from mods (under {speed_threshold:g})",
+                SEV_LOW_SPEED,
             )
+        )
 
     return report
 
@@ -176,19 +198,39 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
 def analyze_roster(
     player: Player,
     priority_config: dict[str, dict[str, Any]] | None = None,
-    min_gear: int = DEFAULT_MIN_GEAR,
 ) -> ModReport:
-    """Analyze every relevant unit and return a ranked ModReport."""
+    """Analyze the roster and return a ranked ModReport.
+
+    Priority units are always considered. Non-priority units are only surfaced
+    when they're fully modded *and* have a real improvement to make.
+    """
     if priority_config is None:
         priority_config = load_priority_config()
 
-    reports: list[UnitModReport] = []
-    for unit in player.units:
-        cfg = priority_config.get(unit.base_id)
-        relevant = cfg is not None or unit.gear_level >= min_gear or unit.relic_level > 0
-        if not relevant or not unit.mods:
-            continue
-        reports.append(_analyze_unit(unit, cfg))
+    modded_units = [u for u in player.units if u.mods]
 
-    reports.sort(key=lambda r: (r.score, r.is_priority, r.total_speed), reverse=True)
-    return ModReport(player_name=player.name, ally_code=player.ally_code, unit_reports=reports)
+    # Roster-wide hygiene totals (over every modded unit, for the summary cards).
+    total_mods = sum(len(u.mods) for u in modded_units)
+    unleveled = sum(1 for u in modded_units for m in u.mods if not m.is_maxed)
+    low_rarity = sum(1 for u in modded_units for m in u.mods if m.rarity and m.rarity < 5)
+
+    reports: list[UnitModReport] = []
+    for unit in modded_units:
+        cfg = priority_config.get(unit.base_id)
+        report = _analyze_unit(unit, cfg)
+        if report.is_priority:
+            reports.append(report)
+        elif report.fully_modded and report.issues:
+            reports.append(report)
+
+    # Fully-modded units (where advice is actionable) rank above undermodded
+    # ones; within each group, higher score first.
+    reports.sort(key=lambda r: (r.fully_modded, r.score, r.is_priority), reverse=True)
+    return ModReport(
+        player_name=player.name,
+        ally_code=player.ally_code,
+        unit_reports=reports,
+        total_mods=total_mods,
+        unleveled_mods=unleveled,
+        low_rarity_mods=low_rarity,
+    )

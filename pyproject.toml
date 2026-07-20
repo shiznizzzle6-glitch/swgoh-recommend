@@ -28,7 +28,7 @@ swgoh-web = "swgoh.web.app:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"swgoh.data" = ["*.yaml"]
+"swgoh.data" = ["*.yaml", "*.json"]
 "swgoh.web" = ["templates/*.html"]
 
 [tool.pytest.ini_options]

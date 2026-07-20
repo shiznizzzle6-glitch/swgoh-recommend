@@ -13,6 +13,7 @@ from typing import Any
 import httpx
 
 from ..models import Mod, Player, SecondaryStat, Unit
+from ..names import display_name
 from .base import DataSource
 
 # Comlink unitStatId -> (canonical name, is_percent).
@@ -112,7 +113,7 @@ def _parse_unit(raw: dict[str, Any]) -> Unit | None:
     mods = [m for m in (_parse_mod(m) for m in (raw.get("equippedStatMod") or [])) if m]
     return Unit(
         base_id=base_id,
-        name=base_id,  # Comlink names require the localization bundle; base_id for now.
+        name=display_name(base_id),
         stars=int(raw.get("currentRarity") or 0),
         level=int(raw.get("currentLevel") or 0),
         gear_level=int(raw.get("currentTier") or 0),
