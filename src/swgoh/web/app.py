@@ -153,6 +153,74 @@ def defense(request: Request, ally_code: str | None = Query(default=None)) -> HT
     )
 
 
+@app.get("/guild", response_class=HTMLResponse)
+def guild(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().guild_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "guild.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/guild")
+def api_guild(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().guild_report(ally_code)
+    s = report.standing
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "standing": None if s is None else {
+                "guild_name": s.guild_name,
+                "guild_gp": s.guild_gp,
+                "member_count": s.member_count,
+                "my_gp": s.my_gp,
+                "my_gp_rank": s.my_gp_rank,
+                "my_gp_percentile": s.my_gp_percentile,
+                "gac_league": s.gac_league,
+                "gac_division": s.gac_division,
+                "gac_skill_rating": s.gac_skill_rating,
+            },
+            "raids": [
+                {
+                    "raid_id": r.raid_id,
+                    "raid_name": r.raid_name,
+                    "my_score": r.my_score,
+                    "guild_total": r.guild_total,
+                    "top_score": r.top_score,
+                    "median_score": r.median_score,
+                    "squads": [
+                        {
+                            "name": sq.name,
+                            "tier": sq.tier,
+                            "status": sq.status,
+                            "readiness": sq.readiness,
+                            "owned": sq.owned_count,
+                            "size": len(sq.members),
+                            "tags": sq.tags,
+                            "objectives": [
+                                {"kind": o.kind, "detail": o.detail} for o in sq.objectives[:3]
+                            ],
+                        }
+                        for sq in r.squads
+                    ],
+                }
+                for r in report.raids
+            ],
+        }
+    )
+
+
 @app.get("/gear", response_class=HTMLResponse)
 def gear(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
     settings = get_settings()

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Guild{% endblock %}
+{% block form_action %}/guild{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  {% set s = report.standing %}
+  <h2 style="margin:.2rem 0 .3rem">Guild — {{ s.guild_name }}</h2>
+  <p class="note" style="margin:0 0 1.2rem">
+    Where you stand, and how to start contributing to the raids your guild actually runs.
+  </p>
+
+  {% if s %}
+    <div class="rankstrip">
+      <div class="rankcard">
+        <div class="k">Your GP rank in guild</div>
+        <div class="v">#{{ s.my_gp_rank }} <span class="muted" style="font-size:.9rem">/ {{ s.member_count }}</span></div>
+        <div class="d flat">{{ s.my_gp_percentile }}th percentile · {{ '{:,}'.format(s.my_gp) }} GP</div>
+      </div>
+      <div class="rankcard">
+        <div class="k">Guild galactic power</div>
+        <div class="v">{{ '%.0f' % (s.guild_gp / 1000000) }}M</div>
+        <div class="d flat">{{ s.member_count }} members</div>
+      </div>
+      {% if s.gac_league %}
+      <div class="rankcard">
+        <div class="k">Grand Arena (GAC)</div>
+        <div class="v" style="font-size:1.2rem">{{ s.gac_league|capitalize }} {{ s.gac_division }}</div>
+        <div class="d flat">skill rating {{ s.gac_skill_rating }}</div>
+      </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% for r in report.raids %}
+    <h3 style="margin:1.2rem 0 .5rem">🐉 {{ r.raid_name }} raid</h3>
+    {% if r.my_score is not none %}
+      <div class="squad" style="margin-bottom:.8rem">
+        <div class="top">
+          <span class="nm">Your last score</span>
+          {% if r.my_score == 0 %}<span class="st Build">0 — not scoring yet</span>
+          {% elif r.my_score >= r.median_score %}<span class="st Ready">above guild median</span>
+          {% else %}<span class="st Close">below median</span>{% endif %}
+          <span class="spacer"></span>
+          <span class="muted">
+            you {{ '{:,}'.format(r.my_score) }} · median {{ '{:,}'.format(r.median_score) }} · top {{ '{:,}'.format(r.top_score) }}
+          </span>
+        </div>
+      </div>
+    {% else %}
+      <p class="note" style="margin:0 0 .6rem">This raid is active but no recent scores were reported yet.</p>
+    {% endif %}
+
+    <p class="note" style="margin:0 0 .6rem">
+      Teams to build for this raid, closest-to-ready first. <span class="tag">beginner</span> = cheap
+      starter (boosted up — the fastest way from 0 to scoring).
+    </p>
+    {% for sq in r.squads %}
+      <article class="squad">
+        <div class="top">
+          <span class="nm">{{ sq.name }}</span>
+          <span class="st {{ sq.status }}">{{ sq.status }}</span>
+          <span class="pill">tier {{ sq.tier }}</span>
+          {% for t in sq.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+          <span class="spacer"></span>
+          <span class="muted">{{ sq.owned_count }}/{{ sq.members|length }} owned · {{ sq.readiness|round|int }}% built</span>
+        </div>
+        <div class="bar"><i style="width:{{ sq.readiness|round|int }}%"></i></div>
+        <div class="shiplist">
+          {% for m in sq.members %}
+            <span class="chip">{% if m.is_leader %}★ {% endif %}{{ m.name }}
+              {% if m.owned %}<span class="muted">{{ m.stars }}★ g{{ m.gear_level }}{% if m.relic_level %} r{{ m.relic_level }}{% endif %}</span>
+              {% else %}<span style="color:var(--bad)">need</span>{% endif %}</span>
+          {% endfor %}
+        </div>
+        {% if sq.objectives %}
+          <div style="margin-top:.4rem">
+            {% for o in sq.objectives[:3] %}<div class="note" style="margin:.15rem 0">{{ loop.index }}. {{ o.detail }}</div>{% endfor %}
+          </div>
+        {% endif %}
+        {% if sq.note %}<div class="note" style="font-style:italic;margin-top:.4rem">{{ sq.note }}</div>{% endif %}
+      </article>
+    {% endfor %}
+  {% endfor %}
+
+  {% if not report.raids %}
+    <div class="unit empty">No active raids detected for your guild.</div>
+  {% endif %}
+{% endblock %}

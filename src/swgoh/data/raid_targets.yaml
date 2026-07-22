@@ -1,0 +1,55 @@
+# Effective squads for the guild raids, keyed by raid id (as Comlink reports it).
+# The Guild page only shows squads for the raids your guild actually runs.
+# Curated from raid meta (mid-2026), base_ids verified against unit_names.json.
+# `beginner: true` marks cheap/low-investment teams — the fastest way for a
+# small account to go from scoring 0 to contributing.
+
+order66:
+  - name: Enfys Nest (solo)
+    tier: A
+    beginner: true
+    note: >
+      Enfys Nest can solo the lower raid tiers for ~300k on her own — by far the
+      cheapest way to start scoring when you're currently at 0. Build her first.
+    members: [ENFYSNEST]
+  - name: Grand Moff Tarkin (Dark Clones)
+    tier: S
+    note: Thematic dark-clone squad; even a partial Tarkin + Scorch core scores near max.
+    members: [GRANDMOFFTARKIN, SCORCH, APPO, OPERATIVE, DISGUISEDCLONETROOPER]
+  - name: Maz Kanata (Pirates)
+    tier: A
+    note: Pirate follow-up team; solid contribution once you've invested in Pirates.
+    members: [MAZKANATA, ENFYSNEST, HONDO, ITHANO, SM33]
+  - name: Jedi Master Mace Windu
+    tier: S
+    note: Highest ceiling (3.6M max) but relic-heavy — a long-term target, not a starter.
+    members: [JEDIMASTERMACEWINDU, DEPABILLABA, VANGUARDTEMPLEGUARD, KITFISTO, PLOKOON]
+  - name: Pirate King Hondo
+    tier: S
+    note: Galactic Legend pirate lead, max-score capable — endgame investment.
+    members: [GLHONDO_GLE_INHERIT_NOULT, SM33, ITHANO, SANASTARROS, HONDO]
+
+naboo:
+  - name: Gungans
+    tier: S
+    beginner: true
+    note: >
+      The go-to Naboo team — cheap, extremely durable with the raid's shield
+      mechanics, and scores well without heavy relics. Best starter for Naboo.
+    members: [BOSSNASS, CAPTAINTARPALS, BOOMADIER, GUNGANPHALANX, JARJARBINKS_EVENT]
+  - name: Separatists & Sith
+    tier: A
+    note: B2-led droids with Maul + Sidious; consistent scoring at mid tiers.
+    members: [B2SUPERBATTLEDROID, STAP, MAGNAGUARD, MAUL, DARTHSIDIOUS]
+  - name: Luminara Jedi
+    tier: A
+    note: Luminara heal-over-time + Kit Fisto potency synergy; strong if you have the Jedi.
+    members: [LUMINARAUNDULI, GRANDMASTERYODA, KITFISTO, PLOKOON, SHAAKTI]
+  - name: Kelleran Beq Jedi
+    tier: A
+    note: Galactic Republic Jedi under Kelleran; good second Jedi team.
+    members: [KELLERANBEQ, MACEWINDU, KIADIMUNDI, SHAAKTI, AAYLASECURA]
+  - name: Queen Amidala
+    tier: A
+    note: Amidala "Queen's Protection" stacking team; flexible back slots.
+    members: [QUEENAMIDALA, MASTERQUIGON, PADAWANOBIWAN, JARJARBINKS_EVENT, MACEWINDU]

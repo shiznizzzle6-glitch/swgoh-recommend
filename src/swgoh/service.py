@@ -9,6 +9,7 @@ from .recommend import (
     EnergyReport,
     FleetReport,
     GearReport,
+    GuildReport,
     ModReport,
     RelicReport,
     SliceReport,
@@ -19,6 +20,7 @@ from .recommend import (
     analyze_energy,
     analyze_fleet,
     analyze_gear,
+    analyze_guild,
     analyze_relics,
     analyze_roster,
     analyze_slicing,
@@ -92,6 +94,13 @@ class SwgohService:
     def gear_report(self, ally_code: str | None = None) -> GearReport:
         player = self.get_player(ally_code)
         return analyze_gear(player)
+
+    def guild_report(self, ally_code: str | None = None) -> GuildReport:
+        player = self.get_player(ally_code)
+        if not player.guild_id or not hasattr(self.source, "get_guild"):
+            raise ValueError("No guild found for this player (or the data source can't fetch guilds).")
+        guild = self.source.get_guild(player.guild_id)
+        return analyze_guild(player, guild)
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)

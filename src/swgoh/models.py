@@ -110,9 +110,44 @@ class Player:
     fleet_arena_rank: int | None = None
     # base_ids of the currently-set Squad Arena defense team, in slot order.
     arena_defense_squad: list[str] = field(default_factory=list)
+    # Identity + guild membership (for guild features).
+    player_id: str = ""
+    guild_id: str = ""
+    guild_name: str = ""
+    # Grand Arena (GAC) standing.
+    gac_league: str = ""
+    gac_division: int = 0
+    gac_skill_rating: int = 0
 
     def unit(self, base_id: str) -> Unit | None:
         for u in self.units:
             if u.base_id == base_id:
                 return u
         return None
+
+
+@dataclass
+class GuildMember:
+    player_id: str
+    name: str
+    galactic_power: int = 0
+    char_gp: int = 0
+    ship_gp: int = 0
+    level: int = 0
+    last_active_ms: int = 0
+    league_id: str = ""
+
+
+@dataclass
+class Guild:
+    id: str
+    name: str
+    galactic_power: int = 0
+    member_count: int = 0
+    members: list[GuildMember] = field(default_factory=list)
+    # Raids the guild currently runs (e.g. ["naboo", "order66"]).
+    active_raids: list[str] = field(default_factory=list)
+    # Most recent completed raid: id, guild total, and per-player scores.
+    recent_raid_id: str = ""
+    recent_raid_total: int = 0
+    recent_raid_scores: dict[str, int] = field(default_factory=dict)

@@ -17,7 +17,7 @@
         <span class="pill">tier {{ s.tier }}</span>
         {% for t in s.tags %}<span class="tag">{{ t.replace('_',' ') }}</span>{% endfor %}
         <span class="spacer"></span>
-        <span class="muted">{{ s.owned }}/{{ s.members|length }} owned · {{ s.readiness|round|int }}% built</span>
+        <span class="muted">{{ s.owned_count }}/{{ s.members|length }} owned · {{ s.readiness|round|int }}% built</span>
       </div>
       <div class="bar"><i style="width:{{ s.readiness|round|int }}%"></i></div>
       <div class="shiplist">

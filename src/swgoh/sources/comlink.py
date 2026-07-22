@@ -12,7 +12,7 @@ from typing import Any
 
 import httpx
 
-from ..models import Mod, Player, SecondaryStat, Unit
+from ..models import Guild, GuildMember, Mod, Player, SecondaryStat, Unit
 from ..names import display_name
 from .base import DataSource
 
@@ -156,6 +156,67 @@ def _parse_unit(raw: dict[str, Any]) -> Unit | None:
     )
 
 
+def _parse_guild(data: dict[str, Any]) -> Guild:
+    gd = data.get("guild") or {}
+    profile = gd.get("profile") or {}
+
+    members: list[GuildMember] = []
+    for m in gd.get("member") or []:
+        members.append(
+            GuildMember(
+                player_id=str(m.get("playerId") or ""),
+                name=str(m.get("playerName") or ""),
+                galactic_power=int(_to_float(m.get("galacticPower"))),
+                char_gp=int(_to_float(m.get("characterGalacticPower"))),
+                ship_gp=int(_to_float(m.get("shipGalacticPower"))),
+                level=int(m.get("playerLevel") or 0),
+                last_active_ms=int(_to_float(m.get("lastActivityTime"))),
+                league_id=str(m.get("leagueId") or ""),
+            )
+        )
+
+    # Raids the guild runs come from its launch configs (single + auto).
+    active: list[str] = []
+    for cfg_key in ("singleLaunchConfig", "autoLaunchConfig"):
+        rid = (profile.get(cfg_key) or {}).get("raidId")
+        if rid and rid not in active:
+            active.append(str(rid))
+
+    recent_id = ""
+    recent_total = 0
+    recent_scores: dict[str, int] = {}
+    recent = gd.get("recentRaidResult") or []
+    if recent:
+        rr = recent[0]
+        recent_id = str(rr.get("raidId") or "")
+        for rm in rr.get("raidMember") or []:
+            pid = str(rm.get("playerId") or "")
+            if pid:
+                recent_scores[pid] = int(_to_float(rm.get("memberProgress")))
+        summary = gd.get("lastRaidPointsSummary")
+        total = 0
+        if isinstance(summary, dict):
+            total = int(_to_float(summary.get("totalPoints")))
+        elif isinstance(summary, list):
+            for entry in summary:
+                if isinstance(entry, dict) and entry.get("totalPoints"):
+                    total = int(_to_float(entry.get("totalPoints")))
+                    break
+        recent_total = total or sum(recent_scores.values())
+
+    return Guild(
+        id=str(profile.get("id") or ""),
+        name=str(profile.get("name") or ""),
+        galactic_power=int(_to_float(profile.get("guildGalacticPower"))),
+        member_count=int(profile.get("memberCount") or len(members)),
+        members=members,
+        active_raids=active,
+        recent_raid_id=recent_id,
+        recent_raid_total=recent_total,
+        recent_raid_scores=recent_scores,
+    )
+
+
 class ComlinkSource(DataSource):
     name = "comlink"
 
@@ -179,6 +240,9 @@ class ComlinkSource(DataSource):
         }
         squad_rank, fleet_rank, defense = _parse_pvp(data, id_to_base)
         name = (data.get("name") or data.get("playerName") or "Unknown")
+        rating = data.get("playerRating") or {}
+        skill = (rating.get("playerSkillRating") or {}).get("skillRating")
+        rank_status = rating.get("playerRankStatus") or {}
         return Player(
             name=str(name),
             ally_code=str(ally_code),
@@ -186,4 +250,20 @@ class ComlinkSource(DataSource):
             squad_arena_rank=squad_rank,
             fleet_arena_rank=fleet_rank,
             arena_defense_squad=defense,
+            player_id=str(data.get("playerId") or ""),
+            guild_id=str(data.get("guildId") or ""),
+            guild_name=str(data.get("guildName") or ""),
+            gac_league=str(rank_status.get("leagueId") or ""),
+            gac_division=int(rank_status.get("divisionId") or 0),
+            gac_skill_rating=int(skill or 0),
         )
+
+    def get_guild(self, guild_id: str) -> Guild:
+        url = f"{self.base_url}/guild"
+        body = {
+            "payload": {"guildId": str(guild_id), "includeRecentGuildActivityInfo": True},
+            "enums": False,
+        }
+        resp = httpx.post(url, json=body, timeout=self.timeout)
+        resp.raise_for_status()
+        return _parse_guild(resp.json())
