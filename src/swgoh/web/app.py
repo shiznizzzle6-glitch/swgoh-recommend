@@ -149,6 +149,56 @@ def defense(request: Request, ally_code: str | None = Query(default=None)) -> HT
     )
 
 
+@app.get("/zetas", response_class=HTMLResponse)
+def zetas(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().zeta_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "zetas.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/zetas")
+def api_zetas(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().zeta_report(ally_code)
+
+    def t_json(t):
+        return {
+            "base_id": t.base_id,
+            "unit_name": t.unit_name,
+            "ability_id": t.ability_id,
+            "ability_name": t.ability_name,
+            "kind": t.kind,
+            "modes": t.modes,
+            "goals": t.goals,
+            "roles": t.roles,
+            "priority": t.priority,
+            "current_tier": t.current_tier,
+            "max_tier": t.max_tier,
+        }
+
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "zetas": [t_json(t) for t in report.zetas],
+            "omicrons": [t_json(t) for t in report.omicrons],
+            "other_zetas": report.other_zetas,
+            "other_omicrons": report.other_omicrons,
+        }
+    )
+
+
 @app.get("/relics", response_class=HTMLResponse)
 def relics(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
     settings = get_settings()

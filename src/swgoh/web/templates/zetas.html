@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Zeta / Omicron Priority{% endblock %}
+{% block form_action %}/zetas{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <h2 style="margin:.2rem 0 .3rem">Zeta / Omicron priority</h2>
+  <p class="note" style="margin:0 0 1.2rem">
+    Unlearned zetas &amp; omicrons on units that matter to your goals, ranked by payoff.
+    Learned status is read live from your roster. Zetas and omicrons use different
+    materials, so they're listed separately.
+  </p>
+
+  {% macro abilityrow(t, idx) %}
+    <article class="obj" style="align-items:flex-start">
+      <span class="rank">{{ idx }}</span>
+      <div style="flex:1">
+        <div style="display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap">
+          <span style="font-weight:700">{{ t.unit_name }}</span>
+          <span style="color:var(--muted)">— {{ t.ability_name }}</span>
+          {% for m in t.modes %}<span class="tag">{{ m }}</span>{% endfor %}
+          {% for r in t.roles %}<span class="pill">{{ r }}</span>{% endfor %}
+          <span class="spacer"></span>
+          <span class="score">{{ '%g' % t.priority }}</span>
+        </div>
+        {% if t.goals %}
+          <div class="muted" style="font-size:.85rem;margin-top:.25rem">Serves:
+            {% for g in t.goals %}<span class="tag">{{ g }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </article>
+  {% endmacro %}
+
+  <h3 style="margin:.2rem 0 .6rem">⚡ Zetas ({{ report.zetas|length }})</h3>
+  {% if report.zetas %}
+    {% for t in report.zetas %}{{ abilityrow(t, loop.index) }}{% endfor %}
+  {% else %}
+    <div class="squad empty">No unlearned zetas on your goal units — all zeta'd up. 🎉</div>
+  {% endif %}
+  {% if report.other_zetas %}
+    <p class="note" style="margin:.5rem 0 0">
+      + {{ report.other_zetas }} more unlearned zetas on units not tied to a tracked goal.
+    </p>
+  {% endif %}
+
+  <h3 style="margin:1.4rem 0 .6rem">🔮 Omicrons ({{ report.omicrons|length }})</h3>
+  <p class="note" style="margin:0 0 .6rem">
+    Tags show which game modes each omicron works in (only applicable ones are listed —
+    an omicron needs its zeta learned first).
+  </p>
+  {% if report.omicrons %}
+    {% for t in report.omicrons %}{{ abilityrow(t, loop.index) }}{% endfor %}
+  {% else %}
+    <div class="squad empty">No applicable omicrons on your goal units right now.</div>
+  {% endif %}
+  {% if report.other_omicrons %}
+    <p class="note" style="margin:.5rem 0 0">
+      + {{ report.other_omicrons }} more applicable omicrons on units not tied to a tracked goal.
+    </p>
+  {% endif %}
+{% endblock %}

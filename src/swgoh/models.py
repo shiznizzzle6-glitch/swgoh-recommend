@@ -79,6 +79,7 @@ class Unit:
     relic_level: int = 0  # 0-9 (0 == no relic)
     power: int = 0
     mods: list[Mod] = field(default_factory=list)
+    skills: dict[str, int] = field(default_factory=dict)  # ability base_id -> current tier
 
     def mod_in_slot(self, slot: int) -> Mod | None:
         for m in self.mods:

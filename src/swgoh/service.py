@@ -12,12 +12,14 @@ from .recommend import (
     RelicReport,
     SquadReport,
     TonightPlan,
+    ZetaReport,
     analyze_defense,
     analyze_energy,
     analyze_fleet,
     analyze_relics,
     analyze_roster,
     analyze_squads,
+    analyze_zetas,
     build_tonight_plan,
     load_priority_config,
 )
@@ -69,6 +71,10 @@ class SwgohService:
     def relic_report(self, ally_code: str | None = None) -> RelicReport:
         player = self.get_player(ally_code)
         return analyze_relics(player)
+
+    def zeta_report(self, ally_code: str | None = None) -> ZetaReport:
+        player = self.get_player(ally_code)
+        return analyze_zetas(player)
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)

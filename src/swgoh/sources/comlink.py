@@ -138,6 +138,11 @@ def _parse_unit(raw: dict[str, Any]) -> Unit | None:
     relic = raw.get("relic") or {}
     relic_tier = int(relic.get("currentTier") or 0)
     mods = [m for m in (_parse_mod(m) for m in (raw.get("equippedStatMod") or [])) if m]
+    skills = {
+        str(s.get("id")): int(s.get("tier") or 0)
+        for s in (raw.get("skill") or [])
+        if s.get("id")
+    }
     return Unit(
         base_id=base_id,
         name=display_name(base_id),
@@ -147,6 +152,7 @@ def _parse_unit(raw: dict[str, Any]) -> Unit | None:
         relic_level=max(0, relic_tier - 2),
         power=0,
         mods=mods,
+        skills=skills,
     )
 
 
