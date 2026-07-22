@@ -21,6 +21,7 @@ from .fleet import FleetReport
 from .gear import GearReport
 from .mods import ModReport
 from .relics import RelicReport
+from .slicing import SliceReport
 from .squads import SquadReport
 from .zetas import ZetaReport
 
@@ -123,12 +124,23 @@ def _energy_items(energy: EnergyReport, limit: int) -> list[PlanItem]:
     return out
 
 
-def _mod_items(mods: ModReport, limit: int) -> list[PlanItem]:
-    out = []
-    for r in mods.flagged_units[:limit]:
-        detail = max(r.issues, key=lambda i: i.severity).detail if r.issues else ""
-        out.append(PlanItem(r.unit.name, detail, round(r.score, 1), r.unit.base_id))
-    return out
+def _mod_items(mods: ModReport, slicing: SliceReport, limit: int) -> list[PlanItem]:
+    """Top mod moves — hygiene fixes and slicing, one row per unit (its best action)."""
+    best: dict[str, PlanItem] = {}
+
+    def consider(item: PlanItem) -> None:
+        cur = best.get(item.base_id)
+        if cur is None or item.score > cur.score:
+            best[item.base_id] = item
+
+    for r in mods.flagged_units:
+        if r.issues:
+            detail = max(r.issues, key=lambda i: i.severity).detail
+            consider(PlanItem(r.unit.name, detail, round(r.score, 1), r.unit.base_id))
+    for c in slicing.candidates:
+        consider(PlanItem(c.unit_name, f"Slice {c.slot}: {c.action}", c.priority, c.base_id))
+
+    return sorted(best.values(), key=lambda i: i.score, reverse=True)[:limit]
 
 
 def build_tonight_board(
@@ -139,6 +151,7 @@ def build_tonight_board(
     relics: RelicReport,
     zetas: ZetaReport,
     energy: EnergyReport,
+    slicing: SliceReport,
     limit: int = 3,
 ) -> TonightBoard:
     categories = [
@@ -148,7 +161,7 @@ def build_tonight_board(
         PlanCategory("relics", "Relics", "/relics", _relic_items(relics, limit)),
         PlanCategory("zetas", "Zetas & Omicrons", "/zetas", _zeta_items(zetas, limit)),
         PlanCategory("energy", "Energy", "/energy", _energy_items(energy, limit)),
-        PlanCategory("mods", "Mods", "/mods", _mod_items(mods, limit)),
+        PlanCategory("mods", "Mods", "/mods", _mod_items(mods, slicing, limit)),
     ]
 
     # Multi-payoff highlights: units appearing in 2+ areas.

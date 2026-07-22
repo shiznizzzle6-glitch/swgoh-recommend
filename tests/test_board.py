@@ -7,6 +7,7 @@ from swgoh.recommend.gear import GearReport, GearTarget
 from swgoh.recommend.mods import Issue, ModReport, UnitModReport
 from swgoh.recommend.plan import build_tonight_board
 from swgoh.recommend.relics import RelicReport, RelicTarget
+from swgoh.recommend.slicing import SliceCandidate, SliceReport
 from swgoh.recommend.squads import MemberStatus, Objective as SObj, SquadPlan, SquadReport
 from swgoh.recommend.zetas import AbilityTarget, ZetaReport
 from swgoh.models import Unit
@@ -59,8 +60,13 @@ def _energy():
     return EnergyReport("ShizzNizzle", "474168985", cantina=[t])
 
 
+def _slicing():
+    c = SliceCandidate("MACEWINDU", "Mace Windu", "Diamond", "Speed", 22.0, "6D → 6A (gold)", "to_gold_6", ["Endurance fleet"], 7.2)
+    return SliceReport("ShizzNizzle", "474168985", candidates=[c])
+
+
 def _board():
-    return build_tonight_board(_mods(), _fleet(), _squads(), _gear(), _relics(), _zetas(), _energy())
+    return build_tonight_board(_mods(), _fleet(), _squads(), _gear(), _relics(), _zetas(), _energy(), _slicing())
 
 
 def test_board_has_all_categories_in_order():
@@ -78,6 +84,11 @@ def test_categories_carry_top_items():
     assert by_key["relics"].items[0].name == "IG-88"
     assert by_key["zetas"].items[0].detail == "zeta: On The Hunt"
     assert by_key["energy"].items[0].name == "Dengar"
+    # Mods card blends hygiene + slicing: the top slice (Mace, 7.2) outranks Cal's issue.
+    mod_items = by_key["mods"].items
+    assert mod_items[0].name == "Mace Windu"
+    assert "Slice Diamond" in mod_items[0].detail
+    assert any(it.name == "Cal Kestis" for it in mod_items)  # hygiene still present
 
 
 def test_multi_payoff_highlight_surfaces_bossk():

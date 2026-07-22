@@ -107,6 +107,7 @@ class SwgohService:
             relics=analyze_relics(player),
             zetas=analyze_zetas(player),
             energy=analyze_energy(player),
+            slicing=analyze_slicing(player),
         )
 
     def tonight_board(self, ally_code: str | None = None) -> TonightBoard:
