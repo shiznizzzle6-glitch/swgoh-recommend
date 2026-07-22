@@ -9,11 +9,13 @@ from .recommend import (
     EnergyReport,
     FleetReport,
     ModReport,
+    RelicReport,
     SquadReport,
     TonightPlan,
     analyze_defense,
     analyze_energy,
     analyze_fleet,
+    analyze_relics,
     analyze_roster,
     analyze_squads,
     build_tonight_plan,
@@ -63,6 +65,10 @@ class SwgohService:
     def energy_report(self, ally_code: str | None = None) -> EnergyReport:
         player = self.get_player(ally_code)
         return analyze_energy(player)
+
+    def relic_report(self, ally_code: str | None = None) -> RelicReport:
+        player = self.get_player(ally_code)
+        return analyze_relics(player)
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)

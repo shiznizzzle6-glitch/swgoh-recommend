@@ -149,6 +149,51 @@ def defense(request: Request, ally_code: str | None = Query(default=None)) -> HT
     )
 
 
+@app.get("/relics", response_class=HTMLResponse)
+def relics(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().relic_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "relics.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/relics")
+def api_relics(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().relic_report(ally_code)
+
+    def t_json(t):
+        return {
+            "base_id": t.base_id,
+            "name": t.name,
+            "relic_level": t.relic_level,
+            "roles": t.roles,
+            "goals": t.goals,
+            "priority": t.priority,
+            "note": t.note,
+        }
+
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "eligible_count": report.eligible_count,
+            "eligible": [t_json(t) for t in report.eligible],
+            "others": [t_json(t) for t in report.others],
+        }
+    )
+
+
 @app.get("/energy", response_class=HTMLResponse)
 def energy(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
     settings = get_settings()
