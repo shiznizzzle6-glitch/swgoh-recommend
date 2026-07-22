@@ -149,6 +149,52 @@ def defense(request: Request, ally_code: str | None = Query(default=None)) -> HT
     )
 
 
+@app.get("/gear", response_class=HTMLResponse)
+def gear(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().gear_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "gear.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/gear")
+def api_gear(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().gear_report(ally_code)
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "eligible_count": report.eligible_count,
+            "others_count": report.others_count,
+            "eligible": [
+                {
+                    "base_id": t.base_id,
+                    "name": t.name,
+                    "gear_level": t.gear_level,
+                    "next_tier": t.next_tier,
+                    "next_pieces": t.next_pieces,
+                    "tiers_to_target": t.tiers_to_target,
+                    "roles": t.roles,
+                    "goals": t.goals,
+                    "priority": t.priority,
+                }
+                for t in report.eligible
+            ],
+        }
+    )
+
+
 @app.get("/zetas", response_class=HTMLResponse)
 def zetas(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
     settings = get_settings()

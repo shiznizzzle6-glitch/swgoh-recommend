@@ -8,6 +8,7 @@ from .recommend import (
     DefenseReport,
     EnergyReport,
     FleetReport,
+    GearReport,
     ModReport,
     RelicReport,
     SquadReport,
@@ -16,6 +17,7 @@ from .recommend import (
     analyze_defense,
     analyze_energy,
     analyze_fleet,
+    analyze_gear,
     analyze_relics,
     analyze_roster,
     analyze_squads,
@@ -75,6 +77,10 @@ class SwgohService:
     def zeta_report(self, ally_code: str | None = None) -> ZetaReport:
         player = self.get_player(ally_code)
         return analyze_zetas(player)
+
+    def gear_report(self, ally_code: str | None = None) -> GearReport:
+        player = self.get_player(ally_code)
+        return analyze_gear(player)
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)

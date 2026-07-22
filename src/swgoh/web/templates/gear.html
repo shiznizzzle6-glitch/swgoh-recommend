@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Gear Priority{% endblock %}
+{% block form_action %}/gear{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <h2 style="margin:.2rem 0 .3rem">Gear upgrade priority</h2>
+  <p class="note" style="margin:0 0 1.2rem">
+    Goal-relevant units below Gear 13, ranked by payoff, with the named pieces their next
+    tier needs. Gearing <strong>fleet pilots</strong> boosts their ships, and G13 is the gate
+    for relics. {{ report.eligible|length }} goal units below G13.
+  </p>
+
+  {% if not report.eligible %}
+    <div class="squad empty">No goal units left below Gear 13. 🎉</div>
+  {% endif %}
+
+  {% for t in report.eligible %}
+    <article class="obj" style="align-items:flex-start">
+      <span class="rank">{{ loop.index }}</span>
+      <div style="flex:1">
+        <div style="display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap">
+          <span style="font-weight:700">{{ t.name }}</span>
+          <span class="badge">{{ t.target_label }}</span>
+          {% for r in t.roles %}<span class="pill">{{ r }}</span>{% endfor %}
+          <span class="muted" style="font-size:.8rem">{{ t.tiers_to_target }} tier{{ 's' if t.tiers_to_target != 1 else '' }} to G13</span>
+          <span class="spacer"></span>
+          <span class="score">{{ '%g' % t.priority }}</span>
+        </div>
+        {% if t.next_pieces %}
+          <div style="margin:.35rem 0 .2rem;font-size:.88rem">
+            <span class="muted">G{{ t.next_tier }} needs:</span>
+            {% for p in t.next_pieces %}<span class="tag">{{ p }}</span>{% endfor %}
+          </div>
+        {% else %}
+          <div class="note" style="margin:.3rem 0 .2rem">Final G13 pieces (not in the swgoh.gg dataset) — check in-game.</div>
+        {% endif %}
+        {% if t.goals %}
+          <div class="muted" style="font-size:.85rem">Serves:
+            {% for g in t.goals %}<span class="tag">{{ g }}</span>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </article>
+  {% endfor %}
+
+  {% if report.others_count %}
+    <p class="note" style="margin-top:1rem">
+      + {{ report.others_count }} more owned units below G13 that aren't tied to a tracked goal.
+    </p>
+  {% endif %}
+{% endblock %}
