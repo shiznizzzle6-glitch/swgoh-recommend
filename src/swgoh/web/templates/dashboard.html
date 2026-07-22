@@ -26,6 +26,11 @@
         <span class="spacer"></span>
         <span class="score">score {{ '%g' % r.score }}</span>
       </div>
+      {% if r.factions %}
+        <div style="margin-top:.35rem">
+          {% for f in r.factions %}<span class="tag">{{ f }}</span>{% endfor %}
+        </div>
+      {% endif %}
       <ul class="issues">
         {% for i in r.issues %}
           <li class="{{ 'sev-high' if i.severity >= 4 else 'sev-mid' }}">{{ i.detail }}</li>

@@ -19,6 +19,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from ..factions import factions_of
 from ..models import Player, Unit
 from ..names import display_name
 from ..ships import ships_piloted_by
@@ -64,6 +65,7 @@ class UnitModReport:
     note: str
     fully_modded: bool = False
     pilot_of: list[str] = field(default_factory=list)
+    factions: list[str] = field(default_factory=list)
     issues: list[Issue] = field(default_factory=list)
 
     @property
@@ -129,6 +131,7 @@ def _analyze_unit(unit: Unit, cfg: dict[str, Any] | None) -> UnitModReport:
         note=str(cfg.get("note") or ""),
         fully_modded=fully_modded,
         pilot_of=pilot_of,
+        factions=factions_of(unit.base_id),
     )
 
     if not fully_modded:
