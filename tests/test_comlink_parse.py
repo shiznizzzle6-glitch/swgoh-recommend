@@ -6,7 +6,7 @@ set/rarity/slot in its first three digits.
 """
 from __future__ import annotations
 
-from swgoh.sources.comlink import _parse_mod, _parse_unit
+from swgoh.sources.comlink import _parse_mod, _parse_pvp, _parse_unit
 
 SQUARE = {
     "definitionId": "451",  # set=4 (Speed), rarity=5, slot=1 (Square)
@@ -77,3 +77,35 @@ def test_parse_unit_relic_offset_and_base_id():
     assert unit.gear_level == 13
     assert unit.relic_level == 2
     assert len(unit.mods) == 1
+
+
+def test_parse_pvp_ranks_and_defense_squad():
+    data = {
+        "pvpProfile": [
+            {
+                "tab": 1,
+                "rank": 2737,
+                "squad": {
+                    "cell": [
+                        {"cellIndex": 2, "unitId": "idC"},
+                        {"cellIndex": 0, "unitId": "idA"},
+                        {"cellIndex": 1, "unitId": "idB"},
+                    ]
+                },
+            },
+            {"tab": 2, "rank": 234, "squad": {"cell": []}},
+        ]
+    }
+    id_to_base = {"idA": "CALKESTIS", "idB": "FIFTHBROTHER", "idC": "MACEWINDU"}
+    squad_rank, fleet_rank, defense = _parse_pvp(data, id_to_base)
+    assert squad_rank == 2737
+    assert fleet_rank == 234
+    # cells sorted by cellIndex, translated to base_ids
+    assert defense == ["CALKESTIS", "FIFTHBROTHER", "MACEWINDU"]
+
+
+def test_parse_pvp_missing_profile_is_safe():
+    squad_rank, fleet_rank, defense = _parse_pvp({}, {})
+    assert squad_rank is None
+    assert fleet_rank is None
+    assert defense == []

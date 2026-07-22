@@ -29,13 +29,13 @@ def tonight(request: Request, ally_code: str | None = Query(default=None)) -> HT
             request, "setup.html", {"data_source": settings.data_source}
         )
     try:
-        plan = _service().tonight_plan(code)
+        plan, arena = _service().landing(code)
     except Exception as exc:
         return templates.TemplateResponse(
             request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
         )
     return templates.TemplateResponse(
-        request, "tonight.html", {"plan": plan, "ally_code": code}
+        request, "tonight.html", {"plan": plan, "arena": arena, "ally_code": code}
     )
 
 
@@ -118,6 +118,85 @@ def squads(request: Request, ally_code: str | None = Query(default=None)) -> HTM
         )
     return templates.TemplateResponse(
         request, "squads.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/defense", response_class=HTMLResponse)
+def defense(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().defense_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "defense.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/defense")
+def api_defense(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().defense_report(ally_code)
+
+    def wall_json(w):
+        return {
+            "base_id": w.base_id,
+            "name": w.name,
+            "owned": w.owned,
+            "wall_score": w.wall_score,
+            "stars": w.stars,
+            "gear_level": w.gear_level,
+            "relic_level": w.relic_level,
+        }
+
+    def team_json(t):
+        return {
+            "name": t.name,
+            "tier": t.tier,
+            "tags": t.tags,
+            "status": t.status,
+            "rating": t.rating,
+            "anchor": t.anchor,
+            "members": [wall_json(m) for m in t.members],
+            "objectives": [
+                {"kind": o.kind, "detail": o.detail, "priority": round(o.priority, 1)}
+                for o in t.objectives
+            ],
+        }
+
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "current_defense": [wall_json(w) for w in report.current_defense],
+            "current_rating": report.current_rating,
+            "bench": [wall_json(w) for w in report.bench],
+            "recommended": team_json(report.recommended) if report.recommended else None,
+            "teams": [team_json(t) for t in report.teams],
+        }
+    )
+
+
+@app.get("/api/arena")
+def api_arena(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    status = _service().arena_status(ally_code)
+    return JSONResponse(
+        {
+            "squad_rank": status.squad_rank,
+            "fleet_rank": status.fleet_rank,
+            "squad_change": status.squad_change,
+            "fleet_change": status.fleet_change,
+            "history": [
+                {"ts": s.ts, "squad_rank": s.squad_rank, "fleet_rank": s.fleet_rank}
+                for s in status.history
+            ],
+        }
     )
 
 

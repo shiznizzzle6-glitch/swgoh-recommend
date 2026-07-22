@@ -1,0 +1,82 @@
+# Defensive "wall" reference — units and teams that win by SURVIVING to the
+# timer rather than by killing fast. In Squad Arena / GAC the attacker must
+# defeat ALL 5 before time runs out; if they can't, it's a DRAW, which for the
+# DEFENDER is a hold (the attacker fails and you keep your rank).
+#
+# Sustain scales hardest with RELIC (self-heal / protection-recovery kits key
+# off character stats that relics inflate most), so the readiness math here
+# weights relic above gear and stars. Editable; meta-notes dated 2026-07.
+
+# Units whose kits are sustain/tank-oriented. `weight` (0-1) is how much of a
+# wall the unit is when fully invested. Anything not listed is treated as a mild
+# wall (baseline) so a geared bruiser still counts for a little.
+wall_units:
+  - base_id: CALKESTIS
+    weight: 1.0
+    note: Self-heals and recovers protection off his own attacks; a true wall at high relic.
+  - base_id: GRANDINQUISITOR
+    weight: 0.95
+    note: Inquisitor lead — the whole Inquisitorius team recovers health/protection every turn.
+  - base_id: FIFTHBROTHER
+    weight: 0.9
+    note: Inquisitor sustain — health-steal and protection recovery on a loop.
+  - base_id: SEVENTHSISTER
+    weight: 0.85
+    note: Inquisitor sustain plus tenacity/immunity tools that stall attackers.
+  - base_id: THIRDSISTER
+    weight: 0.8
+    note: Inquisitor bruiser with self-recovery.
+  - base_id: NINTHSISTER
+    weight: 0.85
+    note: Inquisitor tank — soaks damage and recovers protection.
+  - base_id: SECONDSISTER
+    weight: 0.8
+    note: Inquisitor sustain attacker.
+  - base_id: GRANDMASTERYODA
+    weight: 0.6
+    note: Evasion/foresight makes him hard to pin down.
+  - base_id: SUPREMELEADERKYLOREN
+    weight: 0.85
+    note: Galactic Legend — heavy protection recovery and damage immunity.
+  - base_id: JEDIMASTERKENOBI
+    weight: 0.85
+    note: Galactic Legend — team-wide protection-up and revives; extremely sticky.
+  - base_id: GRANDMASTERLUKE
+    weight: 0.9
+    note: Galactic Legend — foresight/heal-over-time wall.
+  - base_id: DARTHREVAN
+    weight: 0.6
+    note: Sith self-sustain via health-steal under a Malak/Revan core.
+  - base_id: BASTILASHANDARK
+    weight: 0.6
+    note: Sith heal/assist loop keeps the team topped up.
+  - base_id: MOTHERTALZIN
+    weight: 0.55
+    note: Nightsister healer — revives and health recovery.
+  - base_id: DAKA
+    weight: 0.55
+    note: Nightsister reviver — brings fallen allies back, dragging battles long.
+
+# Curated synergy walls — teams whose LEADER makes the whole group sustain, so
+# they hold far better than five unrelated tanks. `anchor` is the unit most
+# worth relicking first.
+teams:
+  - name: Inquisitorius (sustain wall)
+    tier: S
+    tags: [squad_arena, gac_defense]
+    anchor: GRANDINQUISITOR
+    note: >
+      Under a Grand Inquisitor lead every Inquisitor recovers health and
+      protection each turn and gains offense as enemies fall — they out-heal AI
+      chip damage and routinely stall to a draw. The strongest hold team you can
+      realistically build from your roster.
+    members: [GRANDINQUISITOR, FIFTHBROTHER, SEVENTHSISTER, NINTHSISTER, THIRDSISTER]
+  - name: Nightsister stall (revive wall)
+    tier: A
+    tags: [squad_arena, gac_defense]
+    anchor: MOTHERTALZIN
+    note: >
+      Talzin + Daka keep reviving fallen Nightsisters, so the attacker kills the
+      same units repeatedly and burns the clock. Cheap, relic-light hold if you
+      don't have the Inquisitors geared yet.
+    members: [MOTHERTALZIN, DAKA, TALIA, ASAJVENTRESS, NIGHTSISTERZOMBIE]

@@ -103,6 +103,33 @@ def _parse_mod(raw: dict[str, Any]) -> Mod | None:
     )
 
 
+def _parse_pvp(data: dict[str, Any], id_to_base: dict[str, str]) -> tuple[int | None, int | None, list[str]]:
+    """Pull Squad + Fleet arena ranks and the set Squad-Arena defense team.
+
+    `pvpProfile` is a small list of tabs: tab 1 == Squad Arena, tab 2 == Fleet
+    Arena. Each carries the player's current `rank` and the `squad` they've set
+    on defense, whose cells reference roster units by instance id (not base id),
+    so we translate through `id_to_base`.
+    """
+    squad_rank: int | None = None
+    fleet_rank: int | None = None
+    defense: list[str] = []
+    for tab in data.get("pvpProfile") or []:
+        if not isinstance(tab, dict):
+            continue
+        tab_id = int(tab.get("tab") or 0)
+        rank = tab.get("rank")
+        rank = int(rank) if rank is not None else None
+        if tab_id == 1:
+            squad_rank = rank
+            cells = ((tab.get("squad") or {}).get("cell")) or []
+            ordered = sorted(cells, key=lambda c: int(c.get("cellIndex") or 0))
+            defense = [b for b in (id_to_base.get(str(c.get("unitId"))) for c in ordered) if b]
+        elif tab_id == 2:
+            fleet_rank = rank
+    return squad_rank, fleet_rank, defense
+
+
 def _parse_unit(raw: dict[str, Any]) -> Unit | None:
     def_id = str(raw.get("definitionId") or "")
     base_id = def_id.split(":", 1)[0] if def_id else ""
@@ -138,5 +165,19 @@ class ComlinkSource(DataSource):
         data = resp.json()
         roster = data.get("rosterUnit") or data.get("roster") or []
         units = [u for u in (_parse_unit(r) for r in roster) if u]
+        # instance id -> base id, for translating PvP squad-cell references.
+        id_to_base = {
+            str(r.get("id")): str(r.get("definitionId") or "").split(":", 1)[0]
+            for r in roster
+            if r.get("id")
+        }
+        squad_rank, fleet_rank, defense = _parse_pvp(data, id_to_base)
         name = (data.get("name") or data.get("playerName") or "Unknown")
-        return Player(name=str(name), ally_code=str(ally_code), units=units)
+        return Player(
+            name=str(name),
+            ally_code=str(ally_code),
+            units=units,
+            squad_arena_rank=squad_rank,
+            fleet_arena_rank=fleet_rank,
+            arena_defense_squad=defense,
+        )

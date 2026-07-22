@@ -8,6 +8,25 @@
     plans agree on rank highest — one upgrade, multiple payoffs.
   </p>
 
+  {% if arena and (arena.squad_rank is not none or arena.fleet_rank is not none) %}
+    <div class="rankstrip">
+      {% macro rankcard(label, rank, change) %}
+        <div class="rankcard">
+          <div class="k">{{ label }}</div>
+          <div class="v">{% if rank is not none %}#{{ rank }}{% else %}—{% endif %}</div>
+          {% if change is not none and change != 0 %}
+            {% if change < 0 %}<div class="d up">▲ climbed {{ -change }} since last check</div>
+            {% else %}<div class="d down">▼ dropped {{ change }} since last check</div>{% endif %}
+          {% elif change == 0 %}<div class="d flat">— held position</div>
+          {% elif arena.has_history %}<div class="d flat">—</div>
+          {% else %}<div class="d flat">tracking started</div>{% endif %}
+        </div>
+      {% endmacro %}
+      {{ rankcard("Squad Arena rank", arena.squad_rank, arena.squad_change) }}
+      {{ rankcard("Fleet Arena rank", arena.fleet_rank, arena.fleet_change) }}
+    </div>
+  {% endif %}
+
   {% if not plan.units %}
     <div class="squad empty">Nothing pressing right now — your priorities are in good shape. 🎉</div>
   {% endif %}

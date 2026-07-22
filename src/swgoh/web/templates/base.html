@@ -84,6 +84,13 @@
     a { color: var(--accent); }
     code { background: var(--panel2); padding: .1rem .35rem; border-radius: 5px; }
     .empty { color: var(--good); padding: 1rem; }
+    .rankstrip { display:flex; gap:.8rem; flex-wrap:wrap; margin:0 0 1.2rem; }
+    .rankcard { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+      padding:.6rem .9rem; flex:1; min-width:160px; }
+    .rankcard .k { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
+    .rankcard .v { font-size:1.5rem; font-weight:700; font-variant-numeric:tabular-nums; }
+    .rankcard .d { font-size:.8rem; font-weight:700; }
+    .d.up { color:var(--good); } .d.down { color:var(--bad); } .d.flat { color:var(--muted); }
   </style>
 </head>
 <body>
@@ -94,6 +101,7 @@
       <a href="/mods{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Mods</a>
       <a href="/fleet{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Fleet</a>
       <a href="/squads{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Squads</a>
+      <a href="/defense{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Defense</a>
     </nav>
     {% block subtitle %}{% endblock %}
     <form class="ally" method="get" action="{% block form_action %}/{% endblock %}">

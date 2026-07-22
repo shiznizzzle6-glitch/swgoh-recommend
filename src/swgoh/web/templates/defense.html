@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Defense{% endblock %}
+{% block form_action %}/defense{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <h2 style="margin:.2rem 0 .3rem">Arena defense — the wall</h2>
+  <p class="note" style="margin:0 0 1.2rem">
+    Units that win by <em>surviving</em>. In Squad Arena / GAC the attacker must kill
+    all 5 before the timer — if they can't, it's a draw, which for you (the defender)
+    is a hold. Sustain scales hardest with <strong>relic</strong>, so that's weighted heaviest here.
+  </p>
+
+  <h3 style="margin:.2rem 0 .6rem">Your current defense team</h3>
+  {% if report.current_defense %}
+    <article class="squad">
+      <div class="top">
+        <span class="nm">Set defense</span>
+        {% if report.current_rating >= 55 %}<span class="st Ready">strong wall</span>
+        {% elif report.current_rating >= 30 %}<span class="st Close">okay wall</span>
+        {% else %}<span class="st Build">soft</span>{% endif %}
+        <span class="spacer"></span>
+        <span class="muted">wall rating {{ report.current_rating|round|int }}/100</span>
+      </div>
+      <div class="bar"><i style="width:{{ report.current_rating|round|int }}%"></i></div>
+      <div class="shiplist">
+        {% for m in report.current_defense %}
+          <span class="chip">{{ m.name }}
+            <span class="muted">{{ m.stars }}★ g{{ m.gear_level }}{% if m.relic_level %} r{{ m.relic_level }}{% endif %}</span>
+            <span style="color:var(--good)"> · wall {{ m.wall_score|round|int }}</span></span>
+        {% endfor %}
+      </div>
+      <div class="note" style="margin-top:.4rem">
+        Higher per-unit “wall” scores are your stickiest defenders — the ones the AI can't finish off.
+      </div>
+    </article>
+  {% else %}
+    <div class="unit empty">No defense team detected from the API. (Set one in-game and refresh.)</div>
+  {% endif %}
+
+  {% if report.recommended %}
+    {% set r = report.recommended %}
+    <h3 style="margin:1.2rem 0 .6rem">Field this now → {{ r.name }}</h3>
+    <article class="squad">
+      <div class="top">
+        <span class="nm">{{ r.name }}</span>
+        {% if r.rating >= 55 %}<span class="st Ready">strong wall</span>
+        {% elif r.rating >= 30 %}<span class="st Close">okay wall</span>
+        {% else %}<span class="st Build">soft</span>{% endif %}
+        {% if r.tier %}<span class="pill">tier {{ r.tier }}</span>{% endif %}
+        {% for t in r.tags %}<span class="tag">{{ t.replace('_',' ') }}</span>{% endfor %}
+        <span class="spacer"></span>
+        <span class="muted">rating {{ r.rating|round|int }}/100</span>
+      </div>
+      <div class="bar"><i style="width:{{ r.rating|round|int }}%"></i></div>
+      <div class="shiplist">
+        {% for m in r.members %}
+          <span class="chip">{% if m.base_id == r.anchor %}⚓ {% endif %}{{ m.name }}
+            {% if m.owned %}<span class="muted">{{ m.stars }}★ g{{ m.gear_level }}{% if m.relic_level %} r{{ m.relic_level }}{% endif %}</span>
+            {% else %}<span style="color:var(--bad)">need</span>{% endif %}</span>
+        {% endfor %}
+      </div>
+      {% if r.objectives %}
+        <div style="margin-top:.4rem">
+          {% for o in r.objectives[:5] %}
+            <div class="note" style="margin:.15rem 0">{{ loop.index }}. {{ o.detail }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if r.note %}<div class="note" style="font-style:italic;margin-top:.4rem">{{ r.note }}</div>{% endif %}
+    </article>
+  {% endif %}
+
+  <h3 style="margin:1.2rem 0 .6rem">Your strongest wall units</h3>
+  <p class="note" style="margin:0 0 .6rem">Owned sustain units, stickiest first — mix and match to compose a hold team.</p>
+  {% if report.bench %}
+    <div class="shiplist">
+      {% for w in report.bench[:12] %}
+        <span class="chip">{{ w.name }}
+          <span class="muted">{{ w.stars }}★ g{{ w.gear_level }}{% if w.relic_level %} r{{ w.relic_level }}{% endif %}</span>
+          <span style="color:var(--good)"> · wall {{ w.wall_score|round|int }}</span></span>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="unit empty">No sustain units recognized yet.</div>
+  {% endif %}
+
+  {% if report.teams %}
+    <h3 style="margin:1.2rem 0 .6rem">Synergy walls to work toward</h3>
+    <p class="note" style="margin:0 0 .6rem">
+      A coherent lead out-walls five unrelated tanks — these hold far better once built.
+      Strongest-for-you first.
+    </p>
+    {% for t in report.teams %}
+      <article class="squad">
+        <div class="top">
+          <span class="nm">{{ t.name }}</span>
+          <span class="st {{ t.status }}">{{ t.status }}</span>
+          <span class="pill">tier {{ t.tier }}</span>
+          {% for tag in t.tags %}<span class="tag">{{ tag.replace('_',' ') }}</span>{% endfor %}
+          <span class="spacer"></span>
+          <span class="muted">{{ t.owned_count }}/{{ t.members|length }} owned · rating {{ t.rating|round|int }}/100</span>
+        </div>
+        <div class="shiplist" style="margin-top:.5rem">
+          {% for m in t.members %}
+            <span class="chip">{% if m.base_id == t.anchor %}⚓ {% endif %}{{ m.name }}
+              {% if m.owned %}<span class="muted">{{ m.stars }}★ g{{ m.gear_level }}{% if m.relic_level %} r{{ m.relic_level }}{% endif %}</span>
+              {% else %}<span style="color:var(--bad)">need</span>{% endif %}</span>
+          {% endfor %}
+        </div>
+        {% if t.objectives %}
+          <div style="margin-top:.4rem">
+            {% for o in t.objectives[:3] %}
+              <div class="note" style="margin:.15rem 0">{{ loop.index }}. {{ o.detail }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if t.note %}<div class="note" style="font-style:italic;margin-top:.4rem">{{ t.note }}</div>{% endif %}
+      </article>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

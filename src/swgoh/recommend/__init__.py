@@ -1,6 +1,7 @@
 """Recommendation engines."""
 from __future__ import annotations
 
+from .defense import DefenseReport, DefenseTeam, WallUnit, analyze_defense
 from .fleet import FleetReport, analyze_fleet
 from .mods import ModReport, UnitModReport, analyze_roster, load_priority_config
 from .plan import TonightPlan, UnitPlan, build_tonight_plan
@@ -15,6 +16,10 @@ __all__ = [
     "analyze_fleet",
     "SquadReport",
     "analyze_squads",
+    "DefenseReport",
+    "DefenseTeam",
+    "WallUnit",
+    "analyze_defense",
     "TonightPlan",
     "UnitPlan",
     "build_tonight_plan",

@@ -28,6 +28,7 @@ class Settings:
     comlink_url: str
     cache_dir: Path
     cache_ttl_seconds: int
+    rank_history_path: Path
 
     @property
     def has_ally_code(self) -> bool:
@@ -36,6 +37,12 @@ class Settings:
 
 def get_settings() -> Settings:
     cache_dir = Path(os.getenv("SWGOH_CACHE_DIR", ".cache")).expanduser()
+    # Persist arena-rank history under a writable data dir (mount this in Docker
+    # so the trend survives container rebuilds).
+    data_dir = Path(os.getenv("SWGOH_DATA_DIR", ".data")).expanduser()
+    rank_history_path = Path(
+        os.getenv("SWGOH_RANK_HISTORY", str(data_dir / "rank_history.jsonl"))
+    ).expanduser()
     # Hardcoded default ally code; override anytime with SWGOH_ALLY_CODE.
     return Settings(
         ally_code=_clean_ally_code(os.getenv("SWGOH_ALLY_CODE", "474168985")),
@@ -44,4 +51,5 @@ def get_settings() -> Settings:
         comlink_url=os.getenv("SWGOH_COMLINK_URL", "http://localhost:3200").rstrip("/"),
         cache_dir=cache_dir,
         cache_ttl_seconds=int(os.getenv("SWGOH_CACHE_TTL", "3600")),
+        rank_history_path=rank_history_path,
     )

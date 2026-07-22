@@ -29,5 +29,11 @@ services:
       SWGOH_DATA_SOURCE: comlink
       SWGOH_COMLINK_URL: http://comlink:3000   # internal service name + port
       SWGOH_ALLY_CODE: "474168985"
+      SWGOH_DATA_DIR: /data                    # arena-rank history lives here
+    volumes:
+      - swgoh-data:/data                       # persists rank history across rebuilds
     ports:
       - "8000:8000"   # the dashboard — open http://<vm-ip>:8000 from any browser
+
+volumes:
+  swgoh-data:

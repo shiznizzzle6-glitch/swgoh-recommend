@@ -104,6 +104,11 @@ class Player:
     name: str
     ally_code: str
     units: list[Unit] = field(default_factory=list)
+    # Current PvP standings (lower rank number is better). None if unavailable.
+    squad_arena_rank: int | None = None
+    fleet_arena_rank: int | None = None
+    # base_ids of the currently-set Squad Arena defense team, in slot order.
+    arena_defense_squad: list[str] = field(default_factory=list)
 
     def unit(self, base_id: str) -> Unit | None:
         for u in self.units:
