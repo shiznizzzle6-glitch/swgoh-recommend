@@ -11,6 +11,7 @@ from .recommend import (
     GearReport,
     ModReport,
     RelicReport,
+    SliceReport,
     SquadReport,
     TonightBoard,
     ZetaReport,
@@ -20,6 +21,7 @@ from .recommend import (
     analyze_gear,
     analyze_relics,
     analyze_roster,
+    analyze_slicing,
     analyze_squads,
     analyze_zetas,
     build_tonight_board,
@@ -53,6 +55,15 @@ class SwgohService:
     def mod_report(self, ally_code: str | None = None) -> ModReport:
         player = self.get_player(ally_code)
         return analyze_roster(player, self._priority_config)
+
+    def mods_page(self, ally_code: str | None = None) -> tuple[ModReport, SliceReport]:
+        """Mod hygiene + slicing priority from a single fetch (for the Mods tab)."""
+        player = self.get_player(ally_code)
+        return analyze_roster(player, self._priority_config), analyze_slicing(player)
+
+    def slice_report(self, ally_code: str | None = None) -> SliceReport:
+        player = self.get_player(ally_code)
+        return analyze_slicing(player)
 
     def fleet_report(self, ally_code: str | None = None) -> FleetReport:
         player = self.get_player(ally_code)

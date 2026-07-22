@@ -8,6 +8,7 @@ from .fleet import FleetReport, analyze_fleet
 from .mods import ModReport, UnitModReport, analyze_roster, load_priority_config
 from .plan import Highlight, PlanCategory, PlanItem, TonightBoard, build_tonight_board
 from .relics import RelicReport, RelicTarget, analyze_relics
+from .slicing import SliceCandidate, SliceReport, analyze_slicing
 from .squads import SquadReport, analyze_squads
 from .zetas import AbilityTarget, ZetaReport, analyze_zetas
 
@@ -33,6 +34,9 @@ __all__ = [
     "RelicReport",
     "RelicTarget",
     "analyze_relics",
+    "SliceReport",
+    "SliceCandidate",
+    "analyze_slicing",
     "AbilityTarget",
     "ZetaReport",
     "analyze_zetas",

@@ -57,7 +57,7 @@ def dashboard(request: Request, ally_code: str | None = Query(default=None)) -> 
             request, "setup.html", {"data_source": settings.data_source}
         )
     try:
-        report = _service().mod_report(code)
+        report, slicing = _service().mods_page(code)
     except Exception as exc:  # surface fetch/parse errors in the UI
         return templates.TemplateResponse(
             request,
@@ -66,7 +66,7 @@ def dashboard(request: Request, ally_code: str | None = Query(default=None)) -> 
             status_code=502,
         )
     return templates.TemplateResponse(
-        request, "dashboard.html", {"report": report, "ally_code": code}
+        request, "dashboard.html", {"report": report, "slicing": slicing, "ally_code": code}
     )
 
 
@@ -453,6 +453,31 @@ def api_fleet(ally_code: str | None = Query(default=None)) -> JSONResponse:
             "recommended": plan_json(report.recommended) if report.recommended else None,
             "other_targets": [plan_json(p) for p in report.other_targets],
             "current_best_ships": [s.name for s in report.current_best_ships],
+        }
+    )
+
+
+@app.get("/api/slicing")
+def api_slicing(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().slice_report(ally_code)
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "candidates": [
+                {
+                    "base_id": c.base_id,
+                    "name": c.unit_name,
+                    "slot": c.slot,
+                    "set": c.set_name,
+                    "speed": c.speed,
+                    "action": c.action,
+                    "kind": c.kind,
+                    "goals": c.goals,
+                    "priority": c.priority,
+                }
+                for c in report.candidates
+            ],
         }
     )
 

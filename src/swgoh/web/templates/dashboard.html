@@ -10,7 +10,31 @@
     <div class="card"><div class="k">Sub-5-dot mods</div><div class="v" style="color:var(--bad)">{{ report.low_rarity_mods }}</div></div>
   </section>
 
-  <h2 style="margin:.2rem 0 1rem">Characters needing mod work</h2>
+  {% if slicing and slicing.candidates %}
+    <h2 style="margin:.2rem 0 .3rem">Mod slicing priority</h2>
+    <p class="note" style="margin:0 0 1rem">
+      Where to spend Mod energy / slicing mats — speedy mods on your goal units, biggest payoff first.
+      <span style="color:var(--good)">6-dot → gold</span> is the cheapest, biggest win.
+    </p>
+    {% for c in slicing.candidates %}
+      <article class="obj" style="align-items:baseline">
+        <span class="rank">{{ loop.index }}</span>
+        <div style="flex:1">
+          <div style="display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap">
+            <span style="font-weight:700">{{ c.name }}</span>
+            <span class="pill">{{ c.slot }} · {{ c.set_name }}</span>
+            <span class="badge">{{ c.action }}</span>
+            {% if c.speed %}<span class="badge speed">+{{ '%g' % c.speed }} spd</span>{% endif %}
+            <span class="spacer"></span>
+            <span class="score">{{ '%g' % c.priority }}</span>
+          </div>
+          {% if c.goals %}<div class="muted" style="font-size:.82rem;margin-top:.2rem">Serves: {% for g in c.goals %}<span class="tag">{{ g }}</span>{% endfor %}</div>{% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  {% endif %}
+
+  <h2 style="margin:1.4rem 0 1rem">Characters needing mod work</h2>
 
   {% if not report.flagged_units %}
     <div class="unit empty">No mod issues found on your analyzed characters. Nicely modded. 🎉</div>
