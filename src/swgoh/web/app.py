@@ -149,6 +149,53 @@ def defense(request: Request, ally_code: str | None = Query(default=None)) -> HT
     )
 
 
+@app.get("/energy", response_class=HTMLResponse)
+def energy(request: Request, ally_code: str | None = Query(default=None)) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().energy_report(code)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    return templates.TemplateResponse(
+        request, "energy.html", {"report": report, "ally_code": code}
+    )
+
+
+@app.get("/api/energy")
+def api_energy(ally_code: str | None = Query(default=None)) -> JSONResponse:
+    report = _service().energy_report(ally_code)
+
+    def t_json(t):
+        return {
+            "base_id": t.base_id,
+            "name": t.name,
+            "action": t.action,
+            "action_label": t.action_label,
+            "goals": t.goals,
+            "priority": t.priority,
+            "energy": t.energy,
+            "node": t.node,
+            "verify": t.verify,
+        }
+
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "cantina": [t_json(t) for t in report.cantina],
+            "other": [t_json(t) for t in report.other],
+            "unmapped": [t_json(t) for t in report.unmapped],
+        }
+    )
+
+
 @app.get("/api/defense")
 def api_defense(ally_code: str | None = Query(default=None)) -> JSONResponse:
     report = _service().defense_report(ally_code)

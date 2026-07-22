@@ -1,0 +1,29 @@
+# Curated farm locations for goal-relevant characters — which ENERGY pool farms
+# each one's shards. This drives the Energy Focus page (where to point idle
+# Cantina energy).
+#
+# BEST-EFFORT seed (meta 2026-07). Exact node numbers and some energy types move
+# between game updates, so `verify: true` marks entries worth a quick in-game
+# check — each character's page in-game shows their real farm location. Edit
+# freely; adding a character here immediately makes it show up ranked by how many
+# of your goals it serves.
+#
+# Fields (per character base_id):
+#   energy: cantina | normal | fleet | store | event   (which pool farms shards)
+#   node:   optional human hint, e.g. "Cantina 7-A"
+#   verify: true if this is a best-guess location, not confirmed in-game
+
+# --- Cantina-farmable (your chosen focus). Bossk is the standout: he serves the
+#     Bounty Hunters raid squad AND all three fleet targets. ---
+BOSSK:             {energy: cantina, node: "Cantina Battles", verify: true}
+DENGAR:            {energy: cantina, node: "Cantina Battles", verify: true}
+CHOPPERS3:         {energy: cantina, node: "Cantina Battles", verify: true}
+NIGHTSISTERZOMBIE: {energy: cantina, node: "Cantina Battles", verify: true}
+CLONESERGEANTPHASEI: {energy: cantina, node: "Cantina Battles", verify: true}
+
+# --- Examples for the other pools (uncomment / correct as you confirm them
+#     in-game). Anything NOT listed here shows in the "add a farm location"
+#     section of the Energy page, so you can see what still needs mapping. ---
+# TALIA:           {energy: normal, node: "Dark Side 9-?", verify: true}
+# BADBATCHTECH:    {energy: fleet,  node: "Fleet Battles",  verify: true}
+# JANGOFETT:       {energy: store,  node: "Guild store",    verify: true}

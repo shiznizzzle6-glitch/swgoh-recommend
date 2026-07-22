@@ -6,11 +6,13 @@ from .history import ArenaStatus, load_status, record_rank
 from .models import Player
 from .recommend import (
     DefenseReport,
+    EnergyReport,
     FleetReport,
     ModReport,
     SquadReport,
     TonightPlan,
     analyze_defense,
+    analyze_energy,
     analyze_fleet,
     analyze_roster,
     analyze_squads,
@@ -57,6 +59,10 @@ class SwgohService:
     def defense_report(self, ally_code: str | None = None) -> DefenseReport:
         player = self.get_player(ally_code)
         return analyze_defense(player)
+
+    def energy_report(self, ally_code: str | None = None) -> EnergyReport:
+        player = self.get_player(ally_code)
+        return analyze_energy(player)
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)

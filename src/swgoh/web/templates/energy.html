@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Energy Focus{% endblock %}
+{% block form_action %}/energy{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <h2 style="margin:.2rem 0 .3rem">Energy focus — Cantina</h2>
+  <p class="note" style="margin:0 0 1.2rem">
+    The Tonight plan spends your Light/Dark (gear) and Fleet (ship) energy — but Cantina
+    energy piles up. These are the characters your squad &amp; fleet goals still need shards
+    for, ranked by how many goals they serve. Farm the Cantina ones to put that energy to work.
+  </p>
+
+  {% macro farmrow(t, idx) %}
+    <article class="obj" style="align-items:flex-start">
+      <span class="rank">{{ idx }}</span>
+      <div style="flex:1">
+        <div style="display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap">
+          <span style="font-weight:700">{{ t.name }}</span>
+          <span class="pill">{{ t.action_label }}</span>
+          {% if t.goals|length > 1 %}<span class="st Ready">×{{ t.goals|length }} goals</span>{% endif %}
+          {% if t.node %}<span class="tag">{{ t.node }}{% if t.verify %} ⚠{% endif %}</span>{% endif %}
+          <span class="spacer"></span>
+          <span class="score">{{ '%g' % t.priority }}</span>
+        </div>
+        <div class="muted" style="font-size:.85rem;margin-top:.25rem">Serves:
+          {% for g in t.goals %}<span class="tag">{{ g }}</span>{% endfor %}
+        </div>
+      </div>
+    </article>
+  {% endmacro %}
+
+  <h3 style="margin:.2rem 0 .6rem">🎯 Spend Cantina energy on</h3>
+  {% if report.cantina %}
+    {% for t in report.cantina %}{{ farmrow(t, loop.index) }}{% endfor %}
+    <p class="note" style="margin:.6rem 0 1.2rem">
+      ⚠ = best-effort location, worth a quick in-game check (each character's page shows their
+      real farm node). Correct anything in <code>farm_locations.yaml</code>.
+    </p>
+  {% else %}
+    <div class="squad empty">No Cantina-farmable goal characters mapped yet — add some in <code>farm_locations.yaml</code>.</div>
+  {% endif %}
+
+  {% if report.unmapped %}
+    <h3 style="margin:1.2rem 0 .6rem">Other goal-relevant needs — add a farm location</h3>
+    <p class="note" style="margin:0 0 .6rem">
+      These characters your goals need aren't in the farm map yet. Add each one's energy pool to
+      <code>farm_locations.yaml</code> and they'll slot into the right focus list.
+    </p>
+    <div class="shiplist">
+      {% for t in report.unmapped %}
+        <span class="chip">{{ t.name }}
+          <span class="muted">{{ t.action_label }}</span>
+          <span style="color:var(--warn)"> · {{ '%g' % t.priority }}</span></span>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if report.other %}
+    <h3 style="margin:1.2rem 0 .6rem">Mapped to other energy pools</h3>
+    <div class="shiplist">
+      {% for t in report.other %}
+        <span class="chip">{{ t.name }}
+          <span class="muted">{{ t.energy }}{% if t.node %} · {{ t.node }}{% endif %}</span></span>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}
