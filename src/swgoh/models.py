@@ -151,3 +151,5 @@ class Guild:
     recent_raid_id: str = ""
     recent_raid_total: int = 0
     recent_raid_scores: dict[str, int] = field(default_factory=dict)
+    # The guild's Territory Battle (definitionId, e.g. "t05D" = Rise of the Empire).
+    tb_id: str = ""

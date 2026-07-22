@@ -4,7 +4,7 @@ from __future__ import annotations
 from .defense import DefenseReport, DefenseTeam, WallUnit, analyze_defense
 from .energy import EnergyReport, FarmTarget, analyze_energy
 from .gear import GearReport, GearTarget, analyze_gear
-from .guild import GuildReport, GuildStanding, RaidStanding, analyze_guild
+from .guild import GuildReport, GuildStanding, RaidStanding, TbReport, analyze_guild
 from .fleet import FleetReport, analyze_fleet
 from .mods import ModReport, UnitModReport, analyze_roster, load_priority_config
 from .plan import Highlight, PlanCategory, PlanItem, TonightBoard, build_tonight_board
@@ -35,6 +35,7 @@ __all__ = [
     "GuildReport",
     "GuildStanding",
     "RaidStanding",
+    "TbReport",
     "analyze_guild",
     "RelicReport",
     "RelicTarget",

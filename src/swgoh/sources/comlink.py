@@ -204,6 +204,15 @@ def _parse_guild(data: dict[str, Any]) -> Guild:
                     break
         recent_total = total or sum(recent_scores.values())
 
+    # The guild's Territory Battle — active status first, else the most recent.
+    tb_id = ""
+    for key in ("territoryBattleStatus", "recentTerritoryBattleResult"):
+        entries = gd.get(key) or []
+        if entries and isinstance(entries[0], dict):
+            tb_id = str(entries[0].get("definitionId") or "")
+            if tb_id:
+                break
+
     return Guild(
         id=str(profile.get("id") or ""),
         name=str(profile.get("name") or ""),
@@ -214,6 +223,7 @@ def _parse_guild(data: dict[str, Any]) -> Guild:
         recent_raid_id=recent_id,
         recent_raid_total=recent_total,
         recent_raid_scores=recent_scores,
+        tb_id=tb_id,
     )
 
 

@@ -217,6 +217,15 @@ def api_guild(ally_code: str | None = Query(default=None)) -> JSONResponse:
                 }
                 for r in report.raids
             ],
+            "tb": None if report.tb is None else {
+                "tb_id": report.tb.tb_id,
+                "tb_name": report.tb.tb_name,
+                "total_7star": report.tb.total_7star,
+                "phases": [
+                    {"phase": p.phase, "relic_req": p.relic_req, "count": p.count, "units": p.units}
+                    for p in report.tb.phases
+                ],
+            },
         }
     )
 

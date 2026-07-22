@@ -82,6 +82,35 @@
     {% endfor %}
   {% endfor %}
 
+  {% if report.tb %}
+    {% set tb = report.tb %}
+    <h3 style="margin:1.4rem 0 .5rem">🗺️ Territory Battle — {{ tb.tb_name }}</h3>
+    <p class="note" style="margin:0 0 .6rem">
+      Recon platoons take any <strong>7★ character</strong> at a relic bar that rises each phase.
+      Here's how many of your units qualify to donate per phase (you own {{ tb.total_7star }} 7★ characters).
+    </p>
+    <div class="charts">
+      {% for p in tb.phases %}
+        <div class="chartcard">
+          <div class="k">Phase {{ p.phase }} · needs Relic {{ p.relic_req }}+</div>
+          <div style="font-size:1.4rem;font-weight:700;{% if p.count == 0 %}color:var(--bad){% else %}color:var(--good){% endif %}">
+            {{ p.count }} <span class="muted" style="font-size:.8rem;font-weight:400">can fill</span>
+          </div>
+          {% if p.units %}
+            <div class="shiplist" style="margin-top:.4rem">
+              {% for n in p.units[:8] %}<span class="chip">{{ n }}</span>{% endfor %}
+              {% if p.units|length > 8 %}<span class="chip muted">+{{ p.units|length - 8 }} more</span>{% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <p class="note" style="margin:.6rem 0 0">
+      Fewer qualifiers in later phases? That's the relic gate — the <a href="/relics{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Relics</a>
+      tab ranks which units to relic up to expand your platoon reach.
+    </p>
+  {% endif %}
+
   {% if not report.raids %}
     <div class="unit empty">No active raids detected for your guild.</div>
   {% endif %}

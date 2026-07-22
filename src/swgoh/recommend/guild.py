@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..models import Guild, Player
+from ..ships import is_ship
 from .squads import SquadPlan, _build_plan
 
 # Comlink raid ids -> display names.
@@ -29,6 +30,59 @@ RAID_NAMES = {
 # Readiness boost (percentage points) for cheap "beginner" starter teams, so they
 # stay near the top without outranking a team you're already well into.
 BEGINNER_BOOST = 20
+
+# Territory Battle recon-platoon requirements, derived from the TB definition in
+# Comlink game data. Rise of the Empire (t05D, "mixed") platoons take ANY 7-star
+# character meeting a relic bar that scales by phase — no specific units/faction.
+# relic values are our relic-level scale (game relicTier - 2).
+TB_PLATOON_REQS: dict[str, dict[str, Any]] = {
+    "t05D": {
+        "name": "Rise of the Empire",
+        "phases": [
+            {"phase": 1, "relic": 5},
+            {"phase": 2, "relic": 6},
+            {"phase": 3, "relic": 7},
+            {"phase": 4, "relic": 8},
+            {"phase": 5, "relic": 9},
+            {"phase": 6, "relic": 9},
+        ],
+    },
+}
+
+
+@dataclass
+class TbPhase:
+    phase: int
+    relic_req: int
+    units: list[str] = field(default_factory=list)  # names of qualifying 7★ chars
+
+    @property
+    def count(self) -> int:
+        return len(self.units)
+
+
+@dataclass
+class TbReport:
+    tb_id: str
+    tb_name: str
+    total_7star: int
+    phases: list[TbPhase] = field(default_factory=list)
+
+
+def _analyze_tb(player: Player, tb_id: str) -> TbReport | None:
+    reqs = TB_PLATOON_REQS.get(tb_id)
+    if not reqs:
+        return None
+    chars = [u for u in player.units if u.stars == 7 and not is_ship(u.base_id)]
+    phases = [
+        TbPhase(
+            phase=p["phase"],
+            relic_req=p["relic"],
+            units=sorted(u.name for u in chars if u.relic_level >= p["relic"]),
+        )
+        for p in reqs["phases"]
+    ]
+    return TbReport(tb_id=tb_id, tb_name=reqs["name"], total_7star=len(chars), phases=phases)
 
 
 def load_raid_targets(path: str | Path | None = None) -> dict[str, list[dict[str, Any]]]:
@@ -78,6 +132,7 @@ class GuildReport:
     ally_code: str
     standing: GuildStanding | None
     raids: list[RaidStanding] = field(default_factory=list)
+    tb: TbReport | None = None
 
 
 def _median(values: list[int]) -> int:
@@ -159,4 +214,5 @@ def analyze_guild(
         ally_code=player.ally_code,
         standing=standing,
         raids=raids,
+        tb=_analyze_tb(player, guild.tb_id),
     )

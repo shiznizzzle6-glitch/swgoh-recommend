@@ -95,6 +95,34 @@ def test_only_active_raids_shown():
     assert [r.raid_id for r in rep.raids] == ["order66"]  # naboo not active in this guild
 
 
+def test_tb_platoon_qualifiers_by_relic_and_phase():
+    player = Player(
+        name="P", ally_code="1", player_id="B",
+        units=[
+            Unit("A", "Relic7 Seven", stars=7, relic_level=7),   # qualifies P1,2,3
+            Unit("C", "Relic5 Seven", stars=7, relic_level=5),   # qualifies P1 only
+            Unit("D", "Relic9 Six", stars=6, relic_level=9),     # not 7★ -> never
+            Unit("E", "Relic4 Seven", stars=7, relic_level=4),   # below P1 bar
+        ],
+    )
+    guild = Guild(id="g", name="G", members=[GuildMember("B", "P")], tb_id="t05D")
+    rep = analyze_guild(player, guild, RAIDS)
+    assert rep.tb is not None
+    assert rep.tb.tb_name == "Rise of the Empire"
+    assert rep.tb.total_7star == 3           # A, C, E (not the 6★)
+    p = {ph.phase: ph for ph in rep.tb.phases}
+    assert p[1].count == 2                    # A (r7) + C (r5) meet relic 5
+    assert p[2].count == 1                    # only A meets relic 6
+    assert p[3].count == 1                    # only A meets relic 7
+    assert p[4].count == 0                    # nobody at relic 8
+
+
+def test_tb_none_for_unsupported_battle():
+    guild = Guild(id="g", name="G", members=[GuildMember("B", "P")], tb_id="t01D")
+    rep = analyze_guild(_player(), guild, RAIDS)
+    assert rep.tb is None
+
+
 def test_bundled_raid_targets_base_ids_valid():
     targets = load_raid_targets()
     names = json.loads(
