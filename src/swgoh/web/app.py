@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 
 from ..config import get_settings
 from ..service import SwgohService
+from .charts import rank_trend_svg
 
 _HERE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(_HERE / "templates"))
@@ -35,7 +36,15 @@ def tonight(request: Request, ally_code: str | None = Query(default=None)) -> HT
             request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
         )
     return templates.TemplateResponse(
-        request, "tonight.html", {"plan": plan, "arena": arena, "ally_code": code}
+        request,
+        "tonight.html",
+        {
+            "plan": plan,
+            "arena": arena,
+            "ally_code": code,
+            "squad_chart": rank_trend_svg(arena.history, "squad_rank"),
+            "fleet_chart": rank_trend_svg(arena.history, "fleet_rank"),
+        },
     )
 
 

@@ -25,6 +25,27 @@
       {{ rankcard("Squad Arena rank", arena.squad_rank, arena.squad_change) }}
       {{ rankcard("Fleet Arena rank", arena.fleet_rank, arena.fleet_change) }}
     </div>
+
+    {% if arena.has_history %}
+      <div class="charts">
+        {% if squad_chart %}
+          <div class="chartcard">
+            <div class="k">Squad Arena rank over time</div>
+            {{ squad_chart|safe }}
+          </div>
+        {% endif %}
+        {% if fleet_chart %}
+          <div class="chartcard">
+            <div class="k">Fleet Arena rank over time</div>
+            {{ fleet_chart|safe }}
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="note" style="margin:-.4rem 0 1.2rem">
+        📈 Rank trend charts appear here once there's more than one day of data — check back after tomorrow's refresh.
+      </p>
+    {% endif %}
   {% endif %}
 
   {% if not plan.units %}
