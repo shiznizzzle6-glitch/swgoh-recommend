@@ -30,7 +30,7 @@ def tonight(request: Request, ally_code: str | None = Query(default=None)) -> HT
             request, "setup.html", {"data_source": settings.data_source}
         )
     try:
-        plan, arena = _service().landing(code)
+        board, arena = _service().landing(code)
     except Exception as exc:
         return templates.TemplateResponse(
             request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
@@ -39,7 +39,7 @@ def tonight(request: Request, ally_code: str | None = Query(default=None)) -> HT
         request,
         "tonight.html",
         {
-            "plan": plan,
+            "board": board,
             "arena": arena,
             "ally_code": code,
             "squad_chart": rank_trend_svg(arena.history, "squad_rank"),
@@ -72,21 +72,25 @@ def dashboard(request: Request, ally_code: str | None = Query(default=None)) -> 
 
 @app.get("/api/tonight")
 def api_tonight(ally_code: str | None = Query(default=None)) -> JSONResponse:
-    plan = _service().tonight_plan(ally_code)
+    board = _service().tonight_board(ally_code)
     return JSONResponse(
         {
-            "player": plan.player_name,
-            "ally_code": plan.ally_code,
-            "units": [
+            "player": board.player_name,
+            "ally_code": board.ally_code,
+            "categories": [
                 {
-                    "base_id": u.base_id,
-                    "name": u.name,
-                    "score": u.score,
-                    "headline": u.headline,
-                    "kind": u.primary_kind,
-                    "sources": u.sources,
+                    "key": c.key,
+                    "title": c.title,
+                    "link": c.link,
+                    "items": [
+                        {"name": it.name, "detail": it.detail, "score": it.score, "base_id": it.base_id}
+                        for it in c.items
+                    ],
                 }
-                for u in plan.units
+                for c in board.categories
+            ],
+            "highlights": [
+                {"base_id": h.base_id, "name": h.name, "areas": h.areas} for h in board.highlights
             ],
         }
     )

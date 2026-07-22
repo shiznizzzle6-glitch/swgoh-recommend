@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}{{ plan.player_name }} — What to Upgrade Tonight{% endblock %}
-{% block subtitle %}<span class="muted">{{ plan.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block title %}{{ board.player_name }} — What to Upgrade Tonight{% endblock %}
+{% block subtitle %}<span class="muted">{{ board.player_name }} · {{ ally_code }}</span>{% endblock %}
 {% block content %}
   <h2 style="margin:.2rem 0 .3rem">What to upgrade tonight</h2>
   <p class="note" style="margin:0 0 1.2rem">
-    Your Mods, Fleet, and Squad priorities merged into one ranked list. Units your
-    plans agree on rank highest — one upgrade, multiple payoffs.
+    The top few moves in each area, so you can see your whole account at a glance.
+    Tap any heading to drill into the full list.
   </p>
 
   {% if arena and (arena.squad_rank is not none or arena.fleet_rank is not none) %}
@@ -29,16 +29,10 @@
     {% if arena.has_history %}
       <div class="charts">
         {% if squad_chart %}
-          <div class="chartcard">
-            <div class="k">Squad Arena rank over time</div>
-            {{ squad_chart|safe }}
-          </div>
+          <div class="chartcard"><div class="k">Squad Arena rank over time</div>{{ squad_chart|safe }}</div>
         {% endif %}
         {% if fleet_chart %}
-          <div class="chartcard">
-            <div class="k">Fleet Arena rank over time</div>
-            {{ fleet_chart|safe }}
-          </div>
+          <div class="chartcard"><div class="k">Fleet Arena rank over time</div>{{ fleet_chart|safe }}</div>
         {% endif %}
       </div>
     {% else %}
@@ -48,34 +42,35 @@
     {% endif %}
   {% endif %}
 
-  {% if not plan.units %}
-    <div class="squad empty">Nothing pressing right now — your priorities are in good shape. 🎉</div>
+  {% if board.highlights %}
+    <div class="highlight">
+      <span class="hl-label">⭐ Multi-payoff picks</span>
+      {% for h in board.highlights %}
+        <span class="hl-chip"><strong>{{ h.name }}</strong> <span class="muted">{{ h.areas|join(' · ') }}</span></span>
+      {% endfor %}
+    </div>
   {% endif %}
 
-  {% for u in plan.units %}
-    <article class="obj" style="align-items:flex-start">
-      <span class="rank">{{ loop.index }}</span>
-      <div style="flex:1">
-        <div style="display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap">
-          <span style="font-weight:700">{{ u.name }}</span>
-          <span class="pill">{{ u.primary_kind.replace('_',' ') }}</span>
-          {% if u.multi %}<span class="st Ready">×{{ u.sources|length }} payoffs</span>{% endif %}
-          <span class="spacer"></span>
-          <span class="score">{{ u.score }}</span>
+  <div class="catgrid">
+    {% for c in board.categories %}
+      <section class="catcard">
+        <div class="cathead">
+          <a href="{{ c.link }}{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">{{ c.title }} →</a>
         </div>
-        <div style="margin:.3rem 0 .2rem">{{ u.headline }}</div>
-        <div class="muted" style="font-size:.85rem">Helps:
-          {% for s in u.sources %}<span class="tag">{{ s }}</span>{% endfor %}
-        </div>
-      </div>
-    </article>
-  {% endfor %}
-
-  {% if plan.units %}
-    <p class="note" style="margin-top:1rem">
-      Detail lives in the <a href="/mods{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Mods</a>,
-      <a href="/fleet{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Fleet</a>, and
-      <a href="/squads{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Squads</a> tabs.
-    </p>
-  {% endif %}
+        {% if c.items %}
+          {% for it in c.items %}
+            <div class="catitem">
+              <div class="ci-top">
+                <span class="ci-name">{{ it.name }}</span>
+                <span class="ci-score">{{ '%g' % it.score }}</span>
+              </div>
+              <div class="ci-detail muted">{{ it.detail }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="catitem"><span class="muted">All caught up here 🎉</span></div>
+        {% endif %}
+      </section>
+    {% endfor %}
+  </div>
 {% endblock %}

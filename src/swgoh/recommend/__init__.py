@@ -6,7 +6,7 @@ from .energy import EnergyReport, FarmTarget, analyze_energy
 from .gear import GearReport, GearTarget, analyze_gear
 from .fleet import FleetReport, analyze_fleet
 from .mods import ModReport, UnitModReport, analyze_roster, load_priority_config
-from .plan import TonightPlan, UnitPlan, build_tonight_plan
+from .plan import Highlight, PlanCategory, PlanItem, TonightBoard, build_tonight_board
 from .relics import RelicReport, RelicTarget, analyze_relics
 from .squads import SquadReport, analyze_squads
 from .zetas import AbilityTarget, ZetaReport, analyze_zetas
@@ -36,7 +36,9 @@ __all__ = [
     "AbilityTarget",
     "ZetaReport",
     "analyze_zetas",
-    "TonightPlan",
-    "UnitPlan",
-    "build_tonight_plan",
+    "TonightBoard",
+    "PlanCategory",
+    "PlanItem",
+    "Highlight",
+    "build_tonight_board",
 ]

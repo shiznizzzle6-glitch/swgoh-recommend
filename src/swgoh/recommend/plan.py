@@ -1,122 +1,174 @@
-"""Unified "what to upgrade tonight" plan.
+"""Unified "what to upgrade tonight" board.
 
-Merges the objectives from the Mods, Fleet, and Squad analyzers into one ranked
-list keyed by unit. A unit wanted by several plans (e.g. Bossk — needed for both
-Hound's Tooth in Fleet and the Bounty Hunters raid squad) rises to the top,
-because one investment pays off in multiple places. That cross-feature leverage
-is the whole point.
+Rather than merging every analyzer into one flat list, this presents the **top
+few things to work on in each area** — Fleet, Squads, Gear, Relics, Zetas,
+Energy, Mods — so you can see your whole account at a glance and drill into any
+tab. A small "multi-payoff" highlight surfaces units that show up in several
+areas at once (e.g. Bossk — a fleet pilot who's also a gear/zeta/farm target),
+because those are the highest-leverage single investments.
+
+Defense is intentionally excluded: Squad Arena has no separate defense team to
+set, so it isn't a "tonight" action.
 """
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 
 from ..names import display_name
+from .energy import EnergyReport
 from .fleet import FleetReport
+from .gear import GearReport
 from .mods import ModReport
+from .relics import RelicReport
 from .squads import SquadReport
-
-
-def _norm(priority: float, cap: float = 10.0) -> float:
-    """Clamp differing analyzer priority scales into a common 0..cap range."""
-    return max(0.0, min(cap, priority))
+from .zetas import ZetaReport
 
 
 @dataclass
-class Contribution:
-    source: str   # short label, e.g. "Fleet (Executrix)", "Bounty Hunters squad", "Mods"
-    kind: str     # gear / unlock / star / mod_pilot / mods ...
-    detail: str
-    weight: float
+class PlanItem:
+    name: str        # the unit (or target) to work on
+    detail: str      # short action phrase
+    score: float     # in-category priority
+    base_id: str = ""
 
 
 @dataclass
-class UnitPlan:
+class PlanCategory:
+    key: str
+    title: str
+    link: str
+    items: list[PlanItem] = field(default_factory=list)
+
+
+@dataclass
+class Highlight:
     base_id: str
     name: str
-    contributions: list[Contribution] = field(default_factory=list)
+    areas: list[str]
 
     @property
-    def sources(self) -> list[str]:
-        seen: list[str] = []
-        for c in self.contributions:
-            if c.source not in seen:
-                seen.append(c.source)
-        return seen
-
-    @property
-    def score(self) -> float:
-        total = sum(c.weight for c in self.contributions)
-        # Cross-feature boost: each extra distinct source adds 50%.
-        return round(total * (1 + 0.5 * (len(self.sources) - 1)), 1)
-
-    @property
-    def _top(self) -> Contribution:
-        return max(self.contributions, key=lambda c: c.weight)
-
-    @property
-    def headline(self) -> str:
-        return self._top.detail
-
-    @property
-    def primary_kind(self) -> str:
-        return self._top.kind
-
-    @property
-    def multi(self) -> bool:
-        return len(self.sources) > 1
+    def count(self) -> int:
+        return len(self.areas)
 
 
 @dataclass
-class TonightPlan:
+class TonightBoard:
     player_name: str
     ally_code: str
-    units: list[UnitPlan] = field(default_factory=list)
+    categories: list[PlanCategory] = field(default_factory=list)
+    highlights: list[Highlight] = field(default_factory=list)
 
 
-def build_tonight_plan(
+def _label(base_id: str, fallback: str) -> str:
+    return display_name(base_id) if base_id else fallback
+
+
+def _fleet_items(fleet: FleetReport, limit: int) -> list[PlanItem]:
+    if not fleet.recommended:
+        return []
+    return [
+        PlanItem(_label(o.target_base_id, fleet.recommended.name), o.detail, round(o.priority, 1), o.target_base_id)
+        for o in fleet.recommended.objectives[:limit]
+    ]
+
+
+def _squad_items(squads: SquadReport, limit: int) -> list[PlanItem]:
+    pairs = []
+    for s in squads.squads:
+        if s.status not in ("Ready", "Close"):
+            continue
+        for o in s.objectives:
+            pairs.append((o, s.name))
+    pairs.sort(key=lambda x: x[0].priority, reverse=True)
+    return [
+        PlanItem(_label(o.target_base_id, name), f"{o.detail} · {name}", round(o.priority, 1), o.target_base_id)
+        for o, name in pairs[:limit]
+    ]
+
+
+def _gear_items(gear: GearReport, limit: int) -> list[PlanItem]:
+    out = []
+    for t in gear.eligible[:limit]:
+        piece = f" · next: {t.next_pieces[0]}" if t.next_pieces else ""
+        out.append(PlanItem(t.name, f"{t.target_label}{piece}", t.priority, t.base_id))
+    return out
+
+
+def _relic_items(relics: RelicReport, limit: int) -> list[PlanItem]:
+    return [
+        PlanItem(t.name, t.target_label + (f" · {t.roles[0]}" if t.roles else ""), t.priority, t.base_id)
+        for t in relics.eligible[:limit]
+    ]
+
+
+def _zeta_items(zetas: ZetaReport, limit: int) -> list[PlanItem]:
+    combined = sorted(zetas.zetas + zetas.omicrons, key=lambda t: t.priority, reverse=True)
+    return [
+        PlanItem(t.unit_name, f"{t.kind}: {t.ability_name}", t.priority, t.base_id)
+        for t in combined[:limit]
+    ]
+
+
+def _energy_items(energy: EnergyReport, limit: int) -> list[PlanItem]:
+    farm = sorted(
+        energy.cantina + energy.other + energy.unmapped,
+        key=lambda t: t.priority,
+        reverse=True,
+    )
+    out = []
+    for t in farm[:limit]:
+        pool = t.energy or "farm shards"
+        out.append(PlanItem(t.name, f"{t.action_label} · {pool}", t.priority, t.base_id))
+    return out
+
+
+def _mod_items(mods: ModReport, limit: int) -> list[PlanItem]:
+    out = []
+    for r in mods.flagged_units[:limit]:
+        detail = max(r.issues, key=lambda i: i.severity).detail if r.issues else ""
+        out.append(PlanItem(r.unit.name, detail, round(r.score, 1), r.unit.base_id))
+    return out
+
+
+def build_tonight_board(
     mods: ModReport,
     fleet: FleetReport,
     squads: SquadReport,
-    limit: int = 15,
-) -> TonightPlan:
-    buckets: dict[str, UnitPlan] = {}
+    gear: GearReport,
+    relics: RelicReport,
+    zetas: ZetaReport,
+    energy: EnergyReport,
+    limit: int = 3,
+) -> TonightBoard:
+    categories = [
+        PlanCategory("fleet", "Fleet", "/fleet", _fleet_items(fleet, limit)),
+        PlanCategory("squads", "Squads", "/squads", _squad_items(squads, limit)),
+        PlanCategory("gear", "Gear", "/gear", _gear_items(gear, limit)),
+        PlanCategory("relics", "Relics", "/relics", _relic_items(relics, limit)),
+        PlanCategory("zetas", "Zetas & Omicrons", "/zetas", _zeta_items(zetas, limit)),
+        PlanCategory("energy", "Energy", "/energy", _energy_items(energy, limit)),
+        PlanCategory("mods", "Mods", "/mods", _mod_items(mods, limit)),
+    ]
 
-    def add(base_id: str, contribution: Contribution) -> None:
-        if not base_id:
-            return
-        plan = buckets.get(base_id)
-        if plan is None:
-            plan = UnitPlan(base_id=base_id, name=display_name(base_id))
-            buckets[base_id] = plan
-        plan.contributions.append(contribution)
+    # Multi-payoff highlights: units appearing in 2+ areas.
+    areas: dict[str, set[str]] = defaultdict(set)
+    names: dict[str, str] = {}
+    for cat in categories:
+        for it in cat.items:
+            if it.base_id:
+                areas[it.base_id].add(cat.title)
+                names.setdefault(it.base_id, it.name)
+    highlights = [
+        Highlight(base_id, names[base_id], sorted(cats))
+        for base_id, cats in areas.items()
+        if len(cats) >= 2
+    ]
+    highlights.sort(key=lambda h: h.count, reverse=True)
 
-    # Mods — units flagged with fixable mod work.
-    for r in mods.flagged_units:
-        if not r.issues:
-            continue
-        top = max(r.issues, key=lambda i: i.severity)
-        add(
-            r.unit.base_id,
-            Contribution("Mods", "mods", f"{r.unit.name}: {top.detail}", _norm(r.raw_severity)),
-        )
-
-    # Fleet — the single recommended fleet's build path.
-    if fleet.recommended:
-        source = f"Fleet ({fleet.recommended.name})"
-        for o in fleet.recommended.objectives:
-            add(o.target_base_id, Contribution(source, o.kind, o.detail, _norm(o.priority)))
-
-    # Squads — only near-fieldable ones (Ready/Close) are worth tonight's effort.
-    for squad in squads.squads:
-        if squad.status not in ("Ready", "Close"):
-            continue
-        source = f"{squad.name} squad"
-        for o in squad.objectives:
-            add(o.target_base_id, Contribution(source, o.kind, o.detail, _norm(o.priority)))
-
-    units = sorted(buckets.values(), key=lambda u: u.score, reverse=True)
-    return TonightPlan(
+    return TonightBoard(
         player_name=mods.player_name,
         ally_code=mods.ally_code,
-        units=units[:limit],
+        categories=categories,
+        highlights=highlights,
     )

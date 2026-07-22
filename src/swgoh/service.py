@@ -12,7 +12,7 @@ from .recommend import (
     ModReport,
     RelicReport,
     SquadReport,
-    TonightPlan,
+    TonightBoard,
     ZetaReport,
     analyze_defense,
     analyze_energy,
@@ -22,7 +22,7 @@ from .recommend import (
     analyze_roster,
     analyze_squads,
     analyze_zetas,
-    build_tonight_plan,
+    build_tonight_board,
     load_priority_config,
 )
 from .sources import build_source
@@ -86,20 +86,24 @@ class SwgohService:
         player = self.get_player(ally_code)
         return load_status(player, self.settings.rank_history_path)
 
-    def tonight_plan(self, ally_code: str | None = None) -> TonightPlan:
-        """Fetch the roster once and merge all analyzers into one ranked plan."""
-        player = self.get_player(ally_code)
-        mods = analyze_roster(player, self._priority_config)
-        fleet = analyze_fleet(player)
-        squads = analyze_squads(player)
-        return build_tonight_plan(mods, fleet, squads)
+    def _board(self, player: Player) -> TonightBoard:
+        """Run every 'tonight' analyzer over one already-fetched player."""
+        return build_tonight_board(
+            mods=analyze_roster(player, self._priority_config),
+            fleet=analyze_fleet(player),
+            squads=analyze_squads(player),
+            gear=analyze_gear(player),
+            relics=analyze_relics(player),
+            zetas=analyze_zetas(player),
+            energy=analyze_energy(player),
+        )
 
-    def landing(self, ally_code: str | None = None) -> tuple[TonightPlan, ArenaStatus]:
-        """One fetch → the tonight plan plus the arena-rank trend for the header."""
+    def tonight_board(self, ally_code: str | None = None) -> TonightBoard:
+        return self._board(self.get_player(ally_code))
+
+    def landing(self, ally_code: str | None = None) -> tuple[TonightBoard, ArenaStatus]:
+        """One fetch → the categorized board plus the arena-rank trend for the header."""
         player = self.get_player(ally_code)
-        mods = analyze_roster(player, self._priority_config)
-        fleet = analyze_fleet(player)
-        squads = analyze_squads(player)
-        plan = build_tonight_plan(mods, fleet, squads)
+        board = self._board(player)
         status = load_status(player, self.settings.rank_history_path)
-        return plan, status
+        return board, status
