@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from swgoh.history import RankSnapshot
-from swgoh.web.charts import rank_trend_svg
+from swgoh.web.charts import rank_trend_svg, skill_trend_svg
 
 DAY = 86400.0
 
@@ -50,4 +50,36 @@ def test_y_axis_is_inverted_best_rank_on_top():
 
     ys = [float(m) for m in re.findall(r'<circle cx="[\d.]+" cy="([\d.]+)"', svg)]
     # ranks are 2737 (worst), 2700, 2600 (best) -> y should DECREASE (rise).
+    assert ys[0] > ys[-1]
+
+
+def _skill_hist():
+    return [
+        RankSnapshot(ts=1_000_000.0, squad_rank=None, fleet_rank=None, skill_rating=1300),
+        RankSnapshot(ts=1_000_000.0 + DAY, squad_rank=None, fleet_rank=None, skill_rating=1350),
+        RankSnapshot(ts=1_000_000.0 + 2 * DAY, squad_rank=None, fleet_rank=None, skill_rating=1420),
+    ]
+
+
+def test_skill_empty_and_unrated_render_nothing():
+    assert skill_trend_svg([]) == ""
+    hist = [RankSnapshot(ts=1_000_000.0, squad_rank=5, fleet_rank=5, skill_rating=None)]
+    assert skill_trend_svg(hist) == ""
+
+
+def test_skill_multi_point_labels_latest_with_commas():
+    svg = skill_trend_svg(_skill_hist())
+    assert svg.count("<circle") == 3
+    assert "<path" in svg
+    assert "1,420" in svg              # latest rating, thousands-separated
+    assert "↑ better (gaining)" in svg
+
+
+def test_skill_axis_higher_is_on_top():
+    # Higher rating must map to a SMALLER y (higher on screen) than a lower one.
+    import re
+
+    svg = skill_trend_svg(_skill_hist(), width=520, height=132)
+    ys = [float(m) for m in re.findall(r'<circle cx="[\d.]+" cy="([\d.]+)"', svg)]
+    # ratings 1300 (low), 1350, 1420 (high) -> y should DECREASE (rise).
     assert ys[0] > ys[-1]

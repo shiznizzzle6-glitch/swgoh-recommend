@@ -4,6 +4,7 @@ from __future__ import annotations
 from .config import Settings, get_settings
 from .history import ArenaStatus, load_status, record_rank
 from .models import Player
+from .web.charts import skill_trend_svg
 from .recommend import (
     DefenseReport,
     EnergyReport,
@@ -95,12 +96,21 @@ class SwgohService:
         player = self.get_player(ally_code)
         return analyze_gear(player)
 
-    def guild_report(self, ally_code: str | None = None) -> GuildReport:
+    def _guild_page(self, ally_code: str | None) -> tuple[GuildReport, str]:
         player = self.get_player(ally_code)
         if not player.guild_id or not hasattr(self.source, "get_guild"):
             raise ValueError("No guild found for this player (or the data source can't fetch guilds).")
         guild = self.source.get_guild(player.guild_id)
-        return analyze_guild(player, guild)
+        status = load_status(player, self.settings.rank_history_path)
+        report = analyze_guild(player, guild, skill_change=status.skill_change)
+        return report, skill_trend_svg(status.history)
+
+    def guild_report(self, ally_code: str | None = None) -> GuildReport:
+        return self._guild_page(ally_code)[0]
+
+    def guild_page(self, ally_code: str | None = None) -> tuple[GuildReport, str]:
+        """Guild report plus the inline GAC skill-rating trend chart (HTML route)."""
+        return self._guild_page(ally_code)
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)

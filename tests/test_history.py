@@ -47,6 +47,41 @@ def test_status_no_history_is_none(tmp_path):
     assert status.has_history is False
 
 
+def _pg(squad, fleet, skill):
+    return Player(
+        name="P", ally_code="123456789",
+        squad_arena_rank=squad, fleet_arena_rank=fleet, gac_skill_rating=skill,
+    )
+
+
+def test_records_when_only_skill_rating_present(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    # No arena ranks but a GAC rating -> still worth logging.
+    assert record_rank(_pg(None, None, 1350), path, now=1_000_000.0) is True
+    status = load_status(_pg(None, None, 1350), path)
+    assert status.skill_rating == 1350
+
+
+def test_skill_change_positive_is_improvement(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    record_rank(_pg(2737, 240, 1350), path, now=1_000_000.0)
+    # Next day: same ranks but skill rating climbed -> a new row is written.
+    assert record_rank(_pg(2737, 240, 1400), path, now=1_100_000.0) is True
+    status = load_status(_pg(2737, 240, 1400), path)
+    assert status.skill_change == 50          # gained rating
+    assert status.has_skill_history is True
+
+
+def test_skill_change_skips_snapshots_without_rating(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    # Day 1 had a rating; day 2 a rank-only change (no GAC yet in that fetch).
+    record_rank(_pg(2737, 240, 1350), path, now=1_000_000.0)
+    record_rank(_pg(2700, 240, 0), path, now=1_100_000.0)  # skill 0 -> None
+    status = load_status(_pg(2700, 240, 1375), path)
+    # Compares to the last snapshot that actually had a rating (1350), not the None row.
+    assert status.skill_change == 25
+
+
 def test_history_filters_by_ally_code(tmp_path):
     path = tmp_path / "rank.jsonl"
     record_rank(_p(2737, 234), path, now=1_000_000.0)

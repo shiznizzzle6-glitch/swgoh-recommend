@@ -25,9 +25,27 @@
       <div class="rankcard">
         <div class="k">Grand Arena (GAC)</div>
         <div class="v" style="font-size:1.2rem">{{ s.gac_league|capitalize }} {{ s.gac_division }}</div>
-        <div class="d flat">skill rating {{ s.gac_skill_rating }}</div>
+        <div class="d {% if s.gac_skill_change and s.gac_skill_change > 0 %}up{% elif s.gac_skill_change and s.gac_skill_change < 0 %}down{% else %}flat{% endif %}">
+          {{ '{:,}'.format(s.gac_skill_rating) }} skill
+          {% if s.gac_skill_change %}
+            · {{ '+' if s.gac_skill_change > 0 else '' }}{{ s.gac_skill_change }} since last
+          {% endif %}
+        </div>
       </div>
       {% endif %}
+    </div>
+  {% endif %}
+
+  {% if gac_chart %}
+    <div class="charts" style="margin:0 0 1.2rem">
+      <div class="chartcard">
+        <div class="k">GAC skill rating over time</div>
+        {{ gac_chart|safe }}
+        <div class="note" style="margin-top:.4rem">
+          Rating climbs when you win Grand Arena matchups — the clearest signal your
+          roster is getting more competitive. Logged each time you open the tool.
+        </div>
+      </div>
     </div>
   {% endif %}
 

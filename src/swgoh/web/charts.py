@@ -138,3 +138,99 @@ def rank_trend_svg(
 
     parts.append("</svg>")
     return "".join(parts)
+
+
+def skill_trend_svg(
+    history: list[RankSnapshot],
+    *,
+    width: int = 520,
+    height: int = 132,
+) -> str:
+    """Render the GAC skill-rating trend (HIGHER is better -> normal y-axis).
+
+    Unlike arena rank, skill rating is a score: bigger is better, so the largest
+    value sits at the TOP and a rising line means you're gaining rating. Returns
+    "" when fewer than one rated snapshot exists.
+    """
+    pts = [(s.ts, s.skill_rating) for s in history if s.skill_rating is not None]
+    if not pts:
+        return ""
+
+    pad_l, pad_r, pad_t, pad_b = 10, 60, 16, 22
+    plot_w = width - pad_l - pad_r
+    plot_h = height - pad_t - pad_b
+
+    ratings = [r for _, r in pts]
+    hi, lo = max(ratings), min(ratings)
+    span = hi - lo or max(1, round(hi * 0.02))  # avoid /0 on a flat line
+
+    times = [t for t, _ in pts]
+    t0, t1 = min(times), max(times)
+    t_span = t1 - t0
+
+    def x_of(i: int, t: float) -> float:
+        if len(pts) == 1:
+            return pad_l + plot_w / 2
+        if t_span > 0:
+            return pad_l + plot_w * (t - t0) / t_span
+        return pad_l + plot_w * i / (len(pts) - 1)
+
+    def y_of(rating: int) -> float:
+        # Highest rating -> top (small y).
+        return pad_t + plot_h * (hi - rating) / span
+
+    coords = [(x_of(i, t), y_of(r), r, t) for i, (t, r) in enumerate(pts)]
+
+    parts: list[str] = []
+    parts.append(
+        f'<svg viewBox="0 0 {width} {height}" role="img" '
+        f'style="width:100%;height:auto;display:block" '
+        f'aria-label="GAC skill rating over time">'
+    )
+
+    for rating in ({hi, lo} if span else {hi}):
+        y = y_of(rating)
+        parts.append(
+            f'<line x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}" '
+            f'stroke="{GRID}" stroke-width="1" />'
+        )
+        parts.append(
+            f'<text x="{pad_l + plot_w + 6}" y="{y + 3:.1f}" fill="{MUTED}" '
+            f'font-size="11" font-variant-numeric="tabular-nums">{rating:,}</text>'
+        )
+
+    parts.append(
+        f'<text x="{pad_l}" y="{pad_t - 5:.1f}" fill="{MUTED}" font-size="10">↑ better (gaining)</text>'
+    )
+
+    if len(coords) > 1:
+        d = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y, _, _ in coords)
+        parts.append(
+            f'<path d="{d}" fill="none" stroke="{LINE}" stroke-width="2" '
+            f'stroke-linejoin="round" stroke-linecap="round" />'
+        )
+
+    last_i = len(coords) - 1
+    for i, (x, y, r, t) in enumerate(coords):
+        parts.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{LINE}" '
+            f'stroke="{SURFACE}" stroke-width="2">'
+            f"<title>{escape(_fmt_day_safe(t))}: {r:,}</title></circle>"
+        )
+        if i == last_i:
+            parts.append(
+                f'<text x="{x + 8:.1f}" y="{y + 4:.1f}" fill="{INK}" font-size="12" '
+                f'font-weight="700" font-variant-numeric="tabular-nums">{r:,}</text>'
+            )
+
+    parts.append(
+        f'<text x="{pad_l}" y="{height - 6}" fill="{MUTED}" font-size="10">{escape(_fmt_day_safe(t0))}</text>'
+    )
+    if len(coords) > 1:
+        parts.append(
+            f'<text x="{pad_l + plot_w}" y="{height - 6}" fill="{MUTED}" font-size="10" '
+            f'text-anchor="end">{escape(_fmt_day_safe(t1))}</text>'
+        )
+
+    parts.append("</svg>")
+    return "".join(parts)

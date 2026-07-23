@@ -79,6 +79,13 @@ def test_standing_rank_and_percentile():
     assert s.gac_skill_rating == 1390
 
 
+def test_standing_carries_skill_change():
+    rep = analyze_guild(_player(), _guild(), RAIDS, skill_change=40)
+    assert rep.standing.gac_skill_change == 40
+    # Defaults to None when no history is supplied.
+    assert analyze_guild(_player(), _guild(), RAIDS).standing.gac_skill_change is None
+
+
 def test_raid_shows_my_score_vs_guild():
     rep = analyze_guild(_player(), _guild(), RAIDS)
     r = rep.raids[0]
