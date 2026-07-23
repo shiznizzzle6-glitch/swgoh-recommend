@@ -12,9 +12,17 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from ..factions import has_faction
 from ..models import Guild, Player
+from ..names import display_name
 from ..ships import is_ship
 from .squads import SquadPlan, _build_plan
+
+# The four "classic" Territory Battles (Hoth + Geonosis). Unlike Rise of the
+# Empire (t05D, relic-gated "any 7★"), their platoons demand SPECIFIC units,
+# assigned per-event and only present in the live guild TB status. See
+# data/tb_platoons.yaml for the stable per-TB facts we can bundle.
+CLASSIC_TB_IDS = ("t01D", "t02D", "t03D", "t04D")
 
 # Comlink raid ids -> display names.
 RAID_NAMES = {
@@ -85,6 +93,178 @@ def _analyze_tb(player: Player, tb_id: str) -> TbReport | None:
     return TbReport(tb_id=tb_id, tb_name=reqs["name"], total_7star=len(chars), phases=phases)
 
 
+# --------------------------------------------------------------------------
+# Classic TB platoon readiness (Hoth / Geonosis)
+# --------------------------------------------------------------------------
+# Two complementary views:
+#   1. Faction-depth readiness (always available): how many distinct units of a
+#      TB's driving faction you own, bucketed by star tier. A newer player's real
+#      lever — platoons need MANY distinct faction units, and later phases gate
+#      on 7★, so depth is what lets you fill slots whenever the guild runs one.
+#   2. Live platoon fills (only while the guild is running that classic TB): the
+#      exact per-slot unit + whether you own it at the required rarity, read from
+#      the live guild TB status.
+
+
+@dataclass
+class TbFactionDepth:
+    faction: str
+    owned: int  # distinct owned characters in this faction
+    r7: int     # owned at exactly 7★
+    r6: int     # owned at 6★
+    r5: int     # owned at 5★
+
+    @property
+    def fillable(self) -> int:
+        """Owned at 5★+ — the pool that can donate to most platoon slots."""
+        return self.r7 + self.r6 + self.r5
+
+
+@dataclass
+class LiveSlot:
+    unit_name: str
+    required_stars: int
+    owned: bool       # you own this exact unit at the required rarity
+    filled: bool      # a guildmate has already donated it
+
+
+@dataclass
+class LivePlatoon:
+    zone: str
+    slots: list[LiveSlot] = field(default_factory=list)
+
+    @property
+    def you_can_fill(self) -> int:
+        return sum(1 for s in self.slots if s.owned and not s.filled)
+
+
+@dataclass
+class ClassicTb:
+    tb_id: str
+    name: str
+    planet: str
+    alignment: str
+    phases: int
+    factions: list[str]
+    is_active: bool
+    current_phase: int
+    depth: list[TbFactionDepth] = field(default_factory=list)
+    live_platoons: list[LivePlatoon] = field(default_factory=list)
+
+    @property
+    def has_live(self) -> bool:
+        return bool(self.live_platoons)
+
+
+@dataclass
+class ClassicTbReport:
+    active_tb_id: str | None  # the classic TB the guild is running now, if any
+    tbs: list[ClassicTb] = field(default_factory=list)
+
+
+def load_tb_platoons(path: str | Path | None = None) -> dict[str, dict[str, Any]]:
+    import yaml
+
+    if path is not None:
+        text = Path(path).read_text(encoding="utf-8")
+    else:
+        text = resources.files("swgoh.data").joinpath("tb_platoons.yaml").read_text("utf-8")
+    data = yaml.safe_load(text) or {}
+    return {str(k): dict(v or {}) for k, v in data.items()}
+
+
+def _faction_depth(player: Player, factions: list[str]) -> list[TbFactionDepth]:
+    chars = [u for u in player.units if not is_ship(u.base_id)]
+    out: list[TbFactionDepth] = []
+    for fac in factions:
+        members = [u for u in chars if has_faction(u.base_id, fac)]
+        out.append(
+            TbFactionDepth(
+                faction=fac,
+                owned=len(members),
+                r7=sum(1 for u in members if u.stars == 7),
+                r6=sum(1 for u in members if u.stars == 6),
+                r5=sum(1 for u in members if u.stars == 5),
+            )
+        )
+    return out
+
+
+def _parse_live_platoons(player: Player, guild: Guild) -> list[LivePlatoon]:
+    """Best-effort read of the LIVE per-slot platoon fills for an active classic TB.
+
+    The live guild TB status only exists while a battle is running, so this can't
+    be validated between events. Field names below are provisional — derived from
+    the static definition's shape (reconZone → platoon → squad slots) and Comlink
+    conventions — and are read defensively: anything unrecognized yields an empty
+    list (the UI then simply falls back to the faction-depth view). We finalize the
+    mapping against a real payload the first time the guild runs Hoth/Geonosis.
+    """
+    raw = guild.tb_status_raw or {}
+    if not raw:
+        return []
+    owned = {u.base_id: u for u in player.units}
+    platoons: list[LivePlatoon] = []
+    for conflict in raw.get("conflictStatus") or []:
+        if not isinstance(conflict, dict):
+            continue
+        zone = conflict.get("zoneStatus") or conflict.get("reconZoneStatus") or conflict
+        zone_id = str(zone.get("zoneId") or zone.get("id") or "")
+        for pl in zone.get("platoon") or zone.get("platoons") or []:
+            if not isinstance(pl, dict):
+                continue
+            slots: list[LiveSlot] = []
+            for sq in pl.get("squad") or pl.get("squads") or []:
+                if not isinstance(sq, dict):
+                    continue
+                unit_ref = str(
+                    sq.get("unitDefId") or sq.get("defId") or sq.get("unitId") or ""
+                ).split(":", 1)[0]
+                if not unit_ref:
+                    continue
+                req_stars = int(sq.get("requiredRarity") or sq.get("rarity") or 0)
+                have = owned.get(unit_ref)
+                slots.append(
+                    LiveSlot(
+                        unit_name=display_name(unit_ref),
+                        required_stars=req_stars,
+                        owned=bool(have and (req_stars == 0 or have.stars >= req_stars)),
+                        filled=bool(sq.get("playerId") or sq.get("filledBy") or sq.get("memberId")),
+                    )
+                )
+            if slots:
+                platoons.append(LivePlatoon(zone=zone_id or str(pl.get("id") or ""), slots=slots))
+    return platoons
+
+
+def _analyze_classic_tb(player: Player, guild: Guild) -> ClassicTbReport:
+    meta = load_tb_platoons()
+    active_id = guild.tb_id if (guild.tb_active and guild.tb_id in CLASSIC_TB_IDS) else None
+    tbs: list[ClassicTb] = []
+    for tb_id in CLASSIC_TB_IDS:
+        m = meta.get(tb_id)
+        if not m:
+            continue
+        is_active = tb_id == active_id
+        tbs.append(
+            ClassicTb(
+                tb_id=tb_id,
+                name=str(m.get("name") or tb_id),
+                planet=str(m.get("planet") or ""),
+                alignment=str(m.get("alignment") or ""),
+                phases=int(m.get("phases") or 0),
+                factions=list(m.get("factions") or []),
+                is_active=is_active,
+                current_phase=guild.tb_round if is_active else 0,
+                depth=_faction_depth(player, list(m.get("factions") or [])),
+                live_platoons=_parse_live_platoons(player, guild) if is_active else [],
+            )
+        )
+    # Surface the active classic TB first.
+    tbs.sort(key=lambda t: (not t.is_active, t.tb_id))
+    return ClassicTbReport(active_tb_id=active_id, tbs=tbs)
+
+
 def load_raid_targets(path: str | Path | None = None) -> dict[str, list[dict[str, Any]]]:
     import yaml
 
@@ -135,6 +315,7 @@ class GuildReport:
     standing: GuildStanding | None
     raids: list[RaidStanding] = field(default_factory=list)
     tb: TbReport | None = None
+    classic_tb: ClassicTbReport | None = None
 
 
 def _median(values: list[int]) -> int:
@@ -220,4 +401,5 @@ def analyze_guild(
         standing=standing,
         raids=raids,
         tb=_analyze_tb(player, guild.tb_id),
+        classic_tb=_analyze_classic_tb(player, guild),
     )

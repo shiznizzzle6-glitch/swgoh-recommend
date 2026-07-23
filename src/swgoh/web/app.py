@@ -227,6 +227,48 @@ def api_guild(ally_code: str | None = Query(default=None)) -> JSONResponse:
                     for p in report.tb.phases
                 ],
             },
+            "classic_tb": None if report.classic_tb is None else {
+                "active_tb_id": report.classic_tb.active_tb_id,
+                "tbs": [
+                    {
+                        "tb_id": t.tb_id,
+                        "name": t.name,
+                        "planet": t.planet,
+                        "alignment": t.alignment,
+                        "phases": t.phases,
+                        "is_active": t.is_active,
+                        "current_phase": t.current_phase,
+                        "depth": [
+                            {
+                                "faction": d.faction,
+                                "owned": d.owned,
+                                "r7": d.r7,
+                                "r6": d.r6,
+                                "r5": d.r5,
+                                "fillable": d.fillable,
+                            }
+                            for d in t.depth
+                        ],
+                        "live_platoons": [
+                            {
+                                "zone": p.zone,
+                                "you_can_fill": p.you_can_fill,
+                                "slots": [
+                                    {
+                                        "unit_name": s.unit_name,
+                                        "required_stars": s.required_stars,
+                                        "owned": s.owned,
+                                        "filled": s.filled,
+                                    }
+                                    for s in p.slots
+                                ],
+                            }
+                            for p in t.live_platoons
+                        ],
+                    }
+                    for t in report.classic_tb.tbs
+                ],
+            },
         }
     )
 

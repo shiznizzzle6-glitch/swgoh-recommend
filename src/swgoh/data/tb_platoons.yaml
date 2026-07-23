@@ -1,0 +1,37 @@
+# Classic Territory Battle metadata for the platoon-readiness view.
+#
+# The specific unit each platoon slot demands is assigned per-event and only
+# exists in the guild's LIVE TB status while a battle is running -- it is NOT in
+# the static game definition (verified: zero base_ids in territoryBattleDefinition).
+# So this file holds only the *stable* facts, all confirmed against Comlink game
+# data segment 2 (forceAlignment: 2=Light, 3=Dark; roundCount = phase count):
+#
+#   - which faction drives each TB's platoons (a newer player's real lever is
+#     owning enough distinct units of that faction at the required star levels)
+#   - alignment, planet, and phase count
+#
+# The live per-slot fills are read separately from the active guild TB status.
+t01D:
+  name: Rebel Assault
+  planet: Hoth
+  alignment: Light Side
+  phases: 6
+  factions: [Rebel]
+t02D:
+  name: Imperial Retaliation
+  planet: Hoth
+  alignment: Dark Side
+  phases: 6
+  factions: [Empire]
+t03D:
+  name: Separatist Might
+  planet: Geonosis
+  alignment: Dark Side
+  phases: 4
+  factions: [Separatist]
+t04D:
+  name: Republic Offensive
+  planet: Geonosis
+  alignment: Light Side
+  phases: 4
+  factions: [Galactic Republic]

@@ -153,3 +153,9 @@ class Guild:
     recent_raid_scores: dict[str, int] = field(default_factory=dict)
     # The guild's Territory Battle (definitionId, e.g. "t05D" = Rise of the Empire).
     tb_id: str = ""
+    # True when that TB is currently RUNNING (from territoryBattleStatus), vs a
+    # merely most-recent result. Live platoon fills only exist while running.
+    tb_active: bool = False
+    tb_round: int = 0  # current phase, when active
+    # Raw live territoryBattleStatus for the active TB, for platoon-fill parsing.
+    tb_status_raw: dict = field(default_factory=dict)

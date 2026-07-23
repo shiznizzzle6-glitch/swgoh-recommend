@@ -4,7 +4,12 @@ from __future__ import annotations
 import json
 from importlib import resources
 
-from swgoh.recommend.guild import analyze_guild, load_raid_targets
+from swgoh.recommend.guild import (
+    CLASSIC_TB_IDS,
+    analyze_guild,
+    load_raid_targets,
+    load_tb_platoons,
+)
 from swgoh.models import Guild, GuildMember, Player, Unit
 from swgoh.sources.comlink import _parse_guild
 
@@ -128,6 +133,100 @@ def test_tb_none_for_unsupported_battle():
     guild = Guild(id="g", name="G", members=[GuildMember("B", "P")], tb_id="t01D")
     rep = analyze_guild(_player(), guild, RAIDS)
     assert rep.tb is None
+
+
+def test_classic_tb_faction_depth_buckets():
+    from swgoh.factions import units_with_faction
+    from swgoh.ships import is_ship
+
+    rebels = [b for b in units_with_faction("Rebel") if not is_ship(b)][:4]
+    assert len(rebels) == 4  # roster reference data has Rebels to work with
+    units = [
+        Unit(rebels[0], "R0", stars=7),
+        Unit(rebels[1], "R1", stars=7),
+        Unit(rebels[2], "R2", stars=6),
+        Unit(rebels[3], "R3", stars=5),
+    ]
+    player = Player(name="P", ally_code="1", player_id="B", units=units)
+    guild = Guild(id="g", name="G", members=[GuildMember("B", "P")])
+    rep = analyze_guild(player, guild, RAIDS)
+    assert rep.classic_tb is not None
+    t01 = next(t for t in rep.classic_tb.tbs if t.tb_id == "t01D")
+    assert t01.name == "Rebel Assault" and t01.alignment == "Light Side" and t01.phases == 6
+    d = t01.depth[0]
+    assert d.faction == "Rebel"
+    assert (d.owned, d.r7, d.r6, d.r5) == (4, 2, 1, 1)
+    assert d.fillable == 4
+
+
+def test_classic_tb_marks_active_and_sorts_it_first():
+    guild = Guild(
+        id="g", name="G", members=[GuildMember("B", "P")],
+        tb_id="t03D", tb_active=True, tb_round=2,
+    )
+    rep = analyze_guild(_player(), guild, RAIDS)
+    assert rep.classic_tb.active_tb_id == "t03D"
+    active = [t for t in rep.classic_tb.tbs if t.is_active]
+    assert [t.tb_id for t in active] == ["t03D"]
+    assert active[0].current_phase == 2
+    assert rep.classic_tb.tbs[0].tb_id == "t03D"  # active surfaces first
+
+
+def test_classic_tb_not_active_during_rote():
+    guild = Guild(id="g", name="G", members=[GuildMember("B", "P")], tb_id="t05D", tb_active=True)
+    rep = analyze_guild(_player(), guild, RAIDS)
+    assert rep.classic_tb.active_tb_id is None
+    assert all(not t.is_active for t in rep.classic_tb.tbs)
+
+
+def test_live_platoon_parse_marks_owned_and_filled():
+    # Provisional live schema (validated against a real payload on first classic TB).
+    player = Player(
+        name="P", ally_code="1", player_id="B",
+        units=[Unit("ENFYSNEST", "Enfys Nest", stars=7)],
+    )
+    raw = {
+        "definitionId": "t01D",
+        "conflictStatus": [
+            {"zoneStatus": {"zoneId": "hoth-recon-1", "platoon": [
+                {"id": "p1", "squad": [
+                    {"unitDefId": "ENFYSNEST:SEVEN_STAR", "requiredRarity": 7},   # owned, open
+                    {"unitDefId": "HANSOLO", "requiredRarity": 7, "playerId": "X"},  # already filled
+                    {"unitDefId": "ENFYSNEST", "requiredRarity": 7, "playerId": ""},  # owned, open
+                    {"unitDefId": "GRANDMOFFTARKIN", "requiredRarity": 6},         # not owned
+                ]},
+            ]}},
+        ],
+    }
+    guild = Guild(
+        id="g", name="G", members=[GuildMember("B", "P")],
+        tb_id="t01D", tb_active=True, tb_round=1, tb_status_raw=raw,
+    )
+    rep = analyze_guild(player, guild, RAIDS)
+    t01 = next(t for t in rep.classic_tb.tbs if t.tb_id == "t01D")
+    assert t01.is_active and len(t01.live_platoons) == 1
+    pl = t01.live_platoons[0]
+    assert pl.zone == "hoth-recon-1"
+    assert len(pl.slots) == 4
+    assert pl.you_can_fill == 2                    # two open Enfys slots you own
+    filled = [s for s in pl.slots if s.filled]
+    assert len(filled) == 1 and filled[0].unit_name == "Han Solo"
+    tarkin = [s for s in pl.slots if s.unit_name == "Grand Moff Tarkin"]
+    assert len(tarkin) == 1 and not tarkin[0].owned and tarkin[0].required_stars == 6
+
+
+def test_tb_platoons_yaml_is_well_formed():
+    meta = load_tb_platoons()
+    assert set(meta) == set(CLASSIC_TB_IDS)
+    from swgoh.factions import all_factions
+
+    known = all_factions()
+    for m in meta.values():
+        assert m["phases"] in (4, 6)
+        assert m["alignment"] in ("Light Side", "Dark Side")
+        assert m["factions"]
+        for f in m["factions"]:
+            assert f in known, f  # driving faction must exist in roster data
 
 
 def test_bundled_raid_targets_base_ids_valid():

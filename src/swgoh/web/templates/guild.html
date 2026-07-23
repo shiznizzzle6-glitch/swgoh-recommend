@@ -129,6 +129,56 @@
     </p>
   {% endif %}
 
+  {% if report.classic_tb and report.classic_tb.tbs %}
+    <h3 style="margin:1.4rem 0 .5rem">🪖 Classic TB platoon prep</h3>
+    <p class="note" style="margin:0 0 .6rem">
+      Hoth &amp; Geonosis platoons demand <strong>specific</strong> units, assigned live each event — so the
+      lever you actually control is <strong>faction depth</strong>: owning many distinct units of each TB's
+      driving faction, at the star tiers later phases gate on. Exact per-slot fills light up here while your
+      guild is running one.
+    </p>
+    {% for t in report.classic_tb.tbs %}
+      <article class="squad" style="margin-bottom:.7rem">
+        <div class="top">
+          <span class="nm">{{ t.name }}</span>
+          {% if t.is_active %}<span class="st Ready">running · phase {{ t.current_phase }}</span>{% endif %}
+          <span class="pill">{{ t.planet }}</span>
+          <span class="tag">{{ t.alignment }}</span>
+          <span class="tag">{{ t.phases }} phases</span>
+        </div>
+        {% for d in t.depth %}
+          <div class="shiplist" style="margin-top:.35rem">
+            <span class="chip"><strong>{{ d.faction }}</strong> · {{ d.owned }} owned</span>
+            <span class="chip">7★ {{ d.r7 }}</span>
+            <span class="chip">6★ {{ d.r6 }}</span>
+            <span class="chip">5★ {{ d.r5 }}</span>
+            <span class="chip" style="color:var(--good)">{{ d.fillable }} donatable (5★+)</span>
+          </div>
+        {% endfor %}
+        {% if t.is_active and t.live_platoons %}
+          <div class="note" style="margin:.5rem 0 .2rem">Live platoons — <span style="color:var(--good)">green = you own &amp; can donate</span>:</div>
+          {% for p in t.live_platoons %}
+            <div class="shiplist" style="margin:.2rem 0">
+              <span class="chip muted">{{ p.zone }} · {{ p.you_can_fill }} you can fill</span>
+              {% for s in p.slots %}
+                <span class="chip" style="{% if s.filled %}opacity:.45{% elif s.owned %}color:var(--good){% else %}color:var(--bad){% endif %}">{{ s.unit_name }}{% if s.required_stars %} {{ s.required_stars }}★{% endif %} {% if s.filled %}✓{% elif s.owned %}●{% else %}—{% endif %}</span>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        {% elif t.is_active %}
+          <div class="note" style="font-style:italic;margin-top:.4rem">
+            Running now — exact per-slot fills will populate here as the live data comes through.
+          </div>
+        {% endif %}
+      </article>
+    {% endfor %}
+    <p class="note" style="margin:.4rem 0 0">
+      Thin in a faction? The fastest depth-builders are cheap unlocks — check the
+      <a href="/energy{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Energy</a> and
+      <a href="/squads{% if ally_code %}?ally_code={{ ally_code }}{% endif %}">Squads</a> tabs.
+    </p>
+  {% endif %}
+
   {% if not report.raids %}
     <div class="unit empty">No active raids detected for your guild.</div>
   {% endif %}
