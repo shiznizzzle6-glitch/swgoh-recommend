@@ -49,6 +49,80 @@
     </div>
   {% endif %}
 
+  {# --- Territory Battle checklist (Rise of the Empire) --- #}
+  <details class="tbpanel" id="tb-checklist" open>
+    <summary>📋 Territory Battle — how to play each phase
+      <span class="tb-sub">(Rise of the Empire)</span>
+    </summary>
+    <p class="note" style="margin:.2rem .8rem .3rem;font-style:normal">
+      Every unit can be used <strong>only once per phase</strong>, so do these <strong>in order</strong> —
+      deploy <strong>last</strong>. Deploying first locks your best units out of the missions and platoons
+      where your rewards actually come from. Tick as you go; reset when a new phase opens.
+    </p>
+    <ul class="tbsteps">
+      <li class="tbstep"><input type="checkbox" data-tb="1">
+        <div class="s-body">
+          <div class="s-title">⚔️ 1. Combat missions</div>
+          <div class="s-sub">Clear every mission you can win with your best squads. Match the lane:
+            <span class="lane light">🔵 Light</span> · <span class="lane mix">🟠 Mixed (any)</span> ·
+            <span class="lane dark">🔴 Dark</span>. This is where your gear &amp; currency come from.</div>
+        </div></li>
+      <li class="tbstep"><input type="checkbox" data-tb="2">
+        <div class="s-body">
+          <div class="s-title">✨ 2. Special missions (◎ nodes)</div>
+          <div class="s-sub">Need a specific faction/GL squad — attempt any you can field for the biggest
+            rewards and bonus stars.</div>
+        </div></li>
+      <li class="tbstep"><input type="checkbox" data-tb="3">
+        <div class="s-body">
+          <div class="s-title">🚀 3. Fleet missions</div>
+          <div class="s-sub">Ships only — a separate pool from characters, so they never compete. Clear what
+            you can.</div>
+        </div></li>
+      <li class="tbstep"><input type="checkbox" data-tb="4">
+        <div class="s-body">
+          <div class="s-title">🎖️ 4. Platoons</div>
+          <div class="s-sub">Donate leftover units for guild-wide rewards — the platoon sections lower on
+            this page show which you can fill. Never platoon a unit you still need for a mission.</div>
+        </div></li>
+      <li class="tbstep"><input type="checkbox" data-tb="5">
+        <div class="s-body">
+          <div class="s-title">📦 5. Deploy — last</div>
+          <div class="s-sub">Spread everyone still available across <strong>all</strong> open planets (the game
+            sorts them by alignment). Stop each planet at ⭐⭐⭐ — GP past 3 stars is wasted.</div>
+        </div></li>
+    </ul>
+    <ul class="tbrules">
+      <li><strong>One use per unit per phase</strong> — missions &amp; platoons before deployment, always.</li>
+      <li><strong>3 stars is the cap per planet</strong> — don't pile your whole roster onto one; spread it.</li>
+      <li>Lanes: <span class="lane dark">🔴 Dark Side</span> · <span class="lane mix">🟠 Mixed</span> ·
+        <span class="lane light">🔵 Light Side</span> — units only deploy to their alignment.</li>
+      <li>🔒 planets unlock as the guild stars the ones next to them — clearing yours opens more.</li>
+    </ul>
+    <button type="button" class="tbreset" onclick="tbReset()">↺ Reset for new phase</button>
+  </details>
+  <script>
+    (function () {
+      var boxes = document.querySelectorAll('#tb-checklist input[data-tb]');
+      function key(n) { return 'tbstep-' + n; }
+      function paint(b) { b.closest('.tbstep').classList.toggle('done', b.checked); }
+      boxes.forEach(function (b) {
+        try { b.checked = localStorage.getItem(key(b.dataset.tb)) === '1'; } catch (e) {}
+        paint(b);
+        b.addEventListener('change', function () {
+          try { localStorage.setItem(key(b.dataset.tb), b.checked ? '1' : '0'); } catch (e) {}
+          paint(b);
+        });
+      });
+      window.tbReset = function () {
+        boxes.forEach(function (b) {
+          b.checked = false; paint(b);
+          try { localStorage.removeItem(key(b.dataset.tb)); } catch (e) {}
+        });
+      };
+    })();
+  </script>
+
   {% for r in report.raids %}
     <h3 style="margin:1.2rem 0 .5rem">🐉 {{ r.raid_name }} raid</h3>
     {% if r.my_score is not none %}
