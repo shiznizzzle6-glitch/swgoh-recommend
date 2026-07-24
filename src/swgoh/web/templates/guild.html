@@ -12,9 +12,14 @@
   {% if s %}
     <div class="rankstrip">
       <div class="rankcard">
-        <div class="k">Your GP rank in guild</div>
-        <div class="v">#{{ s.my_gp_rank }} <span class="muted" style="font-size:.9rem">/ {{ s.member_count }}</span></div>
-        <div class="d flat">{{ s.my_gp_percentile }}th percentile · {{ '{:,}'.format(s.my_gp) }} GP</div>
+        <div class="k">Your galactic power</div>
+        <div class="v">{{ '{:,}'.format(s.my_gp) }}</div>
+        <div class="d {% if s.gp_change and s.gp_change > 0 %}up{% elif s.gp_change and s.gp_change < 0 %}down{% else %}flat{% endif %}">
+          #{{ s.my_gp_rank }}/{{ s.member_count }} in guild · {{ s.my_gp_percentile }}th pctile
+          {% if s.gp_change %}
+            · {{ '+' if s.gp_change > 0 else '' }}{{ '{:,}'.format(s.gp_change) }} since last
+          {% endif %}
+        </div>
       </div>
       <div class="rankcard">
         <div class="k">Guild galactic power</div>
@@ -36,8 +41,19 @@
     </div>
   {% endif %}
 
-  {% if gac_chart %}
+  {% if gp_chart or gac_chart %}
     <div class="charts" style="margin:0 0 1.2rem">
+      {% if gp_chart %}
+      <div class="chartcard">
+        <div class="k">Galactic power over time</div>
+        {{ gp_chart|safe }}
+        <div class="note" style="margin-top:.4rem">
+          Total account GP (characters + ships). Grows as you finish journey quests,
+          farm shards for stars, and gear up — logged each day you open the tool.
+        </div>
+      </div>
+      {% endif %}
+      {% if gac_chart %}
       <div class="chartcard">
         <div class="k">GAC skill rating over time</div>
         {{ gac_chart|safe }}
@@ -46,6 +62,7 @@
           roster is getting more competitive. Logged each time you open the tool.
         </div>
       </div>
+      {% endif %}
     </div>
   {% endif %}
 

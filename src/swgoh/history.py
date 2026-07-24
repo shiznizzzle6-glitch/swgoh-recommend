@@ -27,6 +27,8 @@ class RankSnapshot:
     fleet_rank: int | None
     # GAC skill rating (Elo-like: HIGHER is better, unlike the arena ranks above).
     skill_rating: int | None = None
+    # Total account galactic power (HIGHER is better, like skill rating).
+    galactic_power: int | None = None
 
     @property
     def day(self) -> str:
@@ -38,11 +40,13 @@ class ArenaStatus:
     squad_rank: int | None
     fleet_rank: int | None
     skill_rating: int | None = None
+    galactic_power: int | None = None
     # Change vs the previous snapshot. Negative == climbed (rank number fell).
-    # For skill_rating the sign is flipped in meaning: POSITIVE == improved.
+    # For skill_rating / galactic_power the sign is flipped in meaning: POSITIVE == improved.
     squad_change: int | None = None
     fleet_change: int | None = None
     skill_change: int | None = None
+    gp_change: int | None = None
     history: list[RankSnapshot] = field(default_factory=list)
 
     @property
@@ -52,6 +56,10 @@ class ArenaStatus:
     @property
     def has_skill_history(self) -> bool:
         return sum(1 for s in self.history if s.skill_rating is not None) > 1
+
+    @property
+    def has_gp_history(self) -> bool:
+        return sum(1 for s in self.history if s.galactic_power is not None) > 1
 
 
 def _read(path: Path, ally_code: str) -> list[RankSnapshot]:
@@ -74,6 +82,7 @@ def _read(path: Path, ally_code: str) -> list[RankSnapshot]:
                 squad_rank=row.get("squad_rank"),
                 fleet_rank=row.get("fleet_rank"),
                 skill_rating=row.get("skill_rating"),
+                galactic_power=row.get("galactic_power"),
             )
         )
     out.sort(key=lambda s: s.ts)
@@ -89,9 +98,15 @@ def record_rank(player: Player, path: str | Path, now: float | None = None) -> b
     row was written. Never raises on I/O problems: rank logging must not break a
     page request.
     """
-    # GAC skill rating defaults to 0 on the model; treat that as "no data".
+    # GAC skill rating / GP default to 0 on the model; treat that as "no data".
     skill = player.gac_skill_rating or None
-    if player.squad_arena_rank is None and player.fleet_arena_rank is None and skill is None:
+    gp = player.galactic_power or None
+    if (
+        player.squad_arena_rank is None
+        and player.fleet_arena_rank is None
+        and skill is None
+        and gp is None
+    ):
         return False
     ts = time.time() if now is None else now
     path = Path(path)
@@ -99,6 +114,10 @@ def record_rank(player: Player, path: str | Path, now: float | None = None) -> b
         existing = _read(path, player.ally_code)
         if existing:
             last = existing[-1]
+            # GP is deliberately excluded from the change check: it drifts with
+            # every level/gear tick, so keying on it would write many rows a day.
+            # A fresh row (new day, or a rank/skill move) still captures current GP,
+            # giving a clean ~daily GP trend without the noise.
             unchanged = (
                 last.squad_rank == player.squad_arena_rank
                 and last.fleet_rank == player.fleet_arena_rank
@@ -113,6 +132,7 @@ def record_rank(player: Player, path: str | Path, now: float | None = None) -> b
             "squad_rank": player.squad_arena_rank,
             "fleet_rank": player.fleet_arena_rank,
             "skill_rating": skill,
+            "galactic_power": gp,
         }
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("a", encoding="utf-8") as fh:
@@ -144,12 +164,22 @@ def load_status(player: Player, path: str | Path) -> ArenaStatus:
             if prev.skill_rating is not None:
                 skill_change = skill - prev.skill_rating
                 break
+    # GP moves the same way — compare to the most recent PRIOR snapshot with a GP.
+    gp = player.galactic_power or None
+    gp_change = None
+    if gp is not None:
+        for prev in reversed(history[:-1]):
+            if prev.galactic_power is not None:
+                gp_change = gp - prev.galactic_power
+                break
     return ArenaStatus(
         squad_rank=player.squad_arena_rank,
         fleet_rank=player.fleet_arena_rank,
         skill_rating=skill,
+        galactic_power=gp,
         squad_change=squad_change,
         fleet_change=fleet_change,
         skill_change=skill_change,
+        gp_change=gp_change,
         history=history,
     )

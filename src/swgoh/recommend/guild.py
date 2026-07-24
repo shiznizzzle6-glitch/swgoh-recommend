@@ -288,6 +288,8 @@ class GuildStanding:
     gac_skill_rating: int
     # Skill-rating change since the previous logged snapshot (positive = gained).
     gac_skill_change: int | None = None
+    # Galactic-power change since the previous logged snapshot (positive = grew).
+    gp_change: int | None = None
 
     @property
     def my_gp_percentile(self) -> int:
@@ -332,6 +334,7 @@ def analyze_guild(
     raid_targets: dict[str, list[dict[str, Any]]] | None = None,
     *,
     skill_change: int | None = None,
+    gp_change: int | None = None,
 ) -> GuildReport:
     if raid_targets is None:
         raid_targets = load_raid_targets()
@@ -355,6 +358,7 @@ def analyze_guild(
         gac_division=player.gac_division,
         gac_skill_rating=player.gac_skill_rating,
         gac_skill_change=skill_change,
+        gp_change=gp_change,
     )
 
     # --- Raids: only the ones the guild actually runs ---

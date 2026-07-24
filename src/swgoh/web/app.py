@@ -162,13 +162,15 @@ def guild(request: Request, ally_code: str | None = Query(default=None)) -> HTML
             request, "setup.html", {"data_source": settings.data_source}
         )
     try:
-        report, gac_chart = _service().guild_page(code)
+        report, gac_chart, gp_chart = _service().guild_page(code)
     except Exception as exc:
         return templates.TemplateResponse(
             request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
         )
     return templates.TemplateResponse(
-        request, "guild.html", {"report": report, "ally_code": code, "gac_chart": gac_chart}
+        request,
+        "guild.html",
+        {"report": report, "ally_code": code, "gac_chart": gac_chart, "gp_chart": gp_chart},
     )
 
 
@@ -191,6 +193,7 @@ def api_guild(ally_code: str | None = Query(default=None)) -> JSONResponse:
                 "gac_division": s.gac_division,
                 "gac_skill_rating": s.gac_skill_rating,
                 "gac_skill_change": s.gac_skill_change,
+                "gp_change": s.gp_change,
             },
             "raids": [
                 {

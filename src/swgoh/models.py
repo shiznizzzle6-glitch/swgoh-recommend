@@ -118,6 +118,8 @@ class Player:
     gac_league: str = ""
     gac_division: int = 0
     gac_skill_rating: int = 0
+    # Total account galactic power (characters + ships). 0 if unavailable.
+    galactic_power: int = 0
 
     def unit(self, base_id: str) -> Unit | None:
         for u in self.units:

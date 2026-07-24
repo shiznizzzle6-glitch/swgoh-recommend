@@ -140,19 +140,30 @@ def rank_trend_svg(
     return "".join(parts)
 
 
-def skill_trend_svg(
-    history: list[RankSnapshot],
-    *,
-    width: int = 520,
-    height: int = 132,
-) -> str:
-    """Render the GAC skill-rating trend (HIGHER is better -> normal y-axis).
+def _fmt_gp(value: int) -> str:
+    """Compact GP label: 2,191,413 -> '2.19M' (keeps the right margin narrow)."""
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.2f}M"
+    if value >= 1_000:
+        return f"{value / 1_000:.0f}K"
+    return str(value)
 
-    Unlike arena rank, skill rating is a score: bigger is better, so the largest
-    value sits at the TOP and a rising line means you're gaining rating. Returns
-    "" when fewer than one rated snapshot exists.
+
+def _up_trend_svg(
+    pts: list[tuple[float, int]],
+    *,
+    aria: str,
+    hint: str,
+    fmt,
+    width: int,
+    height: int,
+) -> str:
+    """Render a 'higher is better' value trend (normal y-axis) from (ts, value) points.
+
+    Shared by the skill-rating and galactic-power charts: unlike arena rank, these
+    are scores where bigger is better, so the largest value sits at the TOP and a
+    rising line means growth. `fmt` renders the value labels. Returns "" if empty.
     """
-    pts = [(s.ts, s.skill_rating) for s in history if s.skill_rating is not None]
     if not pts:
         return ""
 
@@ -160,8 +171,8 @@ def skill_trend_svg(
     plot_w = width - pad_l - pad_r
     plot_h = height - pad_t - pad_b
 
-    ratings = [r for _, r in pts]
-    hi, lo = max(ratings), min(ratings)
+    values = [v for _, v in pts]
+    hi, lo = max(values), min(values)
     span = hi - lo or max(1, round(hi * 0.02))  # avoid /0 on a flat line
 
     times = [t for t, _ in pts]
@@ -175,32 +186,32 @@ def skill_trend_svg(
             return pad_l + plot_w * (t - t0) / t_span
         return pad_l + plot_w * i / (len(pts) - 1)
 
-    def y_of(rating: int) -> float:
-        # Highest rating -> top (small y).
-        return pad_t + plot_h * (hi - rating) / span
+    def y_of(value: int) -> float:
+        # Highest value -> top (small y).
+        return pad_t + plot_h * (hi - value) / span
 
-    coords = [(x_of(i, t), y_of(r), r, t) for i, (t, r) in enumerate(pts)]
+    coords = [(x_of(i, t), y_of(v), v, t) for i, (t, v) in enumerate(pts)]
 
     parts: list[str] = []
     parts.append(
         f'<svg viewBox="0 0 {width} {height}" role="img" '
         f'style="width:100%;height:auto;display:block" '
-        f'aria-label="GAC skill rating over time">'
+        f'aria-label="{escape(aria)}">'
     )
 
-    for rating in ({hi, lo} if span else {hi}):
-        y = y_of(rating)
+    for value in ({hi, lo} if span else {hi}):
+        y = y_of(value)
         parts.append(
             f'<line x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}" '
             f'stroke="{GRID}" stroke-width="1" />'
         )
         parts.append(
             f'<text x="{pad_l + plot_w + 6}" y="{y + 3:.1f}" fill="{MUTED}" '
-            f'font-size="11" font-variant-numeric="tabular-nums">{rating:,}</text>'
+            f'font-size="11" font-variant-numeric="tabular-nums">{escape(fmt(value))}</text>'
         )
 
     parts.append(
-        f'<text x="{pad_l}" y="{pad_t - 5:.1f}" fill="{MUTED}" font-size="10">↑ better (gaining)</text>'
+        f'<text x="{pad_l}" y="{pad_t - 5:.1f}" fill="{MUTED}" font-size="10">{escape(hint)}</text>'
     )
 
     if len(coords) > 1:
@@ -211,16 +222,16 @@ def skill_trend_svg(
         )
 
     last_i = len(coords) - 1
-    for i, (x, y, r, t) in enumerate(coords):
+    for i, (x, y, v, t) in enumerate(coords):
         parts.append(
             f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{LINE}" '
             f'stroke="{SURFACE}" stroke-width="2">'
-            f"<title>{escape(_fmt_day_safe(t))}: {r:,}</title></circle>"
+            f"<title>{escape(_fmt_day_safe(t))}: {escape(fmt(v))}</title></circle>"
         )
         if i == last_i:
             parts.append(
                 f'<text x="{x + 8:.1f}" y="{y + 4:.1f}" fill="{INK}" font-size="12" '
-                f'font-weight="700" font-variant-numeric="tabular-nums">{r:,}</text>'
+                f'font-weight="700" font-variant-numeric="tabular-nums">{escape(fmt(v))}</text>'
             )
 
     parts.append(
@@ -234,3 +245,39 @@ def skill_trend_svg(
 
     parts.append("</svg>")
     return "".join(parts)
+
+
+def skill_trend_svg(
+    history: list[RankSnapshot],
+    *,
+    width: int = 520,
+    height: int = 132,
+) -> str:
+    """Render the GAC skill-rating trend (HIGHER is better -> normal y-axis)."""
+    pts = [(s.ts, s.skill_rating) for s in history if s.skill_rating is not None]
+    return _up_trend_svg(
+        pts,
+        aria="GAC skill rating over time",
+        hint="↑ better (gaining)",
+        fmt=lambda v: f"{v:,}",
+        width=width,
+        height=height,
+    )
+
+
+def gp_trend_svg(
+    history: list[RankSnapshot],
+    *,
+    width: int = 520,
+    height: int = 132,
+) -> str:
+    """Render the galactic-power trend (HIGHER is better -> normal y-axis)."""
+    pts = [(s.ts, s.galactic_power) for s in history if s.galactic_power is not None]
+    return _up_trend_svg(
+        pts,
+        aria="Galactic power over time",
+        hint="↑ better (growing)",
+        fmt=_fmt_gp,
+        width=width,
+        height=height,
+    )

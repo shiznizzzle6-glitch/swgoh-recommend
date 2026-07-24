@@ -91,6 +91,13 @@ def test_standing_carries_skill_change():
     assert analyze_guild(_player(), _guild(), RAIDS).standing.gac_skill_change is None
 
 
+def test_standing_carries_gp_change():
+    rep = analyze_guild(_player(), _guild(), RAIDS, gp_change=91_413)
+    assert rep.standing.gp_change == 91_413
+    # Defaults to None when no history is supplied.
+    assert analyze_guild(_player(), _guild(), RAIDS).standing.gp_change is None
+
+
 def test_raid_shows_my_score_vs_guild():
     rep = analyze_guild(_player(), _guild(), RAIDS)
     r = rep.raids[0]

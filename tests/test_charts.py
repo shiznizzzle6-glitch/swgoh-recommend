@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from swgoh.history import RankSnapshot
-from swgoh.web.charts import rank_trend_svg, skill_trend_svg
+from swgoh.web.charts import gp_trend_svg, rank_trend_svg, skill_trend_svg
 
 DAY = 86400.0
 
@@ -82,4 +82,35 @@ def test_skill_axis_higher_is_on_top():
     svg = skill_trend_svg(_skill_hist(), width=520, height=132)
     ys = [float(m) for m in re.findall(r'<circle cx="[\d.]+" cy="([\d.]+)"', svg)]
     # ratings 1300 (low), 1350, 1420 (high) -> y should DECREASE (rise).
+    assert ys[0] > ys[-1]
+
+
+def _gp_hist():
+    return [
+        RankSnapshot(ts=1_000_000.0, squad_rank=None, fleet_rank=None, galactic_power=2_000_000),
+        RankSnapshot(ts=1_000_000.0 + DAY, squad_rank=None, fleet_rank=None, galactic_power=2_100_000),
+        RankSnapshot(ts=1_000_000.0 + 2 * DAY, squad_rank=None, fleet_rank=None, galactic_power=2_191_413),
+    ]
+
+
+def test_gp_empty_and_missing_render_nothing():
+    assert gp_trend_svg([]) == ""
+    hist = [RankSnapshot(ts=1_000_000.0, squad_rank=5, fleet_rank=5, galactic_power=None)]
+    assert gp_trend_svg(hist) == ""
+
+
+def test_gp_multi_point_labels_latest_in_millions():
+    svg = gp_trend_svg(_gp_hist())
+    assert svg.count("<circle") == 3
+    assert "<path" in svg
+    assert "2.19M" in svg              # latest GP, compact millions label
+    assert "↑ better (growing)" in svg
+
+
+def test_gp_axis_higher_is_on_top():
+    import re
+
+    svg = gp_trend_svg(_gp_hist(), width=520, height=132)
+    ys = [float(m) for m in re.findall(r'<circle cx="[\d.]+" cy="([\d.]+)"', svg)]
+    # GP 2.0M (low) -> 2.19M (high) -> y should DECREASE (rise).
     assert ys[0] > ys[-1]

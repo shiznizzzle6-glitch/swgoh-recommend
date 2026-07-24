@@ -269,6 +269,12 @@ class ComlinkSource(DataSource):
         rating = data.get("playerRating") or {}
         skill = (rating.get("playerSkillRating") or {}).get("skillRating")
         rank_status = rating.get("playerRankStatus") or {}
+        # Total account GP lives in the profile stats (char GP + ship GP combined).
+        galactic_power = 0
+        for st in data.get("profileStat") or []:
+            if st.get("nameKey") == "STAT_GALACTIC_POWER_ACQUIRED_NAME":
+                galactic_power = int(st.get("value") or 0)
+                break
         return Player(
             name=str(name),
             ally_code=str(ally_code),
@@ -282,6 +288,7 @@ class ComlinkSource(DataSource):
             gac_league=str(rank_status.get("leagueId") or ""),
             gac_division=int(rank_status.get("divisionId") or 0),
             gac_skill_rating=int(skill or 0),
+            galactic_power=galactic_power,
         )
 
     def get_guild(self, guild_id: str) -> Guild:

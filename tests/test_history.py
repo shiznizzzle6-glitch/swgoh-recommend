@@ -82,6 +82,49 @@ def test_skill_change_skips_snapshots_without_rating(tmp_path):
     assert status.skill_change == 25
 
 
+def _pgp(squad, fleet, gp):
+    return Player(
+        name="P", ally_code="123456789",
+        squad_arena_rank=squad, fleet_arena_rank=fleet, galactic_power=gp,
+    )
+
+
+def test_records_when_only_gp_present(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    # No ranks or GAC rating, but GP alone is worth logging a first row.
+    assert record_rank(_pgp(None, None, 2_000_000), path, now=1_000_000.0) is True
+    status = load_status(_pgp(None, None, 2_000_000), path)
+    assert status.galactic_power == 2_000_000
+
+
+def test_gp_change_positive_is_growth(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    record_rank(_pgp(2737, 240, 2_100_000), path, now=1_000_000.0)
+    # Next day: GP grew (and a new day forces a fresh row that captures it).
+    record_rank(_pgp(2737, 240, 2_191_413), path, now=1_100_000.0)
+    status = load_status(_pgp(2737, 240, 2_191_413), path)
+    assert status.gp_change == 91_413        # grew
+    assert status.has_gp_history is True
+
+
+def test_gp_alone_does_not_write_intraday_row(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    assert record_rank(_pgp(2737, 240, 2_100_000), path, now=1_000_000.0) is True
+    # Same day, ranks unchanged, only GP moved -> deliberately NOT a new row.
+    assert record_rank(_pgp(2737, 240, 2_150_000), path, now=1_000_100.0) is False
+    lines = [l for l in path.read_text().splitlines() if l.strip()]
+    assert len(lines) == 1
+
+
+def test_gp_change_skips_snapshots_without_gp(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    record_rank(_pgp(2737, 240, 2_100_000), path, now=1_000_000.0)
+    record_rank(_pgp(2700, 240, 0), path, now=1_100_000.0)  # gp 0 -> None row
+    status = load_status(_pgp(2680, 240, 2_150_000), path)
+    # Compares to the last snapshot that actually had a GP (2.1M), not the None row.
+    assert status.gp_change == 50_000
+
+
 def test_history_filters_by_ally_code(tmp_path):
     path = tmp_path / "rank.jsonl"
     record_rank(_p(2737, 234), path, now=1_000_000.0)
