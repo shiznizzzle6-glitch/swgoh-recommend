@@ -116,6 +116,25 @@ def test_gp_alone_does_not_write_intraday_row(tmp_path):
     assert len(lines) == 1
 
 
+def _pall(squad, fleet, skill, gp):
+    return Player(
+        name="P", ally_code="123456789", squad_arena_rank=squad, fleet_arena_rank=fleet,
+        gac_skill_rating=skill, galactic_power=gp,
+    )
+
+
+def test_gp_backfills_once_when_newly_available_same_day(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    # A pre-feature row today: ranks + skill, but no GP.
+    assert record_rank(_pall(2737, 240, 1350, 0), path, now=1_000_000.0) is True
+    # Same day, identical ranks/skill, but now a GP arrives -> write once to start the trend.
+    assert record_rank(_pall(2737, 240, 1350, 2_100_000), path, now=1_000_100.0) is True
+    # A further same-day fetch (GP now on record) is deduped, even as GP drifts.
+    assert record_rank(_pall(2737, 240, 1350, 2_150_000), path, now=1_000_200.0) is False
+    lines = [l for l in path.read_text().splitlines() if l.strip()]
+    assert len(lines) == 2
+
+
 def test_gp_change_skips_snapshots_without_gp(tmp_path):
     path = tmp_path / "rank.jsonl"
     record_rank(_pgp(2737, 240, 2_100_000), path, now=1_000_000.0)

@@ -123,8 +123,13 @@ def record_rank(player: Player, path: str | Path, now: float | None = None) -> b
                 and last.fleet_rank == player.fleet_arena_rank
                 and last.skill_rating == skill
             )
+            # Exception: if we now have a GP but the latest row predates GP tracking
+            # (or otherwise lacks one), write once so the trend can start *today*
+            # instead of waiting for the next day's row. Only fires until the day
+            # has a GP-bearing row, so it can't spam.
+            gp_newly_available = gp is not None and last.galactic_power is None
             snap = RankSnapshot(ts, player.squad_arena_rank, player.fleet_arena_rank, skill)
-            if unchanged and last.day == snap.day:
+            if unchanged and not gp_newly_available and last.day == snap.day:
                 return False
         row = {
             "ts": round(ts, 3),
