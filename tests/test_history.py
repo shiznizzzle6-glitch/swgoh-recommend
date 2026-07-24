@@ -107,13 +107,24 @@ def test_gp_change_positive_is_growth(tmp_path):
     assert status.has_gp_history is True
 
 
-def test_gp_alone_does_not_write_intraday_row(tmp_path):
+def test_small_gp_drift_does_not_write_intraday_row(tmp_path):
     path = tmp_path / "rank.jsonl"
     assert record_rank(_pgp(2737, 240, 2_100_000), path, now=1_000_000.0) is True
-    # Same day, ranks unchanged, only GP moved -> deliberately NOT a new row.
-    assert record_rank(_pgp(2737, 240, 2_150_000), path, now=1_000_100.0) is False
+    # Same day, ranks unchanged, GP drifted a little (< threshold) -> no new row.
+    assert record_rank(_pgp(2737, 240, 2_105_000), path, now=1_000_100.0) is False
     lines = [l for l in path.read_text().splitlines() if l.strip()]
     assert len(lines) == 1
+
+
+def test_significant_gp_jump_writes_same_day(tmp_path):
+    path = tmp_path / "rank.jsonl"
+    assert record_rank(_pgp(2737, 240, 2_100_000), path, now=1_000_000.0) is True
+    # Same day, ranks unchanged, but a big session pushed GP past the threshold.
+    assert record_rank(_pgp(2737, 240, 2_262_000), path, now=1_000_100.0) is True
+    status = load_status(_pgp(2737, 240, 2_262_000), path)
+    assert status.gp_change == 162_000        # session progress shows immediately
+    lines = [l for l in path.read_text().splitlines() if l.strip()]
+    assert len(lines) == 2
 
 
 def _pall(squad, fleet, skill, gp):
@@ -129,8 +140,8 @@ def test_gp_backfills_once_when_newly_available_same_day(tmp_path):
     assert record_rank(_pall(2737, 240, 1350, 0), path, now=1_000_000.0) is True
     # Same day, identical ranks/skill, but now a GP arrives -> write once to start the trend.
     assert record_rank(_pall(2737, 240, 1350, 2_100_000), path, now=1_000_100.0) is True
-    # A further same-day fetch (GP now on record) is deduped, even as GP drifts.
-    assert record_rank(_pall(2737, 240, 1350, 2_150_000), path, now=1_000_200.0) is False
+    # A further same-day fetch with only small drift (GP now on record) is deduped.
+    assert record_rank(_pall(2737, 240, 1350, 2_105_000), path, now=1_000_200.0) is False
     lines = [l for l in path.read_text().splitlines() if l.strip()]
     assert len(lines) == 2
 

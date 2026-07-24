@@ -19,6 +19,13 @@ from pathlib import Path
 
 from .models import Player
 
+# GP grows in tiny increments all day (every mod/gear/level tick), so we don't
+# log every change. But a real session — a journey-quest unlock, a batch of
+# shards to a new star — moves GP by a lot at once and *should* show up the same
+# day. So GP writes a fresh row when it jumps at least this much since the last
+# logged row, even intra-day; smaller drift waits for the next daily row.
+GP_LOG_THRESHOLD = 10_000
+
 
 @dataclass
 class RankSnapshot:
@@ -93,8 +100,9 @@ def record_rank(player: Player, path: str | Path, now: float | None = None) -> b
     """Append today's rank snapshot for `player`, unless it's redundant.
 
     Skips the write when the newest existing snapshot is from the same UTC day
-    *and* carries identical ranks and skill rating — keeping the log to roughly
-    one row per day while still capturing intra-day movement. Returns True if a
+    *and* carries identical ranks and skill rating *and* GP hasn't jumped past
+    GP_LOG_THRESHOLD — keeping the log to roughly one row per day while still
+    capturing intra-day rank movement and meaningful GP gains. Returns True if a
     row was written. Never raises on I/O problems: rank logging must not break a
     page request.
     """
@@ -114,22 +122,22 @@ def record_rank(player: Player, path: str | Path, now: float | None = None) -> b
         existing = _read(path, player.ally_code)
         if existing:
             last = existing[-1]
-            # GP is deliberately excluded from the change check: it drifts with
-            # every level/gear tick, so keying on it would write many rows a day.
-            # A fresh row (new day, or a rank/skill move) still captures current GP,
-            # giving a clean ~daily GP trend without the noise.
+            # Ranks/skill drive the once-a-day dedup as before.
             unchanged = (
                 last.squad_rank == player.squad_arena_rank
                 and last.fleet_rank == player.fleet_arena_rank
                 and last.skill_rating == skill
             )
-            # Exception: if we now have a GP but the latest row predates GP tracking
-            # (or otherwise lacks one), write once so the trend can start *today*
-            # instead of waiting for the next day's row. Only fires until the day
-            # has a GP-bearing row, so it can't spam.
-            gp_newly_available = gp is not None and last.galactic_power is None
+            # GP forces its own write when it first appears (so the trend can start
+            # today rather than tomorrow) or jumps past the threshold (so a real
+            # session's progress shows up the same day). Ordinary tiny drift below
+            # the threshold stays out of the log and waits for the next daily row.
+            gp_progressed = gp is not None and (
+                last.galactic_power is None
+                or abs(gp - last.galactic_power) >= GP_LOG_THRESHOLD
+            )
             snap = RankSnapshot(ts, player.squad_arena_rank, player.fleet_arena_rank, skill)
-            if unchanged and not gp_newly_available and last.day == snap.day:
+            if unchanged and not gp_progressed and last.day == snap.day:
                 return False
         row = {
             "ts": round(ts, 3),
