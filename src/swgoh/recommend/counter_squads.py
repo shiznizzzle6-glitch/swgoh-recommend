@@ -105,6 +105,7 @@ class SquadMember:
     relic_level: int
     power: int
     investment: float
+    mods_equipped: int = 0  # a unit short of 6 is missing real stats, not a rounding error
     base_speed: int | None = None  # None when the stats export doesn't cover it
     mod_speed: float = 0.0
     # {stat: {'base': x|None, 'mods': y, 'total': z|None}} for the stats this fight wants
@@ -150,9 +151,20 @@ class CounterSquad:
     def warnings(self) -> list[str]:
         seen: dict[str, None] = {}
         for m in self.members:
+            if m.mods_equipped < 6:
+                seen.setdefault(
+                    f"{m.unit_name}: only {m.mods_equipped}/6 mods equipped — "
+                    "missing stats no squad choice can make up",
+                    None,
+                )
             for line in m.liabilities:
                 seen.setdefault(f"{m.unit_name}: {line}", None)
         return list(seen)
+
+    @property
+    def unmodded(self) -> list[str]:
+        """Members missing mods — usually the real reason a squad underperforms."""
+        return [f"{m.unit_name} ({m.mods_equipped}/6)" for m in self.members if m.mods_equipped < 6]
 
     @property
     def synergy_label(self) -> str:
@@ -164,12 +176,19 @@ class CounterSquad:
 
 
 def _mod_score(unit: Unit) -> float:
-    """Rough mod quality: how many slots are maxed, and how much speed they add."""
+    """Rough mod quality: how full the loadout is, how many slots are maxed, and
+    how much speed they add.
+
+    An empty slot is not a small penalty — a relic unit running three mods is
+    missing something like half its stats, which decides fights far more bluntly
+    than any ability does.
+    """
     if not unit.mods:
         return 0.0
+    filled = min(1.0, len(unit.mods) / 6)
     maxed = sum(1 for m in unit.mods if m.is_maxed and m.rarity >= 5)
     speed = sum(m.speed for m in unit.mods)
-    return 0.6 * min(1.0, maxed / 6) + 0.4 * min(1.0, speed / 120)
+    return filled * (0.5 + 0.3 * min(1.0, maxed / 6) + 0.2 * min(1.0, speed / 120))
 
 
 def _investment(unit: Unit, max_power: int) -> float:
@@ -263,6 +282,7 @@ def _member(
         relic_level=unit.relic_level,
         power=unit.power,
         investment=round(_investment(unit, max_power), 3),
+        mods_equipped=len(unit.mods),
         base_speed=base_speed(unit.base_id),
         mod_speed=mod_speed(unit),
         stat_values={
@@ -296,10 +316,15 @@ def build_counter_squads(
     if not needed:
         return []
 
+    # A unit with no mods at all is missing roughly half its stats — it isn't a
+    # candidate at any relic level, so it's excluded rather than ranked low.
     eligible = [
         u
         for u in player.units
-        if not is_ship(u.base_id) and u.stars > 0 and u.relic_level >= min_relic
+        if not is_ship(u.base_id)
+        and u.stars > 0
+        and u.relic_level >= min_relic
+        and u.mods
     ]
     if len(eligible) < SQUAD_SIZE:
         return []
@@ -330,11 +355,18 @@ def build_counter_squads(
     }
     fastest = max(speed.values(), default=0)
 
+    mods_on = {u.base_id: len(u.mods) for u in eligible}
+
     def unit_value(base_id: str) -> float:
         """Standalone worth: how fieldable, plus how many needed tools it brings."""
         value = invest[base_id] + 0.12 * len(tools.get(base_id, set()))
         if racing and fastest:
-            value += 0.20 * (speed.get(base_id, 0) / fastest)
+            # In a speed race, turn order outweighs everything else the unit brings.
+            value += 0.45 * (speed.get(base_id, 0) / fastest)
+        # A unit that isn't fully modded shouldn't beat one that is.
+        missing = 6 - mods_on.get(base_id, 0)
+        if missing > 0:
+            value -= 0.15 * missing
         return value
 
     leaders = sorted(

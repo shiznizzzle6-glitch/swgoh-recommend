@@ -543,6 +543,7 @@ class CounterReport:
     donors: list = field(default_factory=list)  # list[ModDonor] — speed mods to move
     speed_matters: bool = False  # a speed-race modifier is in play
     stat_needs: list[dict] = field(default_factory=list)  # stat targets, merged across threats
+    unmodded_roster: list[str] = field(default_factory=list)  # invested units missing mods
     squad_input: str = ""  # a squad you asked about, as typed
     verdict: object | None = None  # SquadVerdict for that squad
 
@@ -828,6 +829,16 @@ def analyze_counters(
         for key in threat.use:
             wanted[key] = wanted.get(key, 0) + 1
     ranked = [k for k, _ in sorted(wanted.items(), key=lambda kv: kv[1], reverse=True)]
+    # Missing mods beat every other consideration: a relic unit running three
+    # mods loses fights no squad choice can win. Surface it before any advice.
+    from ..ships import is_ship as _is_ship
+
+    report.unmodded_roster = [
+        f"{display_name(u.base_id)} R{u.relic_level} ({len(u.mods)}/6)"
+        for u in sorted(player.units, key=lambda x: (len(x.mods), -x.relic_level))
+        if not _is_ship(u.base_id) and u.relic_level >= 5 and len(u.mods) < 6
+    ][:12]
+
     threat_keys = {s.key for s in report.steps}
     report.stat_needs = _merge_stat_needs(detect_threats(report.threat_text), ranked)
     # Stats the plan wants raised are the ones worth showing per unit.

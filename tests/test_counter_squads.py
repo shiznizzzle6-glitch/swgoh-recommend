@@ -35,11 +35,26 @@ REBELS = [
 ]
 
 
-def _unit(base_id: str, stars: int, gear: int, relic: int, power: int = 0) -> Unit:
-    return Unit(
+def _mods(count: int = 6, speed: float = 0.0) -> list[Mod]:
+    """A plain full loadout. Units are modded by default because an unmodded unit
+    isn't fieldable — the builder excludes it, as it should."""
+    return [
+        Mod(slot=i, set_name="Health", rarity=6, level=15, tier=5,
+            primary_name="Speed" if (i == 2 and speed) else "Offense",
+            primary_value=speed if (i == 2 and speed) else 5.88,
+            secondaries=[])
+        for i in range(1, count + 1)
+    ]
+
+
+def _unit(base_id: str, stars: int, gear: int, relic: int, power: int = 0,
+          mods: int = 6) -> Unit:
+    u = Unit(
         base_id=base_id, name=base_id, stars=stars, level=85,
         gear_level=gear, relic_level=relic, power=power,
     )
+    u.mods = _mods(mods)
+    return u
 
 
 def _player(extra: list[Unit] | None = None) -> Player:
@@ -133,8 +148,10 @@ def test_investment_uses_power_only_when_the_source_supplies_it():
 
 
 def test_mod_score_rises_with_maxed_speed_mods():
-    bare = _unit("A", 7, 13, 5)
+    bare = _unit("A", 7, 13, 5, mods=0)
     assert _mod_score(bare) == 0.0
+    # A full loadout of plain mods already beats a half-empty one.
+    assert _mod_score(_unit("A", 7, 13, 5)) > _mod_score(_unit("A", 7, 13, 5, mods=3))
     modded = _unit("B", 7, 13, 5)
     modded.mods = [
         Mod(slot=i, set_name="Speed", rarity=6, level=15, tier=5,
@@ -157,12 +174,51 @@ def test_better_geared_unit_wins_the_slot():
 
 
 # --- liabilities ---
+def _kit_warnings(squad):
+    """Warnings about kits, ignoring the unrelated missing-mods notices."""
+    return [w for w in squad.warnings if "mods equipped" not in w]
+
+
 def test_liability_flags_only_apply_to_active_threats():
     no_threat = build_counter_squads(_player(), TOOLS, threat_keys=set())
-    assert all(not sq.warnings for sq in no_threat)
+    assert all(not _kit_warnings(sq) for sq in no_threat)
     # Several of these kits call assists, which backfires against a reflect threat.
     with_threat = build_counter_squads(_player(), TOOLS, threat_keys={"damage_reflect"})
-    assert any(sq.warnings for sq in with_threat)
+    assert any(_kit_warnings(sq) for sq in with_threat)
+
+
+def test_missing_mods_are_warned_about_regardless_of_threat():
+    """A relic unit running three mods is missing about half its stats — that
+    decides fights more bluntly than any kit interaction."""
+    units = [_unit(b, 7, 13, 5) for b in ("MACEWINDU", "GRANDMASTERYODA", "JEDIKNIGHTREVAN", "AHSOKATANO")]
+    units.append(_unit("EZRABRIDGERS3", 7, 13, 5, mods=3))  # half-modded
+    squads = build_counter_squads(Player(name="T", ally_code="1", units=units), TOOLS)
+    assert squads
+    assert any("mods equipped" in w for w in squads[0].warnings)
+    assert squads[0].unmodded
+
+
+def test_fully_modded_unit_beats_an_unmodded_one_for_a_slot():
+    from swgoh.models import Mod, SecondaryStat
+
+    def modded(base_id: str) -> Unit:
+        u = _unit(base_id, 7, 13, 5)
+        u.mods = [
+            Mod(slot=i, set_name="Speed", rarity=6, level=15, tier=5,
+                primary_name="Speed", primary_value=20.0,
+                secondaries=[SecondaryStat("Speed", 10.0)])
+            for i in range(1, 7)
+        ]
+        return u
+
+    # Same family and investment; only mod completeness differs.
+    full = [modded(b) for b in ("MACEWINDU", "GRANDMASTERYODA", "JEDIKNIGHTREVAN", "AHSOKATANO", "EZRABRIDGERS3")]
+    bare = [_unit(b, 7, 13, 5, mods=2) for b in ("HERMITYODA", "KANANJARRUSS3")]
+    player = Player(name="T", ally_code="1", units=full + bare)
+
+    top = build_counter_squads(player, TOOLS, limit=1)[0]
+    picked = {m.base_id for m in top.members}
+    assert not (picked & {u.base_id for u in bare}), "an unmodded unit took a slot from a modded one"
 
 
 def test_ships_never_enter_a_squad():

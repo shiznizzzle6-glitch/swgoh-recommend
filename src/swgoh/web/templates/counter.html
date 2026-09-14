@@ -90,6 +90,18 @@
       <div class="quote" style="white-space:pre-wrap">{{ report.threat_text }}</div>
     {% endif %}
 
+    {% if report.unmodded_roster %}
+      <div class="avoidbox">
+        <div class="hd">🔧 Fix your mods first</div>
+        <p style="margin:.2rem 0 .4rem">
+          These relic-5+ units are missing mods. An empty slot costs real Health, Protection, Speed
+          and Offense — a relic unit running three mods loses fights that no squad choice can win.
+          This outranks everything else on this page.
+        </p>
+        <ul>{% for u in report.unmodded_roster %}<li>{{ u }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+
     {% if report.avoid_all %}
       <div class="avoidbox">
         <div class="hd">⚠ What NOT to bring</div>
@@ -206,6 +218,9 @@
               {% if m.is_leader %}<span class="pill" style="color:var(--accent);border-color:rgba(255,213,74,.5)">Leader</span>{% endif %}
               <span class="who">{{ m.unit_name }}</span>
               <span class="gear">{{ m.gear_label }} · {{ m.stars }}★</span>
+              {% if m.mods_equipped < 6 %}
+                <span class="locked">{{ m.mods_equipped }}/6 mods</span>
+              {% endif %}
               {% for stat, v in m.stat_values.items() %}
                 <span class="gear" {% if v.total is none %}style="opacity:.65"{% endif %}>
                   {{ stat }}
