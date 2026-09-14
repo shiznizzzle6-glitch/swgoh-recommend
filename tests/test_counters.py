@@ -291,7 +291,13 @@ def test_speed_race_is_detected_and_wants_crits_not_just_crit_denial():
     assert "speed_race" in threats
     # Landing crits is how you buy speed back, so offence is part of the answer.
     assert "crit_chance" in threats["speed_race"].use
-    assert any("speed mod" in line.lower() for line in threats["speed_race"].avoid)
+    assert "tm_gain" in threats["speed_race"].use
+    # A flat -100 widens speed gaps; the advice must not tell you to ignore speed.
+    avoid = " ".join(threats["speed_race"].avoid).lower()
+    assert "slow units" in avoid
+    assert "magnifies speed gaps" in avoid
+    means = threats["speed_race"].means.lower()
+    assert "widens" in means
 
 
 def test_assist_clause_detected_with_wide_separation():

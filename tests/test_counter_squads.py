@@ -187,3 +187,29 @@ def test_squad_tool_index_respects_effect_direction():
     index = _tool_index(units, [TOOLS_BY_KEY["revive_block"]])
     assert "revive_block" not in index.get("MORGANELSBETH", set())
     assert "revive_block" in index.get("GRANDMOFFTARKIN", set())
+
+
+def test_speed_race_favours_faster_units():
+    """A flat speed penalty widens turn-order gaps, so the builder must weight
+    mod speed when the modifier is a speed race."""
+    from swgoh.models import Mod, SecondaryStat
+
+    def speedy(base_id: str, speed: float) -> Unit:
+        u = _unit(base_id, 7, 13, 5)
+        u.mods = [
+            Mod(slot=1, set_name="Speed", rarity=6, level=15, tier=5,
+                primary_name="Speed", primary_value=speed,
+                secondaries=[SecondaryStat("Speed", speed)])
+        ]
+        return u
+
+    # Same family, same investment; only mod speed differs.
+    fast = [speedy(b, 30.0) for b in ("MACEWINDU", "GRANDMASTERYODA", "HERMITYODA")]
+    slow = [speedy(b, 0.0) for b in ("JEDIKNIGHTREVAN", "AHSOKATANO", "EZRABRIDGERS3", "KANANJARRUSS3")]
+    player = Player(name="T", ally_code="1", units=fast + slow)
+
+    racing = build_counter_squads(player, TOOLS, threat_keys={"speed_race"}, limit=1)
+    assert racing
+    picked = {m.base_id for m in racing[0].members}
+    # At least two of the three fast units should make the cut.
+    assert len(picked & {u.base_id for u in fast}) >= 2

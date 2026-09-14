@@ -284,9 +284,19 @@ def build_counter_squads(
     invest = {u.base_id: _investment(u, max_power) for u in eligible}
     by_id = {u.base_id: u for u in eligible}
 
+    # Under a speed-race modifier, turn order decides the fight before kits do —
+    # a flat speed penalty widens the gap between fast and slow rather than
+    # closing it, so mod speed is worth weighting explicitly.
+    racing = "speed_race" in (threat_keys or set())
+    mod_speed = {u.base_id: sum(m.speed for m in u.mods) for u in eligible}
+    fastest = max(mod_speed.values(), default=0)
+
     def unit_value(base_id: str) -> float:
         """Standalone worth: how fieldable, plus how many needed tools it brings."""
-        return invest[base_id] + 0.12 * len(tools.get(base_id, set()))
+        value = invest[base_id] + 0.12 * len(tools.get(base_id, set()))
+        if racing and fastest:
+            value += 0.20 * (mod_speed.get(base_id, 0) / fastest)
+        return value
 
     leaders = sorted(
         (u for u in eligible if "Leader" in factions_of(u.base_id)),

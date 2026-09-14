@@ -116,6 +116,17 @@ TOOLS: tuple[Tool, ...] = (
         (r"Critical Chance Up", r"gain[s]? \d+% Critical Chance", r"guaranteed to critically hit"),
     ),
     Tool(
+        "tm_gain",
+        "Turn Meter gain / Speed Up",
+        "Moves you up the order without needing raw Speed — the way to act first when the rules slow everyone down.",
+        (
+            r"Speed Up",
+            r"all(?:y|ies)[^.]{0,40}gain \d+% Turn Meter",
+            r"gain[s]? \d+% Turn Meter",
+            r"\+\d+ Speed",
+        ),
+    ),
+    Tool(
         "crit_avoidance",
         "Critical Avoidance / crit denial",
         "Blunts crit-driven damage and any effect that triggers 'whenever they score a critical hit'.",
@@ -316,14 +327,17 @@ THREATS: tuple[Threat, ...] = (
             r"critical hit, gain \d+ Speed",
             r"gain \d+ Speed \(max",
         ),
-        "Everyone starts slowed and buys speed back by meeting the rule (usually landing crits). "
-        "Whoever satisfies it first takes over the fight — your mod speed barely matters.",
-        # You have to win the race, not just survive it: crit denial starves them,
-        # crit chance feeds you.
-        use=("crit_chance", "crit_avoidance", "tm_removal", "daze"),
+        "Everyone is slowed by a flat amount and buys speed back by meeting the rule (usually "
+        "landing crits). A flat penalty doesn't level the field — it widens it: subtracting 100 "
+        "from 350 and from 200 leaves the fast unit taking 2.5x the turns instead of 1.75x. "
+        "Whoever is fastest moves first, crits first, and accelerates away.",
+        # You have to win the race, not survive it: crit denial starves them, crit
+        # chance and turn-meter gain feed you, and speed is the entry fee.
+        use=("crit_chance", "tm_gain", "crit_avoidance", "tm_removal", "daze"),
         avoid=(
-            "Don't rely on your speed mods — the modifier flattens everyone to a fixed starting speed.",
-            "Don't bring low-crit-chance units; they never earn their speed back and are left taking one turn to the enemy's three.",
+            "Don't bring your slow units — a flat speed penalty magnifies speed gaps rather than closing them, "
+            "and the fastest side can take a full round before you move at all.",
+            "Don't bring low-crit-chance units; they never earn their speed back and end up taking one turn to the enemy's three.",
         ),
     ),
     Threat(
