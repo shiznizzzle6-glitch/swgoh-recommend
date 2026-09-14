@@ -30,7 +30,7 @@ from ..factions import factions_of
 from ..models import Player, Unit
 from ..names import display_name
 from ..ships import is_ship
-from ..stats import base_speed, mod_speed
+from ..stats import base_speed, base_stat, mod_speed, mod_stat
 from .counters import TOOLS_BY_KEY, Tool, _find, _sentences
 
 SQUAD_SIZE = 5
@@ -107,6 +107,8 @@ class SquadMember:
     investment: float
     base_speed: int | None = None  # None when the stats export doesn't cover it
     mod_speed: float = 0.0
+    # {stat: {'base': x|None, 'mods': y, 'total': z|None}} for the stats this fight wants
+    stat_values: dict = field(default_factory=dict)
     tools: list[str] = field(default_factory=list)  # tool labels this unit brings
     liabilities: list[str] = field(default_factory=list)
 
@@ -249,6 +251,7 @@ def _member(
     max_power: int,
     tools: dict[str, set[str]],
     liabilities: dict[str, list[str]],
+    stat_names: tuple[str, ...] = (),
 ) -> SquadMember:
     keys = tools.get(unit.base_id, set())
     return SquadMember(
@@ -262,6 +265,18 @@ def _member(
         investment=round(_investment(unit, max_power), 3),
         base_speed=base_speed(unit.base_id),
         mod_speed=mod_speed(unit),
+        stat_values={
+            name: {
+                "base": base_stat(unit.base_id, name),
+                "mods": mod_stat(unit, name),
+                "total": (
+                    None
+                    if base_stat(unit.base_id, name) is None
+                    else round(base_stat(unit.base_id, name) + mod_stat(unit, name), 2)
+                ),
+            }
+            for name in stat_names
+        },
         tools=sorted(TOOLS_BY_KEY[k].label for k in keys if k in TOOLS_BY_KEY),
         liabilities=list(liabilities.get(unit.base_id, [])),
     )
@@ -274,6 +289,7 @@ def build_counter_squads(
     min_relic: int = 0,
     limit: int = 3,
     leader_candidates: int = 12,
+    stat_names: tuple[str, ...] = (),
 ) -> list[CounterSquad]:
     """Assemble the best squads your roster can field against a set of threats."""
     needed = [TOOLS_BY_KEY[k] for k in dict.fromkeys(tool_keys) if k in TOOLS_BY_KEY]
@@ -368,7 +384,8 @@ def build_counter_squads(
             seen.add(key)
 
             members = [
-                _member(u, i == 0, max_power, tools, liabilities) for i, u in enumerate(picked)
+                _member(u, i == 0, max_power, tools, liabilities, stat_names)
+                for i, u in enumerate(picked)
             ]
             shared = ""
             shared_count = 0
@@ -413,41 +430,73 @@ def build_counter_squads(
 
 @dataclass
 class ModDonor:
-    """A speed mod sitting on a unit you aren't fielding."""
+    """A mod sitting on a unit you aren't fielding, carrying a stat you need."""
 
     owner_base_id: str
     owner_name: str
     owner_relic: int
     slot_name: str
     set_name: str
-    speed: float
-    is_speed_arrow: bool
+    stat: str
+    amount: float
+    is_primary: bool  # the stat is the mod's primary, not a secondary
+
+    @property
+    def speed(self) -> float:  # kept for callers that only care about Speed
+        return self.amount if self.stat == "Speed" else 0.0
+
+    @property
+    def is_speed_arrow(self) -> bool:
+        return self.stat == "Speed" and self.is_primary and self.slot_name == "Arrow"
 
     @property
     def label(self) -> str:
-        arrow = " (Speed arrow)" if self.is_speed_arrow else ""
-        return f"{self.slot_name}{arrow} · +{self.speed:g} Speed"
+        primary = f" ({self.stat} primary)" if self.is_primary else ""
+        return f"{self.slot_name}{primary} · +{self.amount:g} {self.stat}"
+
+
+# Below this, a mod isn't worth the swap for a given stat.
+MIN_DONOR = {"Speed": 10.0, "Potency": 8.0, "Tenacity": 8.0, "Critical Chance": 5.0}
+DEFAULT_MIN_DONOR = 100.0  # flat stats (Health/Protection) come in big numbers
+
+
+def _mod_contribution(mod, stat: str) -> tuple[float, bool]:
+    """How much of `stat` one mod carries, and whether it's the primary."""
+    from ..stats import MOD_STAT_ALIASES
+
+    amount = 0.0
+    is_primary = False
+    if MOD_STAT_ALIASES.get(mod.primary_name) == stat:
+        amount += mod.primary_value
+        is_primary = True
+    for sec in mod.secondaries:
+        if MOD_STAT_ALIASES.get(sec.name) == stat:
+            amount += sec.value
+    return amount, is_primary
 
 
 def find_mod_donors(
     player: Player,
     squad_ids: set[str],
+    stat: str = "Speed",
     limit: int = 8,
-    min_speed: float = 10.0,
+    min_amount: float | None = None,
 ) -> list[ModDonor]:
-    """Speed mods equipped on units outside the squad, best first.
+    """Mods carrying `stat`, equipped on units outside the squad, best first.
 
-    When turn order decides the fight, the fastest route to more Speed usually
-    isn't farming — it's moving mods you already own off units that aren't in
-    this fight. Donors are ranked by the Speed they'd free up, and units already
-    in the squad are excluded (moving a mod within the squad gains nothing).
+    When a modifier attacks or rewards a stat, the fastest fix usually isn't
+    farming — it's moving mods you already own off units that aren't in this
+    fight. Units already in the squad are excluded, since moving a mod within the
+    squad gains nothing.
     """
+    threshold = MIN_DONOR.get(stat, DEFAULT_MIN_DONOR) if min_amount is None else min_amount
     donors: list[ModDonor] = []
     for unit in player.units:
         if unit.base_id in squad_ids or is_ship(unit.base_id):
             continue
         for mod in unit.mods:
-            if mod.speed < min_speed:
+            amount, is_primary = _mod_contribution(mod, stat)
+            if amount < threshold:
                 continue
             donors.append(
                 ModDonor(
@@ -456,10 +505,11 @@ def find_mod_donors(
                     owner_relic=unit.relic_level,
                     slot_name=mod.slot_name,
                     set_name=mod.set_name,
-                    speed=mod.speed,
-                    is_speed_arrow=mod.slot == 2 and mod.primary_name == "Speed",
+                    stat=stat,
+                    amount=round(amount, 2),
+                    is_primary=is_primary,
                 )
             )
-    # Most Speed first; prefer taking from less-invested units on ties.
-    donors.sort(key=lambda d: (d.speed, -d.owner_relic), reverse=True)
+    # Biggest contribution first; prefer taking from less-invested owners on ties.
+    donors.sort(key=lambda d: (d.amount, -d.owner_relic), reverse=True)
     return donors[:limit]

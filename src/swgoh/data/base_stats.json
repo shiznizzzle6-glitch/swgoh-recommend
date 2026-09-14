@@ -1,0 +1,1403 @@
+{
+ "_meta": {
+  "source": "swgoh.gg roster export",
+  "units": 155
+ },
+ "stats": {
+  "ADMINISTRATORLANDO": {
+   "Health": 10057.0,
+   "Speed": 104.0,
+   "Armor": 17.81,
+   "Critical Chance": 25.5,
+   "Potency": 8.0,
+   "Tenacity": 24.0,
+   "Protection": 6980.0
+  },
+  "ADMIRALACKBAR": {
+   "Health": 19636.0,
+   "Speed": 119.0,
+   "Armor": 26.68,
+   "Critical Chance": 22.42,
+   "Potency": 26.0,
+   "Tenacity": 30.0,
+   "Protection": 31752.0
+  },
+  "AHSOKATANO": {
+   "Health": 10048.0,
+   "Speed": 93.0,
+   "Armor": 20.66,
+   "Critical Chance": 39.67,
+   "Potency": 0.0,
+   "Tenacity": 16.0,
+   "Protection": 6980.0
+  },
+  "ANAKINKNIGHT": {
+   "Health": 15375.0,
+   "Speed": 137.0,
+   "Armor": 21.34,
+   "Critical Chance": 26.0,
+   "Potency": 7.0,
+   "Tenacity": 25.0,
+   "Protection": 7051.0
+  },
+  "APPO": {
+   "Health": 6635.0,
+   "Speed": 105.0,
+   "Armor": 10.93,
+   "Critical Chance": 14.5,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "ARMORER": {
+   "Health": 23025.0,
+   "Speed": 166.0,
+   "Armor": 29.05,
+   "Critical Chance": 21.29,
+   "Potency": 20.0,
+   "Tenacity": 57.0,
+   "Protection": 48363.0
+  },
+  "ASAJVENTRESS": {
+   "Health": 43175.0,
+   "Speed": 124.0,
+   "Armor": 37.59,
+   "Critical Chance": 53.17,
+   "Potency": 43.0,
+   "Tenacity": 42.0,
+   "Protection": 36710.0
+  },
+  "B2SUPERBATTLEDROID": {
+   "Health": 600.0,
+   "Speed": 100.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.25,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "BADBATCHECHO": {
+   "Health": 16881.0,
+   "Speed": 178.0,
+   "Armor": 30.52,
+   "Critical Chance": 18.5,
+   "Potency": 43.0,
+   "Tenacity": 47.0,
+   "Protection": 34652.0
+  },
+  "BADBATCHHUNTER": {
+   "Health": 60275.0,
+   "Speed": 138.0,
+   "Armor": 49.06,
+   "Critical Chance": 70.17,
+   "Potency": 33.0,
+   "Tenacity": 36.0,
+   "Protection": 49527.0
+  },
+  "BADBATCHOMEGA": {
+   "Health": 10805.0,
+   "Speed": 109.0,
+   "Armor": 20.76,
+   "Critical Chance": 26.67,
+   "Potency": 6.0,
+   "Tenacity": 20.0,
+   "Protection": 11547.0
+  },
+  "BADBATCHTECH": {
+   "Health": 2171.0,
+   "Speed": 95.0,
+   "Armor": 6.01,
+   "Critical Chance": 11.79,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "BADBATCHWRECKER": {
+   "Health": 62876.0,
+   "Speed": 152.0,
+   "Armor": 57.63,
+   "Critical Chance": 43.96,
+   "Potency": 78.0,
+   "Tenacity": 68.0,
+   "Protection": 56915.0
+  },
+  "BASTILASHAN": {
+   "Health": 14099.0,
+   "Speed": 114.0,
+   "Armor": 19.35,
+   "Critical Chance": 22.62,
+   "Potency": 7.0,
+   "Tenacity": 22.0,
+   "Protection": 10928.0
+  },
+  "BAZEMALBUS": {
+   "Health": 16315.0,
+   "Speed": 90.0,
+   "Armor": 25.74,
+   "Critical Chance": 22.79,
+   "Potency": 28.0,
+   "Tenacity": 25.0,
+   "Protection": 9788.0
+  },
+  "BB8": {
+   "Health": 8508.0,
+   "Speed": 144.0,
+   "Armor": 15.73,
+   "Critical Chance": 17.71,
+   "Potency": 15.0,
+   "Tenacity": 20.0,
+   "Protection": 7607.0
+  },
+  "BIGGSDARKLIGHTER": {
+   "Health": 12758.0,
+   "Speed": 108.0,
+   "Armor": 19.96,
+   "Critical Chance": 32.67,
+   "Potency": 33.0,
+   "Tenacity": 25.0,
+   "Protection": 14309.0
+  },
+  "BISHOP": {
+   "Health": 25691.0,
+   "Speed": 142.0,
+   "Armor": 30.37,
+   "Critical Chance": 28.79,
+   "Potency": 49.0,
+   "Tenacity": 61.0,
+   "Protection": 59675.0
+  },
+  "BISTAN": {
+   "Health": 497.0,
+   "Speed": 100.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.38,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "BOBAFETT": {
+   "Health": 12389.0,
+   "Speed": 135.0,
+   "Armor": 22.21,
+   "Critical Chance": 33.58,
+   "Potency": 20.0,
+   "Tenacity": 29.0,
+   "Protection": 11125.0
+  },
+  "BOKATAN": {
+   "Health": 13891.0,
+   "Speed": 132.0,
+   "Armor": 24.06,
+   "Critical Chance": 30.0,
+   "Potency": 38.0,
+   "Tenacity": 47.0,
+   "Protection": 27920.0
+  },
+  "BOSSK": {
+   "Health": 22114.0,
+   "Speed": 151.0,
+   "Armor": 25.39,
+   "Critical Chance": 25.79,
+   "Potency": 28.0,
+   "Tenacity": 28.0,
+   "Protection": 30429.0
+  },
+  "CADBANE": {
+   "Health": 10383.0,
+   "Speed": 107.0,
+   "Armor": 18.84,
+   "Critical Chance": 31.42,
+   "Potency": 8.0,
+   "Tenacity": 21.0,
+   "Protection": 9317.0
+  },
+  "CALKESTIS": {
+   "Health": 47494.0,
+   "Speed": 153.0,
+   "Armor": 53.04,
+   "Critical Chance": 59.58,
+   "Potency": 27.0,
+   "Tenacity": 74.0,
+   "Protection": 57732.0
+  },
+  "CAPTAINREX": {
+   "Health": 12157.0,
+   "Speed": 135.0,
+   "Armor": 18.48,
+   "Critical Chance": 24.58,
+   "Potency": 3.0,
+   "Tenacity": 28.0,
+   "Protection": 12444.0
+  },
+  "CAPTAINTARPALS": {
+   "Health": 3539.0,
+   "Speed": 109.0,
+   "Armor": 6.53,
+   "Critical Chance": 14.25,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "CARADUNE": {
+   "Health": 29070.0,
+   "Speed": 157.0,
+   "Armor": 29.91,
+   "Critical Chance": 32.0,
+   "Potency": 31.0,
+   "Tenacity": 46.0,
+   "Protection": 48363.0
+  },
+  "CARSONTEVA": {
+   "Health": 25598.0,
+   "Speed": 159.0,
+   "Armor": 24.96,
+   "Critical Chance": 26.21,
+   "Potency": 27.0,
+   "Tenacity": 62.0,
+   "Protection": 30352.0
+  },
+  "CASSIANANDOR": {
+   "Health": 13932.0,
+   "Speed": 128.0,
+   "Armor": 17.97,
+   "Critical Chance": 24.88,
+   "Potency": 56.0,
+   "Tenacity": 26.0,
+   "Protection": 18150.0
+  },
+  "CC2224": {
+   "Health": 8250.0,
+   "Speed": 115.0,
+   "Armor": 15.49,
+   "Critical Chance": 23.04,
+   "Potency": 11.0,
+   "Tenacity": 20.0,
+   "Protection": 7052.0
+  },
+  "CEREJUNDA": {
+   "Health": 16633.0,
+   "Speed": 120.0,
+   "Armor": 24.24,
+   "Critical Chance": 27.04,
+   "Potency": 57.0,
+   "Tenacity": 31.0,
+   "Protection": 46186.0
+  },
+  "CHIEFCHIRPA": {
+   "Health": 16917.0,
+   "Speed": 116.0,
+   "Armor": 23.97,
+   "Critical Chance": 24.83,
+   "Potency": 30.0,
+   "Tenacity": 26.0,
+   "Protection": 30040.0
+  },
+  "CHIRRUTIMWE": {
+   "Health": 9396.0,
+   "Speed": 141.0,
+   "Armor": 16.33,
+   "Critical Chance": 29.29,
+   "Potency": 1.0,
+   "Tenacity": 21.0,
+   "Protection": 6217.0
+  },
+  "CHOPPERS3": {
+   "Health": 9764.0,
+   "Speed": 152.0,
+   "Armor": 20.21,
+   "Critical Chance": 23.71,
+   "Potency": 17.0,
+   "Tenacity": 24.0,
+   "Protection": 9395.0
+  },
+  "CLONESERGEANTPHASEI": {
+   "Health": 9879.0,
+   "Speed": 98.0,
+   "Armor": 19.79,
+   "Critical Chance": 24.58,
+   "Potency": 5.0,
+   "Tenacity": 21.0,
+   "Protection": 8019.0
+  },
+  "COMMANDERLUKESKYWALKER": {
+   "Health": 11556.0,
+   "Speed": 146.0,
+   "Armor": 19.96,
+   "Critical Chance": 34.25,
+   "Potency": 1.0,
+   "Tenacity": 19.0,
+   "Protection": 7527.0
+  },
+  "COUNTDOOKU": {
+   "Health": 12213.0,
+   "Speed": 161.0,
+   "Armor": 19.35,
+   "Critical Chance": 28.04,
+   "Potency": 75.0,
+   "Tenacity": 26.0,
+   "Protection": 12665.0
+  },
+  "CROSSHAIRS3": {
+   "Health": 3503.0,
+   "Speed": 105.0,
+   "Armor": 6.32,
+   "Critical Chance": 14.17,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "CT210408": {
+   "Health": 9850.0,
+   "Speed": 127.0,
+   "Armor": 13.92,
+   "Critical Chance": 18.13,
+   "Potency": 11.0,
+   "Tenacity": 23.0,
+   "Protection": 8648.0
+  },
+  "CT5555": {
+   "Health": 15303.0,
+   "Speed": 115.0,
+   "Armor": 29.66,
+   "Critical Chance": 20.38,
+   "Potency": 5.0,
+   "Tenacity": 26.0,
+   "Protection": 9896.0
+  },
+  "CT7567": {
+   "Health": 8470.0,
+   "Speed": 127.0,
+   "Armor": 15.01,
+   "Critical Chance": 23.04,
+   "Potency": 10.0,
+   "Tenacity": 22.0,
+   "Protection": 6247.0
+  },
+  "DAKA": {
+   "Health": 10679.0,
+   "Speed": 126.0,
+   "Armor": 16.08,
+   "Critical Chance": 18.13,
+   "Potency": 20.0,
+   "Tenacity": 21.0,
+   "Protection": 8456.0
+  },
+  "DARKTROOPER": {
+   "Health": 12921.0,
+   "Speed": 147.0,
+   "Armor": 18.26,
+   "Critical Chance": 19.62,
+   "Potency": 21.0,
+   "Tenacity": 22.0,
+   "Protection": 8765.0
+  },
+  "DARTHNIHILUS": {
+   "Health": 14841.0,
+   "Speed": 112.0,
+   "Armor": 15.97,
+   "Critical Chance": 16.54,
+   "Potency": 28.0,
+   "Tenacity": 25.0,
+   "Protection": 11222.0
+  },
+  "DARTHSIDIOUS": {
+   "Health": 8189.0,
+   "Speed": 142.0,
+   "Armor": 20.32,
+   "Critical Chance": 25.38,
+   "Potency": 0.0,
+   "Tenacity": 23.0,
+   "Protection": 7000.0
+  },
+  "DATHCHA": {
+   "Health": 513.0,
+   "Speed": 80.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.33,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "DEATHTROOPER": {
+   "Health": 13296.0,
+   "Speed": 112.0,
+   "Armor": 18.14,
+   "Critical Chance": 27.21,
+   "Potency": 33.0,
+   "Tenacity": 22.0,
+   "Protection": 8789.0
+  },
+  "DEATHTROOPERPERIDEA": {
+   "Health": 425.0,
+   "Speed": 105.0,
+   "Armor": 28.57,
+   "Critical Chance": 10.42,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "DENGAR": {
+   "Health": 17856.0,
+   "Speed": 103.0,
+   "Armor": 23.05,
+   "Critical Chance": 27.25,
+   "Potency": 11.0,
+   "Tenacity": 25.0,
+   "Protection": 13976.0
+  },
+  "DIRECTORKRENNIC": {
+   "Health": 10300.0,
+   "Speed": 129.0,
+   "Armor": 11.64,
+   "Critical Chance": 19.08,
+   "Potency": 39.0,
+   "Tenacity": 29.0,
+   "Protection": 7330.0
+  },
+  "EMPERORPALPATINE": {
+   "Health": 14633.0,
+   "Speed": 122.0,
+   "Armor": 16.5,
+   "Critical Chance": 19.08,
+   "Potency": 47.0,
+   "Tenacity": 31.0,
+   "Protection": 11750.0
+  },
+  "EPIXPOE": {
+   "Health": 56374.0,
+   "Speed": 174.0,
+   "Armor": 43.86,
+   "Critical Chance": 44.38,
+   "Potency": 49.0,
+   "Tenacity": 81.0,
+   "Protection": 29331.0
+  },
+  "EWOKELDER": {
+   "Health": 10377.0,
+   "Speed": 98.0,
+   "Armor": 16.83,
+   "Critical Chance": 20.04,
+   "Potency": 0.0,
+   "Tenacity": 18.0,
+   "Protection": 0.0
+  },
+  "EWOKSCOUT": {
+   "Health": 6541.0,
+   "Speed": 119.0,
+   "Armor": 13.79,
+   "Critical Chance": 21.46,
+   "Potency": 0.0,
+   "Tenacity": 17.0,
+   "Protection": 0.0
+  },
+  "EZRABRIDGERS3": {
+   "Health": 32714.0,
+   "Speed": 163.0,
+   "Armor": 41.38,
+   "Critical Chance": 49.38,
+   "Potency": 46.0,
+   "Tenacity": 50.0,
+   "Protection": 36160.0
+  },
+  "FIFTHBROTHER": {
+   "Health": 52057.0,
+   "Speed": 186.0,
+   "Armor": 44.4,
+   "Critical Chance": 29.75,
+   "Potency": 38.0,
+   "Tenacity": 56.0,
+   "Protection": 62219.0
+  },
+  "FINN": {
+   "Health": 14738.0,
+   "Speed": 107.0,
+   "Armor": 27.62,
+   "Critical Chance": 21.92,
+   "Potency": 1.0,
+   "Tenacity": 22.0,
+   "Protection": 9548.0
+  },
+  "FIRSTORDEREXECUTIONER": {
+   "Health": 20466.0,
+   "Speed": 111.0,
+   "Armor": 25.92,
+   "Critical Chance": 32.79,
+   "Potency": 33.0,
+   "Tenacity": 22.0,
+   "Protection": 34967.0
+  },
+  "FIRSTORDEROFFICERMALE": {
+   "Health": 9355.0,
+   "Speed": 137.0,
+   "Armor": 17.36,
+   "Critical Chance": 23.67,
+   "Potency": 15.0,
+   "Tenacity": 23.0,
+   "Protection": 8290.0
+  },
+  "FIRSTORDERTIEPILOT": {
+   "Health": 2385.0,
+   "Speed": 100.0,
+   "Armor": 4.49,
+   "Critical Chance": 13.17,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "FIRSTORDERTROOPER": {
+   "Health": 16936.0,
+   "Speed": 111.0,
+   "Armor": 26.47,
+   "Critical Chance": 18.96,
+   "Potency": 0.0,
+   "Tenacity": 27.0,
+   "Protection": 9825.0
+  },
+  "FOSITHTROOPER": {
+   "Health": 628.0,
+   "Speed": 80.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.25,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "FULCRUMAHSOKA": {
+   "Health": 42102.0,
+   "Speed": 168.0,
+   "Armor": 41.11,
+   "Critical Chance": 75.5,
+   "Potency": 38.0,
+   "Tenacity": 54.0,
+   "Protection": 39500.0
+  },
+  "GENERALHUX": {
+   "Health": 5701.0,
+   "Speed": 120.0,
+   "Armor": 9.12,
+   "Critical Chance": 15.08,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "GENERALSYNDULLA": {
+   "Health": 40211.0,
+   "Speed": 179.0,
+   "Armor": 48.19,
+   "Critical Chance": 31.75,
+   "Potency": 94.0,
+   "Tenacity": 79.0,
+   "Protection": 57732.0
+  },
+  "GEONOSIANBROODALPHA": {
+   "Health": 2513.0,
+   "Speed": 114.0,
+   "Armor": 81.01,
+   "Critical Chance": 11.79,
+   "Potency": 3.0,
+   "Tenacity": 19.0,
+   "Protection": 0.0
+  },
+  "GEONOSIANSOLDIER": {
+   "Health": 7785.0,
+   "Speed": 100.0,
+   "Armor": 13.91,
+   "Critical Chance": 20.5,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "GEONOSIANSPY": {
+   "Health": 8842.0,
+   "Speed": 121.0,
+   "Armor": 14.26,
+   "Critical Chance": 29.12,
+   "Potency": 12.0,
+   "Tenacity": 20.0,
+   "Protection": 4538.0
+  },
+  "GOPHERANTS": {
+   "Health": 24095.0,
+   "Speed": 123.0,
+   "Armor": 32.72,
+   "Critical Chance": 32.21,
+   "Potency": 48.0,
+   "Tenacity": 64.0,
+   "Protection": 45975.0
+  },
+  "GRANDADMIRALTHRAWN": {
+   "Health": 13799.0,
+   "Speed": 148.0,
+   "Armor": 17.9,
+   "Critical Chance": 19.17,
+   "Potency": 9.0,
+   "Tenacity": 23.0,
+   "Protection": 3551.0
+  },
+  "GRANDMASTERYODA": {
+   "Health": 17967.0,
+   "Speed": 157.0,
+   "Armor": 23.52,
+   "Critical Chance": 23.5,
+   "Potency": 41.0,
+   "Tenacity": 29.0,
+   "Protection": 16325.0
+  },
+  "GRANDMOFFTARKIN": {
+   "Health": 17936.0,
+   "Speed": 134.0,
+   "Armor": 25.74,
+   "Critical Chance": 23.17,
+   "Potency": 33.0,
+   "Tenacity": 31.0,
+   "Protection": 29935.0
+  },
+  "GREEDO": {
+   "Health": 8661.0,
+   "Speed": 122.0,
+   "Armor": 14.94,
+   "Critical Chance": 28.67,
+   "Potency": 18.0,
+   "Tenacity": 20.0,
+   "Protection": 7469.0
+  },
+  "GREEFKARGA": {
+   "Health": 19283.0,
+   "Speed": 134.0,
+   "Armor": 22.11,
+   "Critical Chance": 31.0,
+   "Potency": 3.0,
+   "Tenacity": 31.0,
+   "Protection": 27376.0
+  },
+  "GRIEVOUS": {
+   "Health": 64677.0,
+   "Speed": 129.0,
+   "Armor": 39.37,
+   "Critical Chance": 52.17,
+   "Potency": 31.0,
+   "Tenacity": 42.0,
+   "Protection": 48053.0
+  },
+  "HERASYNDULLAS3": {
+   "Health": 35154.0,
+   "Speed": 152.0,
+   "Armor": 39.37,
+   "Critical Chance": 24.33,
+   "Potency": 25.0,
+   "Tenacity": 58.0,
+   "Protection": 34153.0
+  },
+  "HERMITYODA": {
+   "Health": 4446.0,
+   "Speed": 105.0,
+   "Armor": 7.68,
+   "Critical Chance": 13.63,
+   "Potency": 0.0,
+   "Tenacity": 17.0,
+   "Protection": 0.0
+  },
+  "HOTHREBELSCOUT": {
+   "Health": 10068.0,
+   "Speed": 137.0,
+   "Armor": 17.01,
+   "Critical Chance": 22.5,
+   "Potency": 14.0,
+   "Tenacity": 24.0,
+   "Protection": 7308.0
+  },
+  "HOTHREBELSOLDIER": {
+   "Health": 12653.0,
+   "Speed": 98.0,
+   "Armor": 19.25,
+   "Critical Chance": 19.46,
+   "Potency": 12.0,
+   "Tenacity": 18.0,
+   "Protection": 10767.0
+  },
+  "IDENVERSIOEMPIRE": {
+   "Health": 47879.0,
+   "Speed": 155.0,
+   "Armor": 46.41,
+   "Critical Chance": 71.46,
+   "Potency": 50.0,
+   "Tenacity": 63.0,
+   "Protection": 57732.0
+  },
+  "IG11": {
+   "Health": 50785.0,
+   "Speed": 177.0,
+   "Armor": 50.1,
+   "Critical Chance": 30.87,
+   "Potency": 79.0,
+   "Tenacity": 57.0,
+   "Protection": 53271.0
+  },
+  "IG12": {
+   "Health": 26308.0,
+   "Speed": 151.0,
+   "Armor": 27.35,
+   "Critical Chance": 24.0,
+   "Potency": 39.0,
+   "Tenacity": 53.0,
+   "Protection": 43579.0
+  },
+  "IG86SENTINELDROID": {
+   "Health": 5745.0,
+   "Speed": 112.0,
+   "Armor": 14.7,
+   "Critical Chance": 22.08,
+   "Potency": 5.0,
+   "Tenacity": 19.0,
+   "Protection": 0.0
+  },
+  "IG88": {
+   "Health": 36412.0,
+   "Speed": 147.0,
+   "Armor": 31.27,
+   "Critical Chance": 56.54,
+   "Potency": 26.0,
+   "Tenacity": 45.0,
+   "Protection": 34991.0
+  },
+  "JANGOFETT": {
+   "Health": 39515.0,
+   "Speed": 178.0,
+   "Armor": 36.03,
+   "Critical Chance": 62.42,
+   "Potency": 59.0,
+   "Tenacity": 42.0,
+   "Protection": 38100.0
+  },
+  "JAWASCAVENGER": {
+   "Health": 480.0,
+   "Speed": 100.0,
+   "Armor": 28.57,
+   "Critical Chance": 10.25,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "JEDIKNIGHTCONSULAR": {
+   "Health": 6080.0,
+   "Speed": 85.0,
+   "Armor": 9.51,
+   "Critical Chance": 15.04,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "JYNERSO": {
+   "Health": 10738.0,
+   "Speed": 157.0,
+   "Armor": 17.15,
+   "Critical Chance": 27.29,
+   "Potency": 0.0,
+   "Tenacity": 28.0,
+   "Protection": 6447.0
+  },
+  "K2SO": {
+   "Health": 14571.0,
+   "Speed": 123.0,
+   "Armor": 19.38,
+   "Critical Chance": 19.54,
+   "Potency": 29.0,
+   "Tenacity": 21.0,
+   "Protection": 9546.0
+  },
+  "KANANJARRUSS3": {
+   "Health": 18327.0,
+   "Speed": 95.0,
+   "Armor": 27.02,
+   "Critical Chance": 28.96,
+   "Potency": 16.0,
+   "Tenacity": 20.0,
+   "Protection": 8900.0
+  },
+  "KIX": {
+   "Health": 451.0,
+   "Speed": 108.0,
+   "Armor": 28.57,
+   "Critical Chance": 10.29,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "KUIIL": {
+   "Health": 40290.0,
+   "Speed": 182.0,
+   "Armor": 29.91,
+   "Critical Chance": 21.62,
+   "Potency": 58.0,
+   "Tenacity": 64.0,
+   "Protection": 40000.0
+  },
+  "KYLOREN": {
+   "Health": 20300.0,
+   "Speed": 116.0,
+   "Armor": 24.78,
+   "Critical Chance": 27.12,
+   "Potency": 27.0,
+   "Tenacity": 21.0,
+   "Protection": 15832.0
+  },
+  "KYLORENUNMASKED": {
+   "Health": 19034.0,
+   "Speed": 126.0,
+   "Armor": 26.0,
+   "Critical Chance": 21.79,
+   "Potency": 27.0,
+   "Tenacity": 22.0,
+   "Protection": 9095.0
+  },
+  "LOGRAY": {
+   "Health": 585.0,
+   "Speed": 100.0,
+   "Armor": 28.57,
+   "Critical Chance": 10.25,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "LUKESKYWALKER": {
+   "Health": 34792.0,
+   "Speed": 145.0,
+   "Armor": 30.21,
+   "Critical Chance": 55.17,
+   "Potency": 50.0,
+   "Tenacity": 35.0,
+   "Protection": 36975.0
+  },
+  "LUMINARAUNDULI": {
+   "Health": 3637.0,
+   "Speed": 100.0,
+   "Armor": 10.93,
+   "Critical Chance": 14.71,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "MACEWINDU": {
+   "Health": 40936.0,
+   "Speed": 143.0,
+   "Armor": 36.97,
+   "Critical Chance": 27.42,
+   "Potency": 46.0,
+   "Tenacity": 47.0,
+   "Protection": 41509.0
+  },
+  "MAGMATROOPER": {
+   "Health": 5066.0,
+   "Speed": 100.0,
+   "Armor": 7.41,
+   "Critical Chance": 13.08,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "MAGNAGUARD": {
+   "Health": 629.0,
+   "Speed": 80.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.29,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "MAUL": {
+   "Health": 7841.0,
+   "Speed": 94.0,
+   "Armor": 18.26,
+   "Critical Chance": 34.75,
+   "Potency": 0.0,
+   "Tenacity": 16.0,
+   "Protection": 7825.0
+  },
+  "MERRIN": {
+   "Health": 3429.0,
+   "Speed": 100.0,
+   "Armor": 5.63,
+   "Critical Chance": 13.08,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "MOFFGIDEONS1": {
+   "Health": 7806.0,
+   "Speed": 148.0,
+   "Armor": 14.41,
+   "Critical Chance": 22.33,
+   "Potency": 3.0,
+   "Tenacity": 20.0,
+   "Protection": 9091.0
+  },
+  "MONMOTHMA": {
+   "Health": 21612.0,
+   "Speed": 91.0,
+   "Armor": 30.21,
+   "Critical Chance": 15.25,
+   "Potency": 38.0,
+   "Tenacity": 77.0,
+   "Protection": 35092.0
+  },
+  "MOTHERTALZIN": {
+   "Health": 16636.0,
+   "Speed": 116.0,
+   "Armor": 19.66,
+   "Critical Chance": 17.0,
+   "Potency": 45.0,
+   "Tenacity": 33.0,
+   "Protection": 14037.0
+  },
+  "NIGHTSISTERSPIRIT": {
+   "Health": 8109.0,
+   "Speed": 129.0,
+   "Armor": 15.49,
+   "Critical Chance": 24.88,
+   "Potency": 28.0,
+   "Tenacity": 24.0,
+   "Protection": 7152.0
+  },
+  "NIGHTSISTERZOMBIE": {
+   "Health": 4283.0,
+   "Speed": 80.0,
+   "Armor": 10.07,
+   "Critical Chance": 12.5,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "NUTEGUNRAY": {
+   "Health": 489.0,
+   "Speed": 100.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.42,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "OLDBENKENOBI": {
+   "Health": 25278.0,
+   "Speed": 118.0,
+   "Armor": 40.11,
+   "Critical Chance": 26.96,
+   "Potency": 25.0,
+   "Tenacity": 35.0,
+   "Protection": 35497.0
+  },
+  "OMEGAS3": {
+   "Health": 51739.0,
+   "Speed": 137.0,
+   "Armor": 49.82,
+   "Critical Chance": 36.75,
+   "Potency": 13.0,
+   "Tenacity": 123.0,
+   "Protection": 57469.0
+  },
+  "OPERATIVE": {
+   "Health": 425.0,
+   "Speed": 97.0,
+   "Armor": 28.57,
+   "Critical Chance": 10.42,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "PADAWANSABINE": {
+   "Health": 28403.0,
+   "Speed": 159.0,
+   "Armor": 42.8,
+   "Critical Chance": 40.83,
+   "Potency": 68.0,
+   "Tenacity": 40.0,
+   "Protection": 57469.0
+  },
+  "PAPLOO": {
+   "Health": 17015.0,
+   "Speed": 102.0,
+   "Armor": 25.22,
+   "Critical Chance": 23.17,
+   "Potency": 17.0,
+   "Tenacity": 25.0,
+   "Protection": 15379.0
+  },
+  "PHASMA": {
+   "Health": 16662.0,
+   "Speed": 115.0,
+   "Armor": 22.02,
+   "Critical Chance": 23.17,
+   "Potency": 28.0,
+   "Tenacity": 28.0,
+   "Protection": 8377.0
+  },
+  "PLOKOON": {
+   "Health": 582.0,
+   "Speed": 80.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.29,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "POE": {
+   "Health": 14761.0,
+   "Speed": 137.0,
+   "Armor": 22.96,
+   "Critical Chance": 25.96,
+   "Potency": 10.0,
+   "Tenacity": 25.0,
+   "Protection": 7739.0
+  },
+  "POGGLETHELESSER": {
+   "Health": 9153.0,
+   "Speed": 106.0,
+   "Armor": 13.21,
+   "Critical Chance": 17.67,
+   "Potency": 0.0,
+   "Tenacity": 16.0,
+   "Protection": 0.0
+  },
+  "PRINCESSLEIA": {
+   "Health": 37571.0,
+   "Speed": 184.0,
+   "Armor": 34.98,
+   "Critical Chance": 61.17,
+   "Potency": 49.0,
+   "Tenacity": 45.0,
+   "Protection": 37066.0
+  },
+  "QUIGONJINN": {
+   "Health": 9164.0,
+   "Speed": 137.0,
+   "Armor": 14.77,
+   "Critical Chance": 17.46,
+   "Potency": 30.0,
+   "Tenacity": 23.0,
+   "Protection": 6647.0
+  },
+  "R2D2_LEGENDARY": {
+   "Health": 17351.0,
+   "Speed": 145.0,
+   "Armor": 19.76,
+   "Critical Chance": 22.88,
+   "Potency": 33.0,
+   "Tenacity": 38.0,
+   "Protection": 16258.0
+  },
+  "R5D4": {
+   "Health": 29054.0,
+   "Speed": 170.0,
+   "Armor": 31.12,
+   "Critical Chance": 25.58,
+   "Potency": 40.0,
+   "Tenacity": 65.0,
+   "Protection": 46040.0
+  },
+  "RACCOON": {
+   "Health": 33689.0,
+   "Speed": 176.0,
+   "Armor": 33.35,
+   "Critical Chance": 30.21,
+   "Potency": 13.0,
+   "Tenacity": 53.0,
+   "Protection": 49775.0
+  },
+  "RANGERZEB": {
+   "Health": 28145.0,
+   "Speed": 160.0,
+   "Armor": 38.02,
+   "Critical Chance": 27.71,
+   "Potency": 40.0,
+   "Tenacity": 81.0,
+   "Protection": 49775.0
+  },
+  "REMNANTSNOWCOMMANDER": {
+   "Health": 35755.0,
+   "Speed": 133.0,
+   "Armor": 41.38,
+   "Critical Chance": 19.12,
+   "Potency": 49.0,
+   "Tenacity": 65.0,
+   "Protection": 49775.0
+  },
+  "RESISTANCEPILOT": {
+   "Health": 9186.0,
+   "Speed": 115.0,
+   "Armor": 20.21,
+   "Critical Chance": 27.46,
+   "Potency": 14.0,
+   "Tenacity": 18.0,
+   "Protection": 6938.0
+  },
+  "RESISTANCETROOPER": {
+   "Health": 8980.0,
+   "Speed": 121.0,
+   "Armor": 16.9,
+   "Critical Chance": 27.21,
+   "Potency": 10.0,
+   "Tenacity": 24.0,
+   "Protection": 7275.0
+  },
+  "REY": {
+   "Health": 10492.0,
+   "Speed": 143.0,
+   "Armor": 19.66,
+   "Critical Chance": 29.58,
+   "Potency": 5.0,
+   "Tenacity": 22.0,
+   "Protection": 6872.0
+  },
+  "ROSETICO": {
+   "Health": 520.0,
+   "Speed": 100.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.33,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "ROYALGUARD": {
+   "Health": 15598.0,
+   "Speed": 110.0,
+   "Armor": 21.57,
+   "Critical Chance": 19.42,
+   "Potency": 10.0,
+   "Tenacity": 27.0,
+   "Protection": 10812.0
+  },
+  "SABINEWRENS3": {
+   "Health": 36162.0,
+   "Speed": 171.0,
+   "Armor": 39.94,
+   "Critical Chance": 54.5,
+   "Potency": 42.0,
+   "Tenacity": 45.0,
+   "Protection": 35300.0
+  },
+  "SAWGERRERA": {
+   "Health": 51950.0,
+   "Speed": 181.0,
+   "Armor": 51.02,
+   "Critical Chance": 36.12,
+   "Potency": 50.0,
+   "Tenacity": 66.0,
+   "Protection": 48900.0
+  },
+  "SCARIFREBEL": {
+   "Health": 11632.0,
+   "Speed": 109.0,
+   "Armor": 24.7,
+   "Critical Chance": 16.42,
+   "Potency": 20.0,
+   "Tenacity": 29.0,
+   "Protection": 10450.0
+  },
+  "SEVENTHSISTER": {
+   "Health": 33618.0,
+   "Speed": 186.0,
+   "Armor": 43.31,
+   "Critical Chance": 43.71,
+   "Potency": 16.0,
+   "Tenacity": 54.0,
+   "Protection": 45975.0
+  },
+  "SHORETROOPER": {
+   "Health": 20742.0,
+   "Speed": 111.0,
+   "Armor": 25.57,
+   "Critical Chance": 19.71,
+   "Potency": 19.0,
+   "Tenacity": 25.0,
+   "Protection": 17322.0
+  },
+  "SITHTROOPER": {
+   "Health": 21819.0,
+   "Speed": 95.0,
+   "Armor": 24.6,
+   "Critical Chance": 24.71,
+   "Potency": 37.0,
+   "Tenacity": 31.0,
+   "Protection": 39372.0
+  },
+  "SMUGGLERCHEWBACCA": {
+   "Health": 18608.0,
+   "Speed": 96.0,
+   "Armor": 23.42,
+   "Critical Chance": 24.75,
+   "Potency": 22.0,
+   "Tenacity": 21.0,
+   "Protection": 15936.0
+  },
+  "SMUGGLERHAN": {
+   "Health": 11142.0,
+   "Speed": 139.0,
+   "Armor": 18.92,
+   "Critical Chance": 29.92,
+   "Potency": 9.0,
+   "Tenacity": 19.0,
+   "Protection": 7788.0
+  },
+  "SNOWTROOPER": {
+   "Health": 14265.0,
+   "Speed": 92.0,
+   "Armor": 19.35,
+   "Critical Chance": 25.83,
+   "Potency": 8.0,
+   "Tenacity": 22.0,
+   "Protection": 7413.0
+  },
+  "STORMTROOPER": {
+   "Health": 11264.0,
+   "Speed": 107.0,
+   "Armor": 17.01,
+   "Critical Chance": 23.79,
+   "Potency": 10.0,
+   "Tenacity": 20.0,
+   "Protection": 9668.0
+  },
+  "STORMTROOPERHAN": {
+   "Health": 20754.0,
+   "Speed": 126.0,
+   "Armor": 29.67,
+   "Critical Chance": 38.46,
+   "Potency": 26.0,
+   "Tenacity": 28.0,
+   "Protection": 36235.0
+  },
+  "SUNFAC": {
+   "Health": 20838.0,
+   "Speed": 109.0,
+   "Armor": 25.31,
+   "Critical Chance": 22.46,
+   "Potency": 26.0,
+   "Tenacity": 29.0,
+   "Protection": 21232.0
+  },
+  "TALIA": {
+   "Health": 10089.0,
+   "Speed": 103.0,
+   "Armor": 18.03,
+   "Critical Chance": 18.96,
+   "Potency": 29.0,
+   "Tenacity": 24.0,
+   "Protection": 7887.0
+  },
+  "TARFFUL": {
+   "Health": 20011.0,
+   "Speed": 169.0,
+   "Armor": 27.27,
+   "Critical Chance": 23.83,
+   "Potency": 28.0,
+   "Tenacity": 56.0,
+   "Protection": 49775.0
+  },
+  "TEEBO": {
+   "Health": 11933.0,
+   "Speed": 112.0,
+   "Armor": 16.5,
+   "Critical Chance": 20.46,
+   "Potency": 8.0,
+   "Tenacity": 21.0,
+   "Protection": 3736.0
+  },
+  "THEMANDALORIAN": {
+   "Health": 20963.0,
+   "Speed": 144.0,
+   "Armor": 27.6,
+   "Critical Chance": 37.17,
+   "Potency": 44.0,
+   "Tenacity": 38.0,
+   "Protection": 30480.0
+  },
+  "THEMANDALORIANBESKARARMOR": {
+   "Health": 35876.0,
+   "Speed": 138.0,
+   "Armor": 37.84,
+   "Critical Chance": 45.83,
+   "Potency": 28.0,
+   "Tenacity": 74.0,
+   "Protection": 41712.0
+  },
+  "TIEFIGHTERPILOT": {
+   "Health": 10589.0,
+   "Speed": 152.0,
+   "Armor": 19.15,
+   "Critical Chance": 31.13,
+   "Potency": 33.0,
+   "Tenacity": 28.0,
+   "Protection": 11891.0
+  },
+  "TUSKENRAIDER": {
+   "Health": 550.0,
+   "Speed": 100.0,
+   "Armor": 28.57,
+   "Critical Chance": 10.21,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "VADER": {
+   "Health": 26646.0,
+   "Speed": 121.0,
+   "Armor": 32.79,
+   "Critical Chance": 27.75,
+   "Potency": 31.0,
+   "Tenacity": 33.0,
+   "Protection": 39883.0
+  },
+  "VEERS": {
+   "Health": 9191.0,
+   "Speed": 119.0,
+   "Armor": 13.67,
+   "Critical Chance": 18.46,
+   "Potency": 16.0,
+   "Tenacity": 25.0,
+   "Protection": 7713.0
+  },
+  "WAMPA": {
+   "Health": 640.0,
+   "Speed": 100.0,
+   "Armor": 34.78,
+   "Critical Chance": 10.29,
+   "Potency": 0.0,
+   "Tenacity": 15.0,
+   "Protection": 0.0
+  },
+  "WEDGEANTILLES": {
+   "Health": 11004.0,
+   "Speed": 110.0,
+   "Armor": 17.26,
+   "Critical Chance": 31.0,
+   "Potency": 17.0,
+   "Tenacity": 24.0,
+   "Protection": 6107.0
+  },
+  "WICKET": {
+   "Health": 7697.0,
+   "Speed": 134.0,
+   "Armor": 13.79,
+   "Critical Chance": 30.5,
+   "Potency": 0.0,
+   "Tenacity": 23.0,
+   "Protection": 7747.0
+  },
+  "YOUNGHAN": {
+   "Health": 13360.0,
+   "Speed": 125.0,
+   "Armor": 20.36,
+   "Critical Chance": 33.67,
+   "Potency": 37.0,
+   "Tenacity": 24.0,
+   "Protection": 29407.0
+  },
+  "ZEBS3": {
+   "Health": 15941.0,
+   "Speed": 115.0,
+   "Armor": 26.51,
+   "Critical Chance": 28.25,
+   "Potency": 16.0,
+   "Tenacity": 21.0,
+   "Protection": 8288.0
+  }
+ }
+}

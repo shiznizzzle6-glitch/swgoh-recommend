@@ -218,6 +218,30 @@ TOOLS: tuple[Tool, ...] = (
 
 TOOLS_BY_KEY = {t.key: t for t in TOOLS}
 
+# Tools that work by landing a debuff. If the plan leans on these, Potency stops
+# being optional — an Ability Block that gets resisted is no counter at all.
+DEBUFF_TOOLS = frozenset(
+    {
+        "stun",
+        "daze",
+        "stagger",
+        "ability_block",
+        "buff_prevention",
+        "healing_immunity",
+        "tm_removal",
+        "offense_down",
+    }
+)
+
+
+@dataclass(frozen=True)
+class StatNeed:
+    """A stat the fight rewards or punishes — the half you fix with mods."""
+
+    stat: str  # one of swgoh.stats.TRACKED_STATS
+    direction: str  # "raise" | "avoid"
+    why: str
+
 
 @dataclass(frozen=True)
 class Threat:
@@ -229,6 +253,7 @@ class Threat:
     means: str  # plain-language reading of the mechanic
     use: tuple[str, ...] = ()  # tool keys that answer it
     avoid: tuple[str, ...] = ()  # tactics that backfire
+    stats: tuple[StatNeed, ...] = ()  # stat targets this mechanic implies
 
 
 THREATS: tuple[Threat, ...] = (
@@ -246,6 +271,9 @@ THREATS: tuple[Threat, ...] = (
             "Don't bring a debuff-stacking squad — each debuff you apply converts straight into their sustain.",
             "Don't rely on damage-over-time chip damage; it tops them up faster than it wears them down.",
         ),
+        stats=(
+            StatNeed("Potency", "avoid", "Landing more debuffs feeds their sustain, so Potency works against you."),
+        ),
     ),
     Threat(
         "debuff_reflect",
@@ -259,6 +287,10 @@ THREATS: tuple[Threat, ...] = (
         use=("cleanse", "tenacity_up", "instant_defeat"),
         avoid=(
             "Don't stack debuffs you wouldn't want on your own squad — that's exactly where they end up.",
+        ),
+        stats=(
+            StatNeed("Tenacity", "raise", "The debuffs come back at your team, so resisting them is worth real mod slots."),
+            StatNeed("Potency", "avoid", "Every debuff you land is one that gets thrown back at you."),
         ),
     ),
     Threat(
@@ -276,6 +308,9 @@ THREATS: tuple[Threat, ...] = (
         "Their crits are the trigger. Deny the crit and you deny whatever it sets off.",
         use=("crit_avoidance", "foresight", "taunt", "protection_up"),
         avoid=("Don't field squishy, low-Protection units in front — they turn every enemy crit into a snowball.",),
+        stats=(
+            StatNeed("Protection", "raise", "Their crits are the trigger; a bigger Protection pool absorbs the opening burst."),
+        ),
     ),
     Threat(
         "protection_drain",
@@ -284,6 +319,9 @@ THREATS: tuple[Threat, ...] = (
         "Percentage Protection loss ignores how tanky you are — big health pools don't save you.",
         use=("protection_up", "taunt", "instant_defeat"),
         avoid=("Don't plan on out-tanking it; percent-based drain scales with your own health bar.",),
+        stats=(
+            StatNeed("Health", "raise", "Percent Protection loss scales with your pool, so Health is what's left holding you up."),
+        ),
     ),
     Threat(
         "armor_shred",
@@ -317,6 +355,9 @@ THREATS: tuple[Threat, ...] = (
         "They get stronger every turn. The fight is on a timer you don't control.",
         use=("tm_removal", "stun", "ability_block", "daze"),
         avoid=("Don't let it go long — a defensive, stall-and-heal team loses to a stacking engine by design.",),
+        stats=(
+            StatNeed("Speed", "raise", "Acting first means fewer enemy turns, and fewer turns means fewer stacks."),
+        ),
     ),
     Threat(
         "speed_race",
@@ -338,6 +379,10 @@ THREATS: tuple[Threat, ...] = (
             "Don't bring your slow units — a flat speed penalty magnifies speed gaps rather than closing them, "
             "and the fastest side can take a full round before you move at all.",
             "Don't bring low-crit-chance units; they never earn their speed back and end up taking one turn to the enemy's three.",
+        ),
+        stats=(
+            StatNeed("Speed", "raise", "Turn order decides the fight, and a flat penalty widens the gap rather than closing it."),
+            StatNeed("Critical Chance", "raise", "Every critical hit buys 20 Speed back, up to +200."),
         ),
     ),
     Threat(
@@ -385,6 +430,9 @@ THREATS: tuple[Threat, ...] = (
         "Tenacity does nothing here — this lands regardless of your stats.",
         use=("cleanse", "foresight", "instant_defeat"),
         avoid=("Don't mod for Tenacity expecting to dodge this; it's explicitly unresistable.",),
+        stats=(
+            StatNeed("Tenacity", "avoid", "The effect can't be resisted, so Tenacity does nothing here — spend those mod slots elsewhere."),
+        ),
     ),
     Threat(
         "undispellable",
@@ -418,6 +466,10 @@ THREATS: tuple[Threat, ...] = (
         "raw health, healing and avoidance will.",
         use=("heal", "protection_up", "foresight"),
         avoid=("Don't rely on Defense Up or armour stacking; true damage goes straight through it.",),
+        stats=(
+            StatNeed("Health", "raise", "True damage ignores Armor, so raw Health is the only thing that absorbs it."),
+            StatNeed("Armor", "avoid", "Armor is bypassed entirely by true damage."),
+        ),
     ),
     Threat(
         "enemy_instant_defeat",
@@ -490,6 +542,7 @@ class CounterReport:
     modifiers: list[dict] = field(default_factory=list)  # name/scope/text per modifier
     donors: list = field(default_factory=list)  # list[ModDonor] — speed mods to move
     speed_matters: bool = False  # a speed-race modifier is in play
+    stat_needs: list[dict] = field(default_factory=list)  # stat targets, merged across threats
 
     @property
     def analysed(self) -> bool:
@@ -647,6 +700,53 @@ def detect_threats(text: str) -> list[tuple[Threat, str]]:
     return found
 
 
+
+def _merge_stat_needs(found: list[tuple[Threat, str]], tool_keys: list[str]) -> list[dict]:
+    """Collapse per-threat stat targets into one list, conflicts kept visible.
+
+    Two mechanics in the same fight can disagree — debuffs being reflected back
+    argues for Tenacity while an unresistable effect says Tenacity is wasted. The
+    honest answer is to show both reasons rather than silently pick a winner.
+
+    One target is derived rather than declared: if the plan's tools work by
+    landing debuffs, Potency is required — unless a mechanic has already said
+    debuffs backfire, in which case the plan is the thing that's wrong.
+    """
+    merged: dict[str, dict] = {}
+
+    def record(stat: str, direction: str, why: str) -> None:
+        entry = merged.setdefault(
+            stat, {"stat": stat, "directions": {}, "reasons": [], "conflict": False}
+        )
+        entry["directions"].setdefault(direction, []).append(why)
+        if why not in entry["reasons"]:
+            entry["reasons"].append(f"{'Raise' if direction == 'raise' else 'Avoid'}: {why}")
+
+    for threat, _ in found:
+        for need in threat.stats:
+            record(need.stat, need.direction, need.why)
+
+    avoids_potency = "avoid" in merged.get("Potency", {}).get("directions", {})
+    if not avoids_potency and any(k in DEBUFF_TOOLS for k in tool_keys):
+        record(
+            "Potency",
+            "raise",
+            "The counter-tools for this fight are debuffs, and a resisted debuff is no counter at all.",
+        )
+
+    out: list[dict] = []
+    for entry in merged.values():
+        directions = entry.pop("directions")
+        entry["conflict"] = len(directions) > 1
+        # With no conflict the direction is unambiguous; with one, say so.
+        entry["direction"] = "conflict" if entry["conflict"] else next(iter(directions))
+        out.append(entry)
+    # Raises first, then conflicts, then avoids — the order you act on them.
+    order = {"raise": 0, "conflict": 1, "avoid": 2}
+    out.sort(key=lambda e: order.get(e["direction"], 9))
+    return out
+
+
 def analyze_counters(
     player: Player,
     threat_text: str = "",
@@ -725,14 +825,26 @@ def analyze_counters(
             wanted[key] = wanted.get(key, 0) + 1
     ranked = [k for k, _ in sorted(wanted.items(), key=lambda kv: kv[1], reverse=True)]
     threat_keys = {s.key for s in report.steps}
+    report.stat_needs = _merge_stat_needs(detect_threats(report.threat_text), ranked)
+    # Stats the plan wants raised are the ones worth showing per unit.
+    wanted_stats = tuple(
+        n["stat"] for n in report.stat_needs if n["direction"] in ("raise", "conflict")
+    )
     report.squads = build_counter_squads(
-        player, ranked, threat_keys=threat_keys, min_relic=report.min_relic
+        player,
+        ranked,
+        threat_keys=threat_keys,
+        min_relic=report.min_relic,
+        stat_names=wanted_stats,
     )
 
-    # When turn order decides the fight, moving Speed mods off the bench is
-    # faster than farming, so surface the best donors for the top squad.
+    # Mods are the lever you can pull between battles, so for each stat the fight
+    # rewards, surface the best ones sitting on units outside the top squad.
     report.speed_matters = "speed_race" in threat_keys
-    if report.speed_matters and report.squads:
+    if report.squads and wanted_stats:
         squad_ids = {m.base_id for m in report.squads[0].members}
-        report.donors = find_mod_donors(player, squad_ids)
+        for stat in wanted_stats[:3]:
+            donors = find_mod_donors(player, squad_ids, stat=stat)
+            if donors:
+                report.donors.append({"stat": stat, "mods": donors})
     return report

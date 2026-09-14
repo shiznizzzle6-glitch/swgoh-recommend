@@ -327,3 +327,56 @@ def test_tool_bearers_list_each_unit_once():
     for tool in TOOLS:
         ids = [b.base_id for b in find_tool_bearers(player, tool)]
         assert len(ids) == len(set(ids)), tool.key
+
+
+# --- stat targets: the second axis of a counter ---
+def test_speed_race_asks_for_speed_and_crit_chance():
+    report = analyze_counters(_roster(), threat_text=PERILOUS_ESCAPE)
+    needs = {n["stat"]: n for n in report.stat_needs}
+    assert needs["Speed"]["direction"] == "raise"
+    assert needs["Critical Chance"]["direction"] == "raise"
+
+
+def test_unresistable_marks_tenacity_as_not_worth_modding():
+    report = analyze_counters(_roster(), threat_text="Inflict Armor Shred which can't be resisted.")
+    needs = {n["stat"]: n for n in report.stat_needs}
+    assert needs["Tenacity"]["direction"] == "avoid"
+
+
+def test_debuff_feeding_marks_potency_as_counterproductive():
+    report = analyze_counters(_roster(), threat_text=PIRATES_PLUNDER)
+    needs = {n["stat"]: n for n in report.stat_needs}
+    assert needs["Potency"]["direction"] == "avoid"
+
+
+def test_potency_is_derived_when_the_plan_relies_on_debuffs():
+    """Stun/Ability Block/TM removal have to beat Tenacity, so Potency matters —
+    even though no single mechanic asks for it by name."""
+    report = analyze_counters(_roster(), threat_text="At the start of battle, enemies gain 3 stacks of Fury (stacking, max 5).")
+    needs = {n["stat"]: n for n in report.stat_needs}
+    assert "Potency" in needs
+    assert needs["Potency"]["direction"] == "raise"
+    assert any("resisted debuff" in r for r in needs["Potency"]["reasons"])
+
+
+def test_derived_potency_is_suppressed_when_debuffs_backfire():
+    """Pirate's Plunder recommends debuff tools too, but debuffs feed it — the
+    stat advice must not contradict the warning."""
+    report = analyze_counters(_roster(), threat_text=PIRATES_PLUNDER)
+    potency = next(n for n in report.stat_needs if n["stat"] == "Potency")
+    assert potency["direction"] == "avoid"
+    assert not potency["conflict"]
+
+
+def test_conflicting_stat_advice_is_surfaced_not_hidden():
+    """Debuffs reflected back wants Tenacity; an unresistable effect says it's
+    useless. Both fire on Pirate's Plunder."""
+    report = analyze_counters(_roster(), threat_text=PIRATES_PLUNDER)
+    tenacity = next(n for n in report.stat_needs if n["stat"] == "Tenacity")
+    assert tenacity["conflict"] is True
+    assert tenacity["direction"] == "conflict"
+    assert len(tenacity["reasons"]) >= 2
+
+
+def test_no_threat_means_no_stat_targets():
+    assert analyze_counters(_roster()).stat_needs == []

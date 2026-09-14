@@ -284,3 +284,32 @@ def test_mod_donors_ignore_slow_mods():
                   primary_name="Offense", primary_value=5.88, secondaries=[])]
     player = Player(name="T", ally_code="1", units=[u])
     assert find_mod_donors(player, squad_ids=set()) == []
+
+
+def test_donors_found_for_any_stat_not_just_speed():
+    from swgoh.models import Mod, SecondaryStat
+    from swgoh.recommend.counter_squads import find_mod_donors
+
+    u = _unit("HERMITYODA", 7, 13, 5)
+    u.mods = [
+        Mod(slot=3, set_name="Potency", rarity=6, level=15, tier=5,
+            primary_name="Potency", primary_value=24.0,
+            secondaries=[SecondaryStat("Speed", 11.0)])
+    ]
+    player = Player(name="T", ally_code="1", units=[u])
+
+    potency = find_mod_donors(player, set(), stat="Potency")
+    assert potency and potency[0].amount == 24.0 and potency[0].is_primary
+
+    speed = find_mod_donors(player, set(), stat="Speed")
+    assert speed and speed[0].amount == 11.0 and not speed[0].is_primary
+
+
+def test_squad_members_carry_the_requested_stats():
+    squads = build_counter_squads(
+        _player(), TOOLS, stat_names=("Speed", "Potency"), limit=1
+    )
+    member = squads[0].members[0]
+    assert set(member.stat_values) == {"Speed", "Potency"}
+    for value in member.stat_values.values():
+        assert set(value) == {"base", "mods", "total"}

@@ -572,6 +572,7 @@ def api_counter(
                             "base_speed": m.base_speed,
                             "mod_speed": m.mod_speed,
                             "total_speed": m.total_speed,
+                            "stats": m.stat_values,
                             "tools": m.tools,
                             "liabilities": m.liabilities,
                         }
@@ -581,17 +582,25 @@ def api_counter(
                 for sq in report.squads
             ],
             "speed_matters": report.speed_matters,
+            "stat_needs": report.stat_needs,
             "donors": [
                 {
-                    "owner": d.owner_name,
-                    "owner_base_id": d.owner_base_id,
-                    "owner_relic": d.owner_relic,
-                    "slot": d.slot_name,
-                    "set": d.set_name,
-                    "speed": d.speed,
-                    "speed_arrow": d.is_speed_arrow,
+                    "stat": grp["stat"],
+                    "mods": [
+                        {
+                            "owner": d.owner_name,
+                            "owner_base_id": d.owner_base_id,
+                            "owner_relic": d.owner_relic,
+                            "slot": d.slot_name,
+                            "set": d.set_name,
+                            "stat": d.stat,
+                            "amount": d.amount,
+                            "is_primary": d.is_primary,
+                        }
+                        for d in grp["mods"]
+                    ],
                 }
-                for d in report.donors
+                for grp in report.donors
             ],
             "query": report.query,
             "matches": [bearer_json(b) for b in report.matches],
