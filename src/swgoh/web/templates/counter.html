@@ -67,7 +67,25 @@
   {% if report.analysed %}
     <h3 style="margin:1.4rem 0 .4rem">{{ report.source_label }}</h3>
     {% for tip in report.tips %}<p class="note" style="margin:.1rem 0">{{ tip }}</p>{% endfor %}
-    <div class="quote" style="white-space:pre-wrap">{{ report.threat_text }}</div>
+    {% if report.modifiers %}
+      {% for m in report.modifiers %}
+        <div class="quote">
+          <div style="display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.25rem">
+            <span style="font-weight:700">{{ m.name }}</span>
+            <span class="pill" {% if m.global %}style="color:var(--warn);border-color:rgba(255,176,32,.5)"{% endif %}>{{ m.scope }} modifier</span>
+          </div>
+          {{ m.text }}
+          {% if m.global %}
+            <div class="note" style="margin-top:.35rem">
+              Global — this rule applies to <strong>your</strong> team as well, so it's something to
+              exploit, not just survive.
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="quote" style="white-space:pre-wrap">{{ report.threat_text }}</div>
+    {% endif %}
 
     {% if report.avoid_all %}
       <div class="avoidbox">

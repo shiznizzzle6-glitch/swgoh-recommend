@@ -270,3 +270,43 @@ def test_tool_excludes_are_honoured_by_the_finder():
     tool = Tool("t", "T", "b", (r"can'?t be revived",), excludes=(r"allies",))
     assert _find(tool.patterns, _sentences("Enemies can't be revived."), tool.excludes)
     assert _find(tool.patterns, _sentences("Defeated allies can't be revived."), tool.excludes) is None
+
+
+# --- Trial 2: the speed race (a loss that exposed two catalogue gaps) ---
+PERILOUS_ESCAPE = (
+    "At the start of the encounter, all characters have -100 Speed; whenever a character "
+    "lands a critical hit, gain 20 Speed (max 200); whenever a character attacks out of "
+    "turn, apply Vulnerable for 1 turn"
+)
+THE_CODE = (
+    "Whenever a Mandalorian ally takes damage, all Mandalorian allies gain a stack of Clan "
+    "Loyalty, which can't be copied, dispelled, or prevented; allies with Clan Loyalty have "
+    "a 50% chance to assist when another ally attacks during an enemy's turn (limit once "
+    "per turn), dealing 95% less damage"
+)
+
+
+def test_speed_race_is_detected_and_wants_crits_not_just_crit_denial():
+    threats = {t.key: t for t, _ in detect_threats(PERILOUS_ESCAPE)}
+    assert "speed_race" in threats
+    # Landing crits is how you buy speed back, so offence is part of the answer.
+    assert "crit_chance" in threats["speed_race"].use
+    assert any("speed mod" in line.lower() for line in threats["speed_race"].avoid)
+
+
+def test_assist_clause_detected_with_wide_separation():
+    """'chance to assist when another ally attacks ... dealing' — the original
+    pattern capped the gap at 30 chars and missed it."""
+    assert "assist_chain" in _keys(THE_CODE)
+
+
+def test_counter_attack_threat_detected():
+    assert "counter_attack" in _keys("Clan Loyalty: +1% Max Protection and counter chance")
+
+
+def test_global_modifier_scope_is_preserved():
+    from swgoh.trials import modifier_entries
+
+    mods = {m["name"]: m for m in modifier_entries(trial(2))}
+    assert mods["Perilous Escape"]["global"] is True   # applies to both teams
+    assert mods["The Code"]["global"] is False         # enemy only

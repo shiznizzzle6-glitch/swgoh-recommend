@@ -32,7 +32,7 @@ from ..ability_text import abilities_of
 from ..models import Player
 from ..names import display_name
 from ..ships import is_ship
-from ..trials import modifier_text, trial, trial_label
+from ..trials import modifier_entries, modifier_text, trial, trial_label
 
 # Comlink reports skill tiers 2 below the in-game scale the zeta rules are
 # written against (validated in swgoh.recommend.zetas).
@@ -108,6 +108,12 @@ TOOLS: tuple[Tool, ...] = (
         "Healing Immunity",
         "Stops recovery. Essential against anything that heals itself back up faster than you burn it down.",
         (r"Healing Immunity",),
+    ),
+    Tool(
+        "crit_chance",
+        "Critical Chance / reliable crits",
+        "Lands crits on demand — which matters when the rules reward crits rather than punish them.",
+        (r"Critical Chance Up", r"gain[s]? \d+% Critical Chance", r"guaranteed to critically hit"),
     ),
     Tool(
         "crit_avoidance",
@@ -302,6 +308,34 @@ THREATS: tuple[Threat, ...] = (
         avoid=("Don't let it go long — a defensive, stall-and-heal team loses to a stacking engine by design.",),
     ),
     Threat(
+        "speed_race",
+        "Speed is earned during the fight, not brought to it",
+        (
+            r"all characters have -\d+ Speed",
+            r"-\d+ Speed;.{0,120}gain \d+ Speed",
+            r"critical hit, gain \d+ Speed",
+            r"gain \d+ Speed \(max",
+        ),
+        "Everyone starts slowed and buys speed back by meeting the rule (usually landing crits). "
+        "Whoever satisfies it first takes over the fight — your mod speed barely matters.",
+        # You have to win the race, not just survive it: crit denial starves them,
+        # crit chance feeds you.
+        use=("crit_chance", "crit_avoidance", "tm_removal", "daze"),
+        avoid=(
+            "Don't rely on your speed mods — the modifier flattens everyone to a fixed starting speed.",
+            "Don't bring low-crit-chance units; they never earn their speed back and are left taking one turn to the enemy's three.",
+        ),
+    ),
+    Threat(
+        "counter_attack",
+        "Counters and retaliates when attacked",
+        (r"counter chance", r"\bcounter[s]? attack", r"chance to counter"),
+        "Attacking into them gives them extra attacks, so the more times you swing, the more they "
+        "hit back.",
+        use=("stun", "ability_block", "daze", "instant_defeat"),
+        avoid=("Don't spam multi-hit basics into a counter-heavy team — you're handing them free turns.",),
+    ),
+    Threat(
         "turn_meter_gain",
         "Gains bonus Turn Meter",
         (r"gain[s]? \d+% Turn Meter", r"bonus Turn Meter"),
@@ -312,7 +346,12 @@ THREATS: tuple[Threat, ...] = (
     Threat(
         "assist_chain",
         "Calls assists",
-        (r"call[s]?[^.]{0,40}to assist", r"assist[s]?\b[^.]{0,30}dealing"),
+        (
+            r"call[s]?[^.]{0,40}to assist",
+            r"assist[s]?\b[^.]{0,80}dealing",
+            r"chance to assist",
+            r"assist when",
+        ),
         "One enemy turn becomes several attacks, multiplying damage and on-hit triggers.",
         use=("daze", "stun", "ability_block", "taunt"),
         avoid=(),
@@ -434,6 +473,7 @@ class CounterReport:
     matches: list[ToolBearer] = field(default_factory=list)
     squads: list = field(default_factory=list)  # list[CounterSquad]
     min_relic: int = 0
+    modifiers: list[dict] = field(default_factory=list)  # name/scope/text per modifier
 
     @property
     def analysed(self) -> bool:
@@ -596,6 +636,7 @@ def analyze_counters(
     source_label = "Pasted enemy text"
     tips: list[str] = []
     min_relic = 0
+    modifiers: list[dict] = []
     if trial_number is not None:
         t = trial(trial_number)
         if t is None:
@@ -604,6 +645,7 @@ def analyze_counters(
         source_label = trial_label(t)
         tips = list(t.get("tips", []))
         min_relic = int(t.get("min_relic") or 0)
+        modifiers = modifier_entries(t)
 
     report = CounterReport(
         player_name=player.name,
@@ -614,6 +656,7 @@ def analyze_counters(
         tips=tips,
         query=query.strip(),
         min_relic=min_relic,
+        modifiers=modifiers,
     )
     if report.query:
         report.matches = search_abilities(player, report.query)

@@ -43,3 +43,21 @@ def modifier_text(t: dict) -> str:
     parts = [f"{m['name']}: {m['text']}" for m in t.get("modifiers", [])]
     parts += [f"{e['name']}: {e['text']}" for e in t.get("effects", [])]
     return "\n\n".join(parts)
+
+
+def modifier_entries(t: dict) -> list[dict]:
+    """Modifiers with their scope kept intact.
+
+    Scope changes the strategy: a *Global* modifier applies to your team as well,
+    so its rule is something you can exploit rather than only endure. An *Enemy*
+    modifier only ever helps them.
+    """
+    return [
+        {
+            "name": m.get("name", ""),
+            "scope": m.get("scope", ""),
+            "text": m.get("text", ""),
+            "global": m.get("scope") == "Global",
+        }
+        for m in t.get("modifiers", [])
+    ]

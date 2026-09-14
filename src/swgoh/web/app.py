@@ -548,6 +548,7 @@ def api_counter(
                 for s in report.steps
             ],
             "min_relic": report.min_relic,
+            "modifiers": report.modifiers,
             "squads": [
                 {
                     "family": sq.family,
