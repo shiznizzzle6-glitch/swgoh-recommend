@@ -543,6 +543,8 @@ class CounterReport:
     donors: list = field(default_factory=list)  # list[ModDonor] — speed mods to move
     speed_matters: bool = False  # a speed-race modifier is in play
     stat_needs: list[dict] = field(default_factory=list)  # stat targets, merged across threats
+    squad_input: str = ""  # a squad you asked about, as typed
+    verdict: object | None = None  # SquadVerdict for that squad
 
     @property
     def analysed(self) -> bool:
@@ -752,6 +754,7 @@ def analyze_counters(
     threat_text: str = "",
     trial_number: int | None = None,
     query: str = "",
+    squad: str = "",
 ) -> CounterReport:
     """Build a counter plan for pasted enemy text or a Conquest trial."""
     source_label = "Pasted enemy text"
@@ -776,6 +779,7 @@ def analyze_counters(
         trial_number=trial_number,
         tips=tips,
         query=query.strip(),
+        squad_input=squad.strip(),
         min_relic=min_relic,
         modifiers=modifiers,
     )
@@ -847,4 +851,21 @@ def analyze_counters(
             donors = find_mod_donors(player, squad_ids, stat=stat)
             if donors:
                 report.donors.append({"stat": stat, "mods": donors})
+
+    # Score a squad the user named — a community list, or one they're considering.
+    if report.squad_input:
+        from .counter_squads import evaluate_squad
+
+        # Community lists are written "CLS/Han/Chewy/3PaC/3PO"; accept commas
+        # and newlines too so a pasted list works without reformatting.
+        names = [n.strip() for n in re.split(r"[/,\n]+", report.squad_input) if n.strip()]
+        if names:
+            report.verdict = evaluate_squad(
+                player,
+                names,
+                ranked,
+                threat_keys=threat_keys,
+                min_relic=report.min_relic,
+                stat_names=wanted_stats,
+            )
     return report

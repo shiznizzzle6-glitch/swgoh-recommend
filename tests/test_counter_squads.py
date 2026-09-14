@@ -313,3 +313,55 @@ def test_squad_members_carry_the_requested_stats():
     assert set(member.stat_values) == {"Speed", "Potency"}
     for value in member.stat_values.values():
         assert set(value) == {"base", "mods", "total"}
+
+
+# --- evaluating a squad someone else recommended ---
+def test_community_shorthand_resolves_to_units():
+    from swgoh.aliases import resolve, resolve_squad
+
+    assert resolve("CLS") == ["COMMANDERLUKESKYWALKER"]
+    assert resolve("3PaC") == ["C3POCHEWBACCA"]
+    assert resolve("Snips") == ["AHSOKATANO"]
+    assert resolve("not a unit at all") == []
+    # Squad context disambiguates: "Echo" is Bad Batch here, 501st elsewhere.
+    bad_batch = dict(resolve_squad(["Hunter", "Tech", "Echo"]))
+    assert bad_batch["Echo"] == "BADBATCHECHO"
+
+
+def test_evaluate_squad_reports_unowned_and_ineligible():
+    from swgoh.recommend.counter_squads import evaluate_squad
+
+    player = _player()  # Jedi + Rebels, no Sith
+    v = evaluate_squad(player, ["Mace Windu", "Darth Traya"], TOOLS, min_relic=0)
+    assert "Darth Traya" in v.not_owned
+    assert not v.fieldable
+
+    gated = evaluate_squad(player, ["Mace Windu", "Hermit Yoda"], TOOLS, min_relic=5)
+    assert any("Hermit Yoda" in x for x in gated.ineligible)  # fixture has him at R3
+    assert not gated.fieldable
+
+
+def test_evaluate_squad_scores_a_fieldable_squad():
+    from swgoh.recommend.counter_squads import evaluate_squad
+
+    v = evaluate_squad(
+        _player(),
+        ["Mace Windu", "Grand Master Yoda", "Jedi Knight Revan"],
+        ["dispel", "taunt"],
+        min_relic=5,
+        stat_names=("Speed",),
+    )
+    assert v.fieldable
+    assert v.squad is not None
+    assert v.squad.members[0].is_leader          # first name given leads
+    assert "Speed" in v.squad.members[0].stat_values
+    assert 0 <= v.squad.coverage <= 100
+
+
+def test_evaluate_squad_with_nothing_recognised():
+    from swgoh.recommend.counter_squads import evaluate_squad
+
+    v = evaluate_squad(_player(), ["zzzz", "qqqq"], TOOLS)
+    assert v.squad is None
+    assert len(v.unresolved) == 2
+    assert not v.fieldable

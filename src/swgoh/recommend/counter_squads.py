@@ -513,3 +513,89 @@ def find_mod_donors(
     # Biggest contribution first; prefer taking from less-invested owners on ties.
     donors.sort(key=lambda d: (d.amount, -d.owner_relic), reverse=True)
     return donors[:limit]
+
+
+@dataclass
+class SquadVerdict:
+    """What a squad you named would actually do in this fight."""
+
+    typed: list[str]
+    squad: CounterSquad | None
+    unresolved: list[str] = field(default_factory=list)  # names that matched nothing
+    not_owned: list[str] = field(default_factory=list)
+    ineligible: list[str] = field(default_factory=list)  # owned, but below the relic gate
+
+    @property
+    def fieldable(self) -> bool:
+        return self.squad is not None and not self.not_owned and not self.ineligible
+
+
+def evaluate_squad(
+    player: Player,
+    names: list[str],
+    tool_keys: list[str],
+    threat_keys: set[str] | None = None,
+    min_relic: int = 0,
+    stat_names: tuple[str, ...] = (),
+) -> SquadVerdict:
+    """Score a squad someone else recommended against your roster and this fight.
+
+    Community team lists are written for an average roster, not yours — so the
+    useful questions are whether you own it, whether it clears the entry
+    requirement, and what it actually covers. Units you don't own are reported
+    rather than silently dropped, because a squad missing two members isn't a
+    squad.
+    """
+    from ..aliases import resolve_squad
+
+    owned = {u.base_id: u for u in player.units}
+    resolved = resolve_squad(names, set(owned))
+
+    verdict = SquadVerdict(typed=list(names), squad=None)
+    units: list[Unit] = []
+    for typed, base_id in resolved:
+        if base_id is None:
+            verdict.unresolved.append(typed)
+            continue
+        unit = owned.get(base_id)
+        if unit is None:
+            verdict.not_owned.append(display_name(base_id))
+            continue
+        if unit.relic_level < min_relic:
+            verdict.ineligible.append(f"{display_name(base_id)} (R{unit.relic_level})")
+        units.append(unit)
+
+    if not units:
+        return verdict
+
+    needed = [TOOLS_BY_KEY[k] for k in dict.fromkeys(tool_keys) if k in TOOLS_BY_KEY]
+    tools = _tool_index(units, needed)
+    liabilities = _liability_index(units, threat_keys or set())
+    max_power = max((u.power for u in units), default=0)
+
+    # The first name given is the leader, as written.
+    members = [
+        _member(u, i == 0, max_power, tools, liabilities, stat_names)
+        for i, u in enumerate(units)
+    ]
+    covered: set[str] = set()
+    for u in units:
+        covered |= tools.get(u.base_id, set())
+
+    shared, shared_count = "", 0
+    for fam in _families(units[0].base_id):
+        count = sum(1 for u in units if fam in factions_of(u.base_id))
+        if count > shared_count:
+            shared, shared_count = fam, count
+
+    coverage = len(covered) / len(needed) if needed else 0.0
+    verdict.squad = CounterSquad(
+        members=members,
+        family=shared or "Mixed",
+        family_count=shared_count,
+        covered=sorted(TOOLS_BY_KEY[k].label for k in covered if k in TOOLS_BY_KEY),
+        missing=sorted(t.label for t in needed if t.key not in covered),
+        coverage=round(100 * coverage, 1),
+        score=round(100 * coverage, 1),
+    )
+    return verdict

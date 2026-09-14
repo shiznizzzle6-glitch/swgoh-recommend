@@ -122,10 +122,15 @@ class SwgohService:
         threat_text: str = "",
         trial_number: int | None = None,
         query: str = "",
+        squad: str = "",
     ) -> CounterReport:
         player = self.get_player(ally_code)
         return analyze_counters(
-            player, threat_text=threat_text, trial_number=trial_number, query=query
+            player,
+            threat_text=threat_text,
+            trial_number=trial_number,
+            query=query,
+            squad=squad,
         )
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:

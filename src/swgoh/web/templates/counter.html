@@ -55,6 +55,9 @@
     <label for="text">…or paste any enemy modifier / ability text</label>
     <textarea name="text" id="text" placeholder="e.g. Whenever a Pirate ally scores a critical hit, the enemy loses 10% Protection…">{% if not report.trial_number %}{{ report.threat_text }}{% endif %}</textarea>
 
+    <label for="squad">…or paste a squad to check (a community list, or one you're weighing up)</label>
+    <input type="text" name="squad" id="squad" value="{{ report.squad_input }}" placeholder="e.g. Hunter/Echo/Tech/Wrecker/Shaak — leader first">
+
     <label for="q">…or just search your roster's skills for a keyword</label>
     <input type="text" name="q" id="q" value="{{ report.query }}" placeholder="e.g. Buff Immunity, Daze, can't be revived">
 
@@ -92,6 +95,57 @@
         <div class="hd">⚠ What NOT to bring</div>
         <ul>{% for line in report.avoid_all %}<li>{{ line }}</li>{% endfor %}</ul>
       </div>
+    {% endif %}
+
+    {% if report.verdict %}
+      {% set v = report.verdict %}
+      <h3 style="margin:1.2rem 0 .3rem">That squad, against your roster</h3>
+      <article class="squad" style="border-color:{% if v.fieldable %}rgba(70,209,158,.5){% else %}rgba(255,107,107,.45){% endif %}">
+        <div class="top">
+          <span class="nm">{{ v.typed|join(' / ') }}</span>
+          {% if v.fieldable %}
+            <span class="st Ready">You can field this</span>
+          {% else %}
+            <span class="st Build">Can't field it yet</span>
+          {% endif %}
+          {% if v.squad %}<span class="tag">{{ v.squad.coverage }}% of needed tools</span>{% endif %}
+        </div>
+        {% if v.not_owned %}
+          <p class="note" style="margin:.3rem 0">You don't own: <strong>{{ v.not_owned|join(', ') }}</strong>.</p>
+        {% endif %}
+        {% if v.ineligible %}
+          <p class="note" style="margin:.3rem 0">
+            Below the trial's Relic {{ report.min_relic }} gate: <strong>{{ v.ineligible|join(', ') }}</strong>.
+          </p>
+        {% endif %}
+        {% if v.unresolved %}
+          <p class="note" style="margin:.3rem 0">Couldn't identify: {{ v.unresolved|join(', ') }}.</p>
+        {% endif %}
+        {% if v.squad %}
+          {% for m in v.squad.members %}
+            <div class="bearer">
+              {% if m.is_leader %}<span class="pill" style="color:var(--accent);border-color:rgba(255,213,74,.5)">Leader</span>{% endif %}
+              <span class="who">{{ m.unit_name }}</span>
+              <span class="gear">{{ m.gear_label }} · {{ m.stars }}★</span>
+              {% for stat, sv in m.stat_values.items() %}
+                <span class="gear" {% if sv.total is none %}style="opacity:.65"{% endif %}>
+                  {{ stat }}{% if sv.total is not none %} {{ '%g' % sv.total }}{% else %} ?{% endif %}
+                </span>
+              {% endfor %}
+              <span class="txt">{{ m.tools|join(' · ') or 'no counter tool' }}</span>
+            </div>
+          {% endfor %}
+          {% if v.squad.missing %}
+            <p class="note" style="margin:.5rem 0 0">Doesn't cover: {{ v.squad.missing|join(', ') }}.</p>
+          {% endif %}
+          {% if v.squad.warnings %}
+            <div class="avoidbox" style="margin:.6rem 0 0;padding:.6rem .8rem">
+              <div class="hd" style="font-size:.9rem">⚠ Watch out</div>
+              <ul>{% for w in v.squad.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+            </div>
+          {% endif %}
+        {% endif %}
+      </article>
     {% endif %}
 
     {% if report.stat_needs %}

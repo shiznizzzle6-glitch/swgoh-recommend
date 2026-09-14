@@ -473,6 +473,7 @@ def counter(
     trial: int | None = Query(default=None),
     text: str = Query(default=""),
     q: str = Query(default=""),
+    squad: str = Query(default=""),
 ) -> HTMLResponse:
     settings = get_settings()
     code = ally_code or settings.ally_code
@@ -482,7 +483,7 @@ def counter(
         )
     try:
         report = _service().counter_report(
-            code, threat_text=text, trial_number=trial, query=q
+            code, threat_text=text, trial_number=trial, query=q, squad=squad
         )
     except Exception as exc:
         return templates.TemplateResponse(
@@ -502,8 +503,11 @@ def api_counter(
     trial: int | None = Query(default=None),
     text: str = Query(default=""),
     q: str = Query(default=""),
+    squad: str = Query(default=""),
 ) -> JSONResponse:
-    report = _service().counter_report(ally_code, threat_text=text, trial_number=trial, query=q)
+    report = _service().counter_report(
+        ally_code, threat_text=text, trial_number=trial, query=q, squad=squad
+    )
 
     def bearer_json(b):
         return {
@@ -583,6 +587,27 @@ def api_counter(
             ],
             "speed_matters": report.speed_matters,
             "stat_needs": report.stat_needs,
+            "verdict": None if report.verdict is None else {
+                "typed": report.verdict.typed,
+                "fieldable": report.verdict.fieldable,
+                "unresolved": report.verdict.unresolved,
+                "not_owned": report.verdict.not_owned,
+                "ineligible": report.verdict.ineligible,
+                "coverage": None if report.verdict.squad is None else report.verdict.squad.coverage,
+                "missing_tools": [] if report.verdict.squad is None else report.verdict.squad.missing,
+                "members": [] if report.verdict.squad is None else [
+                    {
+                        "name": m.unit_name,
+                        "leader": m.is_leader,
+                        "gear": m.gear_label,
+                        "stars": m.stars,
+                        "stats": m.stat_values,
+                        "tools": m.tools,
+                        "liabilities": m.liabilities,
+                    }
+                    for m in report.verdict.squad.members
+                ],
+            },
             "donors": [
                 {
                     "stat": grp["stat"],
