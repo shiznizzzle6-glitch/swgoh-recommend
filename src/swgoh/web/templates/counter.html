@@ -76,6 +76,48 @@
       </div>
     {% endif %}
 
+    {% if report.squads %}
+      <h3 style="margin:1.2rem 0 .3rem">Squads to bring ({{ report.squads|length }})</h3>
+      <p class="note" style="margin:0 0 .8rem">
+        Built from your roster: leaders in the leader slot, grouped by faction so kits
+        support each other, ranked on tool coverage, how invested each unit is, and squad synergy.
+        {% if report.min_relic %}Filtered to the trial's Relic {{ report.min_relic }}+ requirement.{% endif %}
+      </p>
+      {% for sq in report.squads %}
+        <article class="squad">
+          <div class="top">
+            <span class="nm">{{ sq.synergy_label }}</span>
+            <span class="tag">{{ sq.coverage }}% of needed tools</span>
+            {% if sq.power %}<span class="tag">{{ '{:,}'.format(sq.power) }} GP</span>{% endif %}
+            <span class="spacer"></span>
+            <span class="score">{{ sq.score }}</span>
+          </div>
+          <div class="bar"><i style="width:{{ sq.coverage }}%"></i></div>
+          {% for m in sq.members %}
+            <div class="bearer">
+              {% if m.is_leader %}<span class="pill" style="color:var(--accent);border-color:rgba(255,213,74,.5)">Leader</span>{% endif %}
+              <span class="who">{{ m.unit_name }}</span>
+              <span class="gear">{{ m.gear_label }} · {{ m.stars }}★</span>
+              <span class="txt">
+                {% if m.tools %}{{ m.tools|join(' · ') }}{% else %}<em>no counter tool — included for synergy/investment</em>{% endif %}
+              </span>
+            </div>
+          {% endfor %}
+          {% if sq.missing %}
+            <p class="note" style="margin:.5rem 0 0">
+              Not covered by this squad: {{ sq.missing|join(', ') }}.
+            </p>
+          {% endif %}
+          {% if sq.warnings %}
+            <div class="avoidbox" style="margin:.6rem 0 0;padding:.6rem .8rem">
+              <div class="hd" style="font-size:.9rem">⚠ Watch out</div>
+              <ul>{% for w in sq.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% endif %}
+
     {% if report.steps %}
       <h3 style="margin:1.2rem 0 .6rem">What it's doing, and what breaks it ({{ report.steps|length }})</h3>
       {% for step in report.steps %}

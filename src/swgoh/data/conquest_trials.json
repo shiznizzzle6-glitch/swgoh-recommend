@@ -6,6 +6,10 @@
   "tips": [
    "Face off against Moff Gideon and a team of Imperial Troopers"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -36,6 +40,10 @@
   "tips": [
    "Face off against Maul and a team of Mandalorians"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -63,6 +71,10 @@
    "Face off against all the members of the Phoenix Squadron",
    "Phoenix Squadron enemies are immune to Fear, and Max Health and Max Protection decreases"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -93,6 +105,10 @@
   "tips": [
    "Face off against Cad Bane and other legendary Bounty Hunters"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -119,6 +135,10 @@
   "tips": [
    "Face off against the Grand Inquisitor and other relentless Inquisitors"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -145,6 +165,10 @@
   "tips": [
    "Face off against Darth Malgus on Takodana"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -171,6 +195,10 @@
   "tips": [
    "Face off against the Ben Solo, Rey, and her allies, in the ruins of the Death Star on Kef Bir"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -197,6 +225,10 @@
   "tips": [
    "Earn Scythe shards by fighting Grand Inquisitor and his allies, in the busy streets of Lothal"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -227,6 +259,10 @@
   "tips": [
    "Earn Admiral Trench shards by fighting against Admiral Trench and his Separatist allies on the gas giant of Bespin"
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -253,6 +289,10 @@
   "tips": [
    "Earn Fury-class Interceptor shards by fighting against Darth Malgus and his Sith allies deep within the Crystal Caves of Ilum."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -283,6 +323,10 @@
   "tips": [
    "Earn Taron Malicos shards by fighting against Taron and his Unaligned Force User allies in this epic battle on Dathomir."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -304,6 +348,10 @@
   "tips": [
    "Earn Dark Trooper Moff Gideon shards by fighting against Dark Trooper Moff Gideon and his powerful Imperial Remnant allies in this epic battle on Mandalore."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -330,6 +378,10 @@
   "tips": [
    "Earn Darth Bane shards by fighting against Darth Bane and his powerful Sith allies in this epic battle on Takodana."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -356,6 +408,10 @@
   "tips": [
    "Earn Queen Amidala shards by fighting against Queen Amidala and her powerful Galactic Republic allies in this epic battle on Naboo."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -382,6 +438,10 @@
   "tips": [
    "Earn Luthen Rael shards by fighting against Luthen Rael and his powerful Rebel allies in this epic battle on Coruscant."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Global",
@@ -416,6 +476,10 @@
   "tips": [
    "Earn Ezra Bridger (Exile) shards by fighting against the Imperial Remnants in this epic battle on Peridea."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Enemy",
@@ -432,6 +496,10 @@
   "tips": [
    "Earn Rey (Dark Side Vision) shards by fighting against the Supreme Leader Kylo Ren in this epic battle on Crait."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Enemy",
@@ -448,6 +516,10 @@
   "tips": [
    "Earn Jocasta Nu shards by fighting against Jedi Master Mace Windu in this epic battle on Coruscant."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Enemy",
@@ -464,6 +536,10 @@
   "tips": [
    "Earn SM-33 shards by fighting against Pirate King Hondo Ohnaka in this epic battle on Takodana."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Enemy",
@@ -480,6 +556,10 @@
   "tips": [
    "Earn Maz Kanata shards by fighting against Maz Kanata and her Outer Rim Pirate allies in this epic battle on Takodana."
   ],
+  "requirements": [
+   "Relic 3+ Characters"
+  ],
+  "min_relic": 3,
   "modifiers": [
    {
     "scope": "Enemy",

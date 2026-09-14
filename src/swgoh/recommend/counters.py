@@ -420,6 +420,8 @@ class CounterReport:
     tips: list[str] = field(default_factory=list)
     query: str = ""  # free-text ability search
     matches: list[ToolBearer] = field(default_factory=list)
+    squads: list = field(default_factory=list)  # list[CounterSquad]
+    min_relic: int = 0
 
     @property
     def analysed(self) -> bool:
@@ -571,6 +573,7 @@ def analyze_counters(
     """Build a counter plan for pasted enemy text or a Conquest trial."""
     source_label = "Pasted enemy text"
     tips: list[str] = []
+    min_relic = 0
     if trial_number is not None:
         t = trial(trial_number)
         if t is None:
@@ -578,6 +581,7 @@ def analyze_counters(
         threat_text = modifier_text(t)
         source_label = trial_label(t)
         tips = list(t.get("tips", []))
+        min_relic = int(t.get("min_relic") or 0)
 
     report = CounterReport(
         player_name=player.name,
@@ -587,6 +591,7 @@ def analyze_counters(
         trial_number=trial_number,
         tips=tips,
         query=query.strip(),
+        min_relic=min_relic,
     )
     if report.query:
         report.matches = search_abilities(player, report.query)
@@ -623,4 +628,20 @@ def analyze_counters(
                 avoid=list(threat.avoid),
             )
         )
+
+    # Assemble squads from the tools the detected threats actually call for,
+    # ordered so the most-wanted tool leads.
+    from .counter_squads import build_counter_squads
+
+    wanted: dict[str, int] = {}
+    for threat, _ in detect_threats(report.threat_text):
+        for key in threat.use:
+            wanted[key] = wanted.get(key, 0) + 1
+    ranked = [k for k, _ in sorted(wanted.items(), key=lambda kv: kv[1], reverse=True)]
+    report.squads = build_counter_squads(
+        player,
+        ranked,
+        threat_keys={s.key for s in report.steps},
+        min_relic=report.min_relic,
+    )
     return report

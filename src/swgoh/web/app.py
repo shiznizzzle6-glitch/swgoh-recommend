@@ -547,6 +547,35 @@ def api_counter(
                 }
                 for s in report.steps
             ],
+            "min_relic": report.min_relic,
+            "squads": [
+                {
+                    "family": sq.family,
+                    "synergy": sq.synergy_label,
+                    "score": sq.score,
+                    "coverage": sq.coverage,
+                    "power": sq.power,
+                    "covered": sq.covered,
+                    "missing": sq.missing,
+                    "warnings": sq.warnings,
+                    "members": [
+                        {
+                            "base_id": m.base_id,
+                            "name": m.unit_name,
+                            "leader": m.is_leader,
+                            "stars": m.stars,
+                            "gear_level": m.gear_level,
+                            "relic_level": m.relic_level,
+                            "power": m.power,
+                            "investment": m.investment,
+                            "tools": m.tools,
+                            "liabilities": m.liabilities,
+                        }
+                        for m in sq.members
+                    ],
+                }
+                for sq in report.squads
+            ],
             "query": report.query,
             "matches": [bearer_json(b) for b in report.matches],
         }

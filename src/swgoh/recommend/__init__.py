@@ -1,6 +1,7 @@
 """Recommendation engines."""
 from __future__ import annotations
 
+from .counter_squads import CounterSquad, SquadMember, build_counter_squads
 from .counters import (
     CounterReport,
     CounterStep,
@@ -77,4 +78,7 @@ __all__ = [
     "ToolBearer",
     "analyze_counters",
     "search_abilities",
+    "CounterSquad",
+    "SquadMember",
+    "build_counter_squads",
 ]

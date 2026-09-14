@@ -106,6 +106,18 @@ def fetch_localization(retries: int = 3) -> bytes:
     raise RuntimeError("unreachable")
 
 
+RELIC_RE = re.compile(r"Relic (\d+)\+", re.I)
+
+
+def min_relic(requirements: list[str]) -> int:
+    """Trials gate entry on relic level ("Relic 3+ Characters"); 0 means no gate."""
+    for line in requirements:
+        m = RELIC_RE.search(line)
+        if m:
+            return int(m.group(1))
+    return 0
+
+
 def tidy_opponent(name: str) -> str:
     """Trim the prose around an opponent so it reads as a name in a menu."""
     name = " ".join(name.split()).strip()
@@ -118,9 +130,17 @@ def parse_trial(number: int, raw: str) -> dict:
     blocks = [b.strip() for b in text.split("\n\n") if b.strip()]
 
     tips: list[str] = []
+    requirements: list[str] = []
     modifiers: list[dict] = []
     effects: list[dict] = []
     for block in blocks:
+        if block.startswith("Required:"):
+            requirements = [
+                line.lstrip("- ").strip()
+                for line in block.splitlines()[1:]
+                if line.strip().lstrip("- ")
+            ]
+            continue
         if block.startswith("Strategy Tips:"):
             tips = [
                 line.lstrip("- ").strip()
@@ -150,6 +170,8 @@ def parse_trial(number: int, raw: str) -> dict:
         "reward_unit": reward.group(1).strip() if reward else "",
         "opponent": tidy_opponent(opponent.group(1)) if opponent else "",
         "tips": tips,
+        "requirements": requirements,
+        "min_relic": min_relic(requirements),
         "modifiers": modifiers,
         "effects": effects,
     }
