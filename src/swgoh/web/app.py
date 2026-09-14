@@ -8,7 +8,9 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from ..config import get_settings
+from ..recommend.counters import TOOLS
 from ..service import SwgohService
+from ..trials import trial_label, trials
 from .charts import rank_trend_svg
 
 _HERE = Path(__file__).parent
@@ -461,6 +463,100 @@ def api_energy(ally_code: str | None = Query(default=None)) -> JSONResponse:
             "other": [t_json(t) for t in report.other],
             "unmapped": [t_json(t) for t in report.unmapped],
         }
+    )
+
+
+@app.get("/counter", response_class=HTMLResponse)
+def counter(
+    request: Request,
+    ally_code: str | None = Query(default=None),
+    trial: int | None = Query(default=None),
+    text: str = Query(default=""),
+    q: str = Query(default=""),
+) -> HTMLResponse:
+    settings = get_settings()
+    code = ally_code or settings.ally_code
+    if not code:
+        return templates.TemplateResponse(
+            request, "setup.html", {"data_source": settings.data_source}
+        )
+    try:
+        report = _service().counter_report(
+            code, threat_text=text, trial_number=trial, query=q
+        )
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request, "error.html", {"ally_code": code, "error": str(exc)}, status_code=502
+        )
+    menu = [{"number": t["number"], "label": trial_label(t)} for t in trials()]
+    return templates.TemplateResponse(
+        request,
+        "counter.html",
+        {"report": report, "ally_code": code, "trials": menu, "tools": TOOLS},
+    )
+
+
+@app.get("/api/counter")
+def api_counter(
+    ally_code: str | None = Query(default=None),
+    trial: int | None = Query(default=None),
+    text: str = Query(default=""),
+    q: str = Query(default=""),
+) -> JSONResponse:
+    report = _service().counter_report(ally_code, threat_text=text, trial_number=trial, query=q)
+
+    def bearer_json(b):
+        return {
+            "base_id": b.base_id,
+            "name": b.unit_name,
+            "ability": b.ability_name,
+            "kind": b.ability_kind,
+            "quote": b.quote,
+            "stars": b.stars,
+            "gear_level": b.gear_level,
+            "relic_level": b.relic_level,
+            "needs_zeta": b.needs_zeta,
+            "needs_omicron": b.needs_omicron,
+        }
+
+    return JSONResponse(
+        {
+            "player": report.player_name,
+            "ally_code": report.ally_code,
+            "source": report.source_label,
+            "trial": report.trial_number,
+            "threat_text": report.threat_text,
+            "avoid": report.avoid_all,
+            "threats": [
+                {
+                    "key": s.key,
+                    "label": s.label,
+                    "quote": s.quote,
+                    "means": s.means,
+                    "avoid": s.avoid,
+                    "tools": [
+                        {
+                            "key": t.key,
+                            "label": t.label,
+                            "blurb": t.blurb,
+                            "extra": t.extra,
+                            "bearers": [bearer_json(b) for b in t.bearers],
+                        }
+                        for t in s.tools
+                    ],
+                }
+                for s in report.steps
+            ],
+            "query": report.query,
+            "matches": [bearer_json(b) for b in report.matches],
+        }
+    )
+
+
+@app.get("/api/trials")
+def api_trials() -> JSONResponse:
+    return JSONResponse(
+        [{**t, "label": trial_label(t)} for t in trials()]
     )
 
 

@@ -1,6 +1,14 @@
 """Recommendation engines."""
 from __future__ import annotations
 
+from .counters import (
+    CounterReport,
+    CounterStep,
+    ToolAdvice,
+    ToolBearer,
+    analyze_counters,
+    search_abilities,
+)
 from .defense import DefenseReport, DefenseTeam, WallUnit, analyze_defense
 from .energy import EnergyReport, FarmTarget, analyze_energy
 from .gear import GearReport, GearTarget, analyze_gear
@@ -63,4 +71,10 @@ __all__ = [
     "PlanItem",
     "Highlight",
     "build_tonight_board",
+    "CounterReport",
+    "CounterStep",
+    "ToolAdvice",
+    "ToolBearer",
+    "analyze_counters",
+    "search_abilities",
 ]

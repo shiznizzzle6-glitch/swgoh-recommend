@@ -14,6 +14,9 @@ env/
 # Local config & secrets
 .env
 
+# Local run state (arena/GP history; the VM keeps this in a Docker volume)
+.data/
+
 # Caches
 .cache/
 .pytest_cache/

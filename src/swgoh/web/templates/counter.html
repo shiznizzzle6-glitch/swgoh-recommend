@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}{{ report.player_name }} — Counter Builder{% endblock %}
+{% block form_action %}/counter{% endblock %}
+{% block subtitle %}<span class="muted">{{ report.player_name }} · {{ ally_code }}</span>{% endblock %}
+{% block content %}
+  <h2 style="margin:.2rem 0 .3rem">Counter builder</h2>
+  <p class="note" style="margin:0 0 1.2rem">
+    Countering isn't about memorising which character beats which. It's about reading what the
+    enemy's text actually <em>does</em>, then bringing the mechanic that breaks it. Paste any enemy
+    ability or modifier below — or pick a Conquest trial — and this reads it for you, then finds
+    which of your units bring each tool and quotes the line that proves it.
+  </p>
+
+  <h3 style="margin:1rem 0 .6rem">The method — five questions, every time</h3>
+  <div class="method">
+    <div class="step">
+      <div class="q">What's their engine?</div>
+      <div class="a">Find the sentence that makes them dangerous — the crit, the stack, the revive.
+        Everything else is decoration.</div>
+    </div>
+    <div class="step">
+      <div class="q">What feeds it?</div>
+      <div class="a">Engines need fuel: buffs gained, stacks built, turns taken. Cut the fuel and the
+        engine stalls without you out-damaging it.</div>
+    </div>
+    <div class="step">
+      <div class="q">What does it punish?</div>
+      <div class="a">The most important question. Some enemies <em>profit</em> from your debuffs or
+        your chip damage. Bringing your usual squad can actively lose you the fight.</div>
+    </div>
+    <div class="step">
+      <div class="q">Which mechanic breaks it?</div>
+      <div class="a">Name the tool, not the character: dispel, Buff Immunity, Ability Block, Turn
+        Meter removal, crit denial, prevent-revive.</div>
+    </div>
+    <div class="step">
+      <div class="q">Can I actually field it?</div>
+      <div class="a">A counter on a G8 unit that dies first isn't a counter. Check relic/gear, and
+        whether the ability needs a zeta you haven't learned.</div>
+    </div>
+  </div>
+
+  <form class="threatbox" method="get" action="/counter">
+    {% if ally_code %}<input type="hidden" name="ally_code" value="{{ ally_code }}">{% endif %}
+    <label for="trial">Conquest — Proving Grounds trial</label>
+    <select name="trial" id="trial">
+      <option value="">— pick a trial —</option>
+      {% for t in trials %}
+        <option value="{{ t.number }}" {% if report.trial_number == t.number %}selected{% endif %}>
+          {{ t.label }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label for="text">…or paste any enemy modifier / ability text</label>
+    <textarea name="text" id="text" placeholder="e.g. Whenever a Pirate ally scores a critical hit, the enemy loses 10% Protection…">{% if not report.trial_number %}{{ report.threat_text }}{% endif %}</textarea>
+
+    <label for="q">…or just search your roster's skills for a keyword</label>
+    <input type="text" name="q" id="q" value="{{ report.query }}" placeholder="e.g. Buff Immunity, Daze, can't be revived">
+
+    <div class="actions">
+      <button type="submit">Analyse</button>
+      <span class="note" style="margin:0">Picking a trial overrides the pasted text.</span>
+    </div>
+  </form>
+
+  {% if report.analysed %}
+    <h3 style="margin:1.4rem 0 .4rem">{{ report.source_label }}</h3>
+    {% for tip in report.tips %}<p class="note" style="margin:.1rem 0">{{ tip }}</p>{% endfor %}
+    <div class="quote" style="white-space:pre-wrap">{{ report.threat_text }}</div>
+
+    {% if report.avoid_all %}
+      <div class="avoidbox">
+        <div class="hd">⚠ What NOT to bring</div>
+        <ul>{% for line in report.avoid_all %}<li>{{ line }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+
+    {% if report.steps %}
+      <h3 style="margin:1.2rem 0 .6rem">What it's doing, and what breaks it ({{ report.steps|length }})</h3>
+      {% for step in report.steps %}
+        <article class="threat">
+          <div class="hd"><span class="nm">{{ step.label }}</span></div>
+          <div class="quote">“{{ step.quote }}”</div>
+          <div class="means">{{ step.means }}</div>
+          {% for tool in step.tools %}
+            <div class="tool">
+              <div class="tl">🛠 {{ tool.label }}</div>
+              <div class="tb">{{ tool.blurb }}</div>
+              {% if tool.have %}
+                {% for b in tool.bearers %}
+                  <div class="bearer">
+                    <span class="who">{{ b.unit_name }}</span>
+                    <span class="ab">{{ b.ability_name }}</span>
+                    <span class="tag">{{ b.ability_kind }}</span>
+                    <span class="gear">{% if b.relic_level %}R{{ b.relic_level }}{% else %}G{{ b.gear_level }}{% endif %} · {{ b.stars }}★</span>
+                    {% if b.needs_zeta %}<span class="locked">needs zeta</span>{% endif %}
+                    {% if b.needs_omicron %}<span class="locked">needs omicron</span>{% endif %}
+                    <span class="txt">“{{ b.quote }}”</span>
+                  </div>
+                {% endfor %}
+                {% if tool.extra %}
+                  <p class="note" style="margin:.35rem 0 0">+ {{ tool.extra }} more of your units bring this.</p>
+                {% endif %}
+              {% else %}
+                <div class="nobearer">Nothing on your roster brings this — a gap worth farming for.</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="squad empty">
+        No known mechanics matched that text. Try pasting the enemy's ability or modifier wording
+        verbatim, or search your skills for a keyword instead.
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if report.query %}
+    <h3 style="margin:1.4rem 0 .6rem">Skills matching “{{ report.query }}” ({{ report.matches|length }})</h3>
+    {% if report.matches %}
+      {% for b in report.matches[:40] %}
+        <div class="bearer">
+          <span class="who">{{ b.unit_name }}</span>
+          <span class="ab">{{ b.ability_name }}</span>
+          <span class="tag">{{ b.ability_kind }}</span>
+          <span class="gear">{% if b.relic_level %}R{{ b.relic_level }}{% else %}G{{ b.gear_level }}{% endif %} · {{ b.stars }}★</span>
+          {% if b.needs_zeta %}<span class="locked">needs zeta</span>{% endif %}
+          {% if b.needs_omicron %}<span class="locked">needs omicron</span>{% endif %}
+          <span class="txt">“{{ b.quote }}”</span>
+        </div>
+      {% endfor %}
+      {% if report.matches|length > 40 %}
+        <p class="note">Showing the 40 best-geared of {{ report.matches|length }} matches.</p>
+      {% endif %}
+    {% else %}
+      <div class="squad empty">No ability on your roster mentions that. Try a shorter keyword.</div>
+    {% endif %}
+  {% endif %}
+
+  <details class="tbpanel" style="margin-top:1.6rem">
+    <summary>📖 The toolbox — what each counter-mechanic is for <span class="tb-sub">({{ tools|length }} mechanics)</span></summary>
+    <div style="padding:.2rem .8rem .6rem">
+      {% for t in tools %}
+        <div class="catitem">
+          <div class="ci-top"><span class="ci-name">{{ t.label }}</span></div>
+          <div class="ci-detail muted">{{ t.blurb }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </details>
+{% endblock %}

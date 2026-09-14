@@ -1,0 +1,492 @@
+[
+ {
+  "number": 1,
+  "reward_unit": "Razor Crest",
+  "opponent": "Moff Gideon",
+  "tips": [
+   "Face off against Moff Gideon and a team of Imperial Troopers"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Remnant of Power",
+    "text": "Whenever a character inflicts a debuff, they gain a stack of Imperial Rule, which can't be copied, dispelled, or prevented"
+   },
+   {
+    "scope": "Enemy",
+    "name": "Endless Ranks",
+    "text": "At the start of battle, Imperial Troopers gain 1 stack of Endless Ranks for each Imperial Trooper ally (max 3 stacks)"
+   }
+  ],
+  "effects": [
+   {
+    "name": "Imperial Rule",
+    "text": "+2% Offense and Potency per stack"
+   },
+   {
+    "name": "Endless Ranks",
+    "text": "When defeated, remove 1 stack of Endless Ranks from all Imperial Trooper allies and revive with 30% Health and Protection, which can't be prevented"
+   }
+  ]
+ },
+ {
+  "number": 2,
+  "reward_unit": "Commander Ahsoka Tano",
+  "opponent": "Maul",
+  "tips": [
+   "Face off against Maul and a team of Mandalorians"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Perilous Escape",
+    "text": "At the start of the encounter, all characters have -100 Speed; whenever a character lands a critical hit, gain 20 Speed (max 200); whenever a character attacks out of turn, apply Vulnerable for 1 turn; at the end of round, if a character doesn't have Protection, gain Stealth for 2 turns (once per character); whenever a character loses Stealth, they gain Expose for 1 turn"
+   },
+   {
+    "scope": "Enemy",
+    "name": "The Code",
+    "text": "Whenever a Mandalorian ally takes damage, all Mandalorian allies gain a stack of Clan Loyalty, which can't be copied, dispelled, or prevented; if there is exactly one non-Mandalorian ally at start of battle, that ally also gains Clan Loyalty if they are not in the Leader slot; allies with Clan Loyalty have a 50% chance to assist when another ally attacks during an enemy's turn (limit once per turn), dealing 95% less damage"
+   }
+  ],
+  "effects": [
+   {
+    "name": "Clan Loyalty",
+    "text": "+1% Max Protection and counter chance, -1% damage penalty when assisting for 1 turn"
+   }
+  ]
+ },
+ {
+  "number": 3,
+  "reward_unit": "Maul",
+  "opponent": "all the members of the Phoenix Squadron",
+  "tips": [
+   "Face off against all the members of the Phoenix Squadron",
+   "Phoenix Squadron enemies are immune to Fear, and Max Health and Max Protection decreases"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Drain Essence",
+    "text": "Characters in the Leader slot gain the Drain Essence ability at the start of the encounter."
+   },
+   {
+    "scope": "Enemy",
+    "name": "A Few Surprises Left",
+    "text": "Rebel allies gain 50% Health Steal and can't be countered. Whenever a Rebel's Health drops below 40%, they are inflicted with Cornered, which can't be copied, dispelled, or prevented. When a Rebel ally's Health is above 70%, Cornered is dispelled and they gain 10% Offense (stacking, max 50%) for the rest of the encounter."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Drain Essence",
+    "text": "All other allies lose 25% Max Health and Max Protection. Gain 5% Offense per ally affected this way (stacking). Then, gain a bonus turn"
+   },
+   {
+    "name": "Cornered",
+    "text": "+30% Offense, calls a random Rebel ally to assist when using an ability, and can't attack out of turn"
+   }
+  ]
+ },
+ {
+  "number": 4,
+  "reward_unit": "Boba Fett, Scion of Jango",
+  "opponent": "Cad Bane and other legendary Bounty Hunters",
+  "tips": [
+   "Face off against Cad Bane and other legendary Bounty Hunters"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Dune Sandstorm",
+    "text": "At the end of every other turn, all units are inflicted with Damage Over Time until defeated, which can't be resisted."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Thrill of the Hunt",
+    "text": "All Bounty Hunter allies gain 9 stacks of True Defense at the start of battle, which cannot be copied, dispelled or prevented. Whenever a Bounty Hunter gains their payout, they also gain Frenzy for 1 turn, 100% increased damage, and their cooldowns are reset."
+   }
+  ],
+  "effects": [
+   {
+    "name": "True Defense",
+    "text": "10% reduced damage taken per stack; lose one stack of True Defense when receiving damage"
+   }
+  ]
+ },
+ {
+  "number": 5,
+  "reward_unit": "TIE Interceptor",
+  "opponent": "Grand Inquisitor and other relentless Inquisitors",
+  "tips": [
+   "Face off against the Grand Inquisitor and other relentless Inquisitors"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Dune Sandstorm",
+    "text": "At the end of every other turn, all units are inflicted with Damage Over Time until defeated, which can't be resisted."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Dark Pursuit",
+    "text": "If the allied leader is Inquisitorius, whenever they use an ability during their turn they inflict a stack of Purge (max 6) on the target enemy. Whenever Purge expires from an enemy, they gain a stack of Fatigue (max 20) which can't be copied, dispelled, or resisted. Whenever an ally defeats an enemy, all enemies are inflicted with 5 stacks of Fatigue. At 20 stacks of Fatigue, Inquisitorius allies gain Coup De Grâce, which can't be copied, dispelled, or prevented."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Fatigue",
+    "text": "-2 Speed and -2% Tenacity Coup De Grâce: On the next Special attack, deal true damage equal to 100% of the target's Max Health and dispel Coup De Grâce from all Inquisitorius allies and dispel Fatigue from all enemies"
+   }
+  ]
+ },
+ {
+  "number": 6,
+  "reward_unit": "Darth Malgus",
+  "opponent": "Darth Malgus on Takodana",
+  "tips": [
+   "Face off against Darth Malgus on Takodana"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Safe Haven",
+    "text": "While no characters are Deathmarked, when a character deals damage to an enemy, they are inflicted with Deathmark until the end of battle, which can't be copied, dispelled, or resisted."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Grim Machinations",
+    "text": "Whenever a Sith ally is defeated, all Sith allies gain 50% Max Health and Offense (stacking) until end of battle, gain 50% Turn Meter, and recover 50% Health. Whenever a Sith ally defeats an enemy, they gain Dark Ascension (stacking), which can't be copied, dispelled, or prevented."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Dark Ascension",
+    "text": "Damage received decreased by 15% and damage dealt increased by 30%"
+   }
+  ]
+ },
+ {
+  "number": 7,
+  "reward_unit": "Ben Solo",
+  "opponent": "Ben Solo",
+  "tips": [
+   "Face off against the Ben Solo, Rey, and her allies, in the ruins of the Death Star on Kef Bir"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Unstable Energies",
+    "text": "At the start of battle, all characters (excluding summoned allies) gain 10 stacks of Unstable Energy for the rest of the encounter. When a character reaches 0 or 30 stacks of Unstable Energy, deal 85% Max Health and 100% Max Protection damage to that character, which can't be evaded, and that character gains 10 stacks of Unstable Energy. This damage can't defeat characters."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Fearless Fortitude",
+    "text": "Whenever an enemy resists a detrimental effect from a Resistance ally, that ally gains Heal Over Time for 1 turn. Whenever a Resistance ally gains a buff, they also gain 5% Critical Chance, Critical Damage, and Potency (stacking) until end of battle, and 10% Turn Meter."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Unstable Energy",
+    "text": "Gain 1 stack whenever this character gains a buff; lose 3 stacks at the end of turn"
+   }
+  ]
+ },
+ {
+  "number": 8,
+  "reward_unit": "Scythe",
+  "opponent": "",
+  "tips": [
+   "Earn Scythe shards by fighting Grand Inquisitor and his allies, in the busy streets of Lothal"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Rebellious",
+    "text": "Whenever an ally uses a special ability during their turn, call a random other ally to assist. Whenever a character attacks out of turn, they gain a stack of Rebellious, which can't be copied, dispelled, or prevented. At 20 stacks of Rebellious, they gain an additional 30% Offense."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Dark Pursuit",
+    "text": "If the allied leader is Inquisitorius, whenever they use an ability during their turn they inflict a stack of Purge (max 6) on the target enemy. Whenever Purge expires from an enemy, they gain a stack of Fatigue (max 20) which can't be copied, dispelled, or resisted. Whenever an ally defeats an enemy, all enemies are inflicted with 5 stacks of Fatigue. At 20 stacks of Fatigue, Inquisitorius allies gain Coup De Grâce, which can't be copied, dispelled, or prevented."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Rebellious",
+    "text": "+2% Critical Chance and Critical Damage (stacking, max 20)"
+   },
+   {
+    "name": "Fatigue",
+    "text": "-2 Speed and -2% Tenacity"
+   }
+  ]
+ },
+ {
+  "number": 9,
+  "reward_unit": "Admiral Trench",
+  "opponent": "Admiral Trench and his Separatist allies",
+  "tips": [
+   "Earn Admiral Trench shards by fighting against Admiral Trench and his Separatist allies on the gas giant of Bespin"
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Decadence",
+    "text": "At the start of the battle, all characters have their Accuracy reduced by 15%."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Malicious Minions",
+    "text": "Summoned Separatist allies have +50% Speed, Max Health, and Max Protection, and damage they deal is increased by 50%. All other Separatist allies gain half of these bonuses."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Collected Wealth",
+    "text": "+10% Critical Chance and Critical Damage (stacking, max 10)"
+   }
+  ]
+ },
+ {
+  "number": 10,
+  "reward_unit": "Fury-class Interceptor",
+  "opponent": "Darth Malgus and his Sith allies",
+  "tips": [
+   "Earn Fury-class Interceptor shards by fighting against Darth Malgus and his Sith allies deep within the Crystal Caves of Ilum."
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Test of Strength",
+    "text": "All units are inflicted with 10 stacks of Hesitation at the start of the battle, which persists through defeat and can't be resisted, dispelled, or prevented. Whenever a character uses a special ability, dispel 1 stack of Hesitation. At 0 stacks, recover 50% Health and gain Clarity, which persists through defeat and cannot be copied, dispelled, or prevented."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Cruel Conspiracies",
+    "text": "Whenever a Sith ally is defeated, all Sith allies gain 20% Max Health and Offense (stacking) until end of battle and recover 25% Health. Whenever a Sith ally defeats an enemy, they gain Dark Ascension (stacking), which can't be copied, dispelled, or prevented."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Hesitation",
+    "text": "-5% Offense and -5% Tenacity per stack. Can't assist or gain bonus Turn Meter. Clarity: +50% Tenacity and +30% Offense. Whenever a debuff is resisted, gain 5% Critical Chance and 5% Critical Damage (stacking) for the rest of the battle."
+   },
+   {
+    "name": "Dark Ascension",
+    "text": "Damage received decreased by 15% and damage dealt increased by 30%"
+   }
+  ]
+ },
+ {
+  "number": 11,
+  "reward_unit": "Taron Malicos",
+  "opponent": "Taron and his Unaligned Force User allies",
+  "tips": [
+   "Earn Taron Malicos shards by fighting against Taron and his Unaligned Force User allies in this epic battle on Dathomir."
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Unstable Artifacts",
+    "text": "At the start of each encounter, or if no character has it at the start of a turn, the healthiest character gains Ancient Power Core, which can't be copied or dispelled. When a character with Ancient Power Core is damaged by an attack, they lose it and the attacking character gains Ancient Power Core. Ancient Power Core: Attacking this character Stuns them, which can't be prevented if this character has less than 10% Health. The attacker then takes a Bonus Turn."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Children of Dathomir",
+    "text": "While the allied Leader is active, all other allies revive with full Health when they are defeated. Whenever an ally revives while the allied Leader is active, active and defeated enemies lose 15% Max Health and Max Protection and the allied Leader gains 100% Turn Meter."
+   }
+  ],
+  "effects": []
+ },
+ {
+  "number": 12,
+  "reward_unit": "Dark Trooper Moff Gideon",
+  "opponent": "Dark Trooper Moff Gideon and his powerful Imperial Remnant allies",
+  "tips": [
+   "Earn Dark Trooper Moff Gideon shards by fighting against Dark Trooper Moff Gideon and his powerful Imperial Remnant allies in this epic battle on Mandalore."
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Boon of the Mythosaur",
+    "text": "At the start of each encounter, the healthiest character on each side gains Boon of the Mythosaur until the end of the encounter. Whenever an ally falls below 50% Health, the ally with Boon of the Mythosaur takes a bonus turn and gains Taunt for 2 turns."
+   },
+   {
+    "scope": "Enemy",
+    "name": "True Empire",
+    "text": "Imperial Remnant allies have +40% Critical Chance, Critical Damage, and Defense, and +20% Potency and Tenacity. Whenever an Imperial Remnant ally uses a Special ability, they call a random another Imperial Remnant ally to assist, dealing 90% less damage. Whenever an Imperial Remnant ally is attacked out of turn, they recover 10% Health and Protection and gain Advantage for 2 turns and 5% Turn Meter. Whenever an Imperial Remnant ally is defeated, all Imperial Remnant allies gain Foresight, Health Steal Up, and Protection Up (50%) for 2 turns, and 20% Turn Meter."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Boon of the Mythosaur",
+    "text": "This character has 200% Health and Protection, 50% Offense, and they gain Retribution while they have Taunt. They lose 50% Defense and 20% Speed"
+   }
+  ]
+ },
+ {
+  "number": 13,
+  "reward_unit": "Darth Bane",
+  "opponent": "Darth Bane and his powerful Sith allies",
+  "tips": [
+   "Earn Darth Bane shards by fighting against Darth Bane and his powerful Sith allies in this epic battle on Takodana."
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Safe Haven",
+    "text": "While no characters are Deathmarked, when a character deals damage to an enemy, they are inflicted with Deathmark until the end of battle, which can't be copied, dispelled, or resisted."
+   },
+   {
+    "scope": "Enemy",
+    "name": "Grim Machinations",
+    "text": "Whenever a Sith ally is defeated, all Sith allies gain 50% Max Health and Offense (stacking) until end of battle, gain 50% Turn Meter, and recover 50% Health. Whenever a Sith ally defeats an enemy, they gain Dark Ascension (stacking), which can't be copied, dispelled, or prevented."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Dark Ascension",
+    "text": "Damage received decreased by 15% and damage dealt increased by 30%"
+   }
+  ]
+ },
+ {
+  "number": 14,
+  "reward_unit": "Queen Amidala",
+  "opponent": "Queen Amidala and her powerful Galactic Republic allies",
+  "tips": [
+   "Earn Queen Amidala shards by fighting against Queen Amidala and her powerful Galactic Republic allies in this epic battle on Naboo."
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "The Bigger Fish",
+    "text": "At the start of the encounter, a random character (excluding summoned units), not in the Leader slot will receive the Big Fish buff, which can't be copied, dispelled, or prevented, until the end of the encounter. If no characters have the Big Fish buff at the start of a turn, then a random character will gain the buff. Whenever a character with the Big Fish buff is defeated, Big Fish transfers to the character that defeated them"
+   },
+   {
+    "scope": "Enemy",
+    "name": "Steadfast Retribution",
+    "text": "Whenever a Galactic Republic ally receives damage from an enemy, they deal true damage to that enemy equal to 20% of the damage received. The damage dealt by this ability is increased by 10% for each time that ally has dealt damage this way. This damage can't be evaded and can't defeat enemies."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Big Fish",
+    "text": "Remove Damage Immunity, Protection Up, and Stealth; +150% Critical Avoidance, Critical Chance, Critical Damage, Max Health, Max Protection, and Offense; this unit can't recover Health or Protection and can't gain bonus Protection, Damage Immunity, Protection Up, or Stealth"
+   }
+  ]
+ },
+ {
+  "number": 15,
+  "reward_unit": "Luthen Rael",
+  "opponent": "Luthen Rael and his powerful Rebel allies",
+  "tips": [
+   "Earn Luthen Rael shards by fighting against Luthen Rael and his powerful Rebel allies in this epic battle on Coruscant."
+  ],
+  "modifiers": [
+   {
+    "scope": "Global",
+    "name": "Thunderous Applause",
+    "text": "All characters (excluding summons) gain the Democracy granted ability which starts at 0%. Whenever an ally gains a buff or inflicts a debuff on an enemy, increase all ally's energy by 5%. At the start of the encounter, both Leaders gain 100% Potency and Tenacity, 100 Speed, and are immune to Fear. The enemy leader is immune to destroy effects and can't fall below 1% Health while an ally is present. Energy is reset at the start of each encounter. Democracy: Set Democracy's charge to 0% for all allies. Inflict 1 stack of No Confidence on the enemy Leader, which can't be copied, dispelled, or prevented, and Stun them for 1 turn, which can't be evaded or resisted. When the enemy Leader reaches 3 stacks of No Confidence, they are instantly defeated (including Galactic Legends), all allies no longer gain charge, and all allies (excluding summons) gain Thunderous Applause for the rest of the encounter, which can't be copied, dispelled, or prevented."
+   },
+   {
+    "scope": "Enemy",
+    "name": "A Couple Surprises Left",
+    "text": "Rebel allies gain 50% Health Steal and can't be countered. Whenever a Rebel's Health drops below 90%, they are inflicted with Cornered. When a Rebel ally's Health is above 95%, Cornered is removed, and they gain 10% Offense (stacking, max 50%) for the rest of the encounter."
+   }
+  ],
+  "effects": [
+   {
+    "name": "Thunderous Applause",
+    "text": "When this character uses a Special ability, all other allies with this buff assist"
+   },
+   {
+    "name": "No Confidence",
+    "text": "-50% Potency and Tenacity, and -50 Speed per stack"
+   },
+   {
+    "name": "Cornered",
+    "text": "+30% Defense, Health Steal, and Speed; call a random Rebel ally to assist when using an ability"
+   }
+  ]
+ },
+ {
+  "number": 16,
+  "reward_unit": "Ezra Bridger (Exile)",
+  "opponent": "Imperial Remnants",
+  "tips": [
+   "Earn Ezra Bridger (Exile) shards by fighting against the Imperial Remnants in this epic battle on Peridea."
+  ],
+  "modifiers": [
+   {
+    "scope": "Enemy",
+    "name": "Imperial Remnant Affairs",
+    "text": "Imperial Remnant allies have +40% Critical Chance, Critical Damage, and Defense, and +20% Potency and Tenacity. Whenever Captain Enoch uses a Basic ability, he calls a random Imperial Remnant ally to assist, dealing 90% less damage. Whenever an Imperial Remnant ally is attacked out of turn, they recover 10% Health and Protection and gain Advantage for 2 turns and 5% Turn Meter. Whenever an Imperial Remnant ally is defeated, all Imperial Remnant allies gain Foresight, Health Steal Up, and Protection Up (50%) for 2 turns, and 20% Turn Meter."
+   }
+  ],
+  "effects": []
+ },
+ {
+  "number": 17,
+  "reward_unit": "Rey (Dark Side Vision)",
+  "opponent": "Supreme Leader Kylo Ren",
+  "tips": [
+   "Earn Rey (Dark Side Vision) shards by fighting against the Supreme Leader Kylo Ren in this epic battle on Crait."
+  ],
+  "modifiers": [
+   {
+    "scope": "Enemy",
+    "name": "Blind Fury",
+    "text": "Whenever a First Order ally gains Advantage, they lose 20% Critical Chance and gain 35% Critical Damage (stacking) until the end of battle. If a First Order unit does not score at least 1 critical hit during their turn, they gain Advantage for 2 turns at the end of that turn if they did not already have it."
+   }
+  ],
+  "effects": []
+ },
+ {
+  "number": 18,
+  "reward_unit": "Jocasta Nu",
+  "opponent": "Jedi Master Mace Windu",
+  "tips": [
+   "Earn Jocasta Nu shards by fighting against Jedi Master Mace Windu in this epic battle on Coruscant."
+  ],
+  "modifiers": [
+   {
+    "scope": "Enemy",
+    "name": "Steadfast Retribution",
+    "text": "Whenever a Galactic Republic ally receives damage from an enemy, they deal true damage to that enemy equal to 100% of the damage received. The damage dealt by this ability is increased by 10% for each time that ally has dealt damage this way. This damage can't be evaded and can't defeat enemies."
+   }
+  ],
+  "effects": []
+ },
+ {
+  "number": 19,
+  "reward_unit": "SM-33",
+  "opponent": "Pirate King Hondo Ohnaka",
+  "tips": [
+   "Earn SM-33 shards by fighting against Pirate King Hondo Ohnaka in this epic battle on Takodana."
+  ],
+  "modifiers": [
+   {
+    "scope": "Enemy",
+    "name": "Pirate's Plunder",
+    "text": "Whenever a Pirate ally scores a critical hit, the enemy loses 10% Protection. While a Pirate ally has Profit, they recover 10% Health whenever they gain a buff and 10% Protection whenever they are inflicted with a debuff. Whenever a Pirate ally's Health falls below 75%, they dispel all debuffs on themselves and inflict those debuffs on the weakest enemy. If the Pirate ally does not have any debuffs, instead inflict Armor Shred on the strongest enemy until the end of the encounter which can't be resisted."
+   }
+  ],
+  "effects": []
+ },
+ {
+  "number": 20,
+  "reward_unit": "Maz Kanata",
+  "opponent": "Maz Kanata and her Outer Rim Pirate allies",
+  "tips": [
+   "Earn Maz Kanata shards by fighting against Maz Kanata and her Outer Rim Pirate allies in this epic battle on Takodana."
+  ],
+  "modifiers": [
+   {
+    "scope": "Enemy",
+    "name": "Pirate's Plunder",
+    "text": "Whenever a Pirate ally scores a critical hit, the enemy loses 10% Protection. While a Pirate ally has Profit, they recover 10% Health whenever they gain a buff and 10% Protection whenever they are inflicted with a debuff. Whenever a Pirate ally's Health falls below 75%, they dispel all debuffs on themselves and inflict those debuffs on the weakest enemy. If the Pirate ally does not have any debuffs, instead inflict Armor Shred on the strongest enemy until the end of the encounter which can't be resisted."
+   }
+  ],
+  "effects": []
+ }
+]

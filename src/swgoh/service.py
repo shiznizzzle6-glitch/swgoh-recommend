@@ -6,6 +6,7 @@ from .history import ArenaStatus, load_status, record_rank
 from .models import Player
 from .web.charts import gp_trend_svg, skill_trend_svg
 from .recommend import (
+    CounterReport,
     DefenseReport,
     EnergyReport,
     FleetReport,
@@ -17,6 +18,7 @@ from .recommend import (
     SquadReport,
     TonightBoard,
     ZetaReport,
+    analyze_counters,
     analyze_defense,
     analyze_energy,
     analyze_fleet,
@@ -113,6 +115,18 @@ class SwgohService:
     def guild_page(self, ally_code: str | None = None) -> tuple[GuildReport, str, str]:
         """Guild report plus the inline GAC skill-rating and galactic-power trend charts."""
         return self._guild_page(ally_code)
+
+    def counter_report(
+        self,
+        ally_code: str | None = None,
+        threat_text: str = "",
+        trial_number: int | None = None,
+        query: str = "",
+    ) -> CounterReport:
+        player = self.get_player(ally_code)
+        return analyze_counters(
+            player, threat_text=threat_text, trial_number=trial_number, query=query
+        )
 
     def arena_status(self, ally_code: str | None = None) -> ArenaStatus:
         player = self.get_player(ally_code)
