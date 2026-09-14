@@ -239,3 +239,34 @@ def test_report_carries_search_results_alongside_a_threat():
 def test_avoid_all_deduplicates_across_threats():
     report = analyze_counters(_roster(), threat_text=PIRATES_PLUNDER)
     assert len(report.avoid_all) == len(set(report.avoid_all))
+
+
+# --- direction of effect (regression: ally-facing wording isn't a tool) ---
+REVIVE_CASES = [
+    # Self- or ally-facing: a drawback the unit carries, not denial of the enemy.
+    ("Dark Trooper can't be revived and can't be critically hit.", False),
+    ("Nightsister allies gain 30% Accuracy, Max Health, and Tenacity, but can't be revived.", False),
+    ("Defeated allies can't be revived.", False),
+    # Enemy-facing: genuinely stops a revive.
+    ("Additionally, enemies can't be revived.", True),
+    ("Enemies defeated by this ability can't be revived.", True),
+    ("The defeated target can't be Revived.", True),
+    ("If this attack defeats the target, they can't be Revived.", True),
+]
+
+
+def test_revive_prevention_requires_enemy_facing_wording():
+    from swgoh.recommend.counters import _find, _sentences
+
+    tool = next(t for t in TOOLS if t.key == "revive_block")
+    for text, expected in REVIVE_CASES:
+        found = _find(tool.patterns, _sentences(text), tool.excludes) is not None
+        assert found is expected, text
+
+
+def test_tool_excludes_are_honoured_by_the_finder():
+    from swgoh.recommend.counters import Tool, _find, _sentences
+
+    tool = Tool("t", "T", "b", (r"can'?t be revived",), excludes=(r"allies",))
+    assert _find(tool.patterns, _sentences("Enemies can't be revived."), tool.excludes)
+    assert _find(tool.patterns, _sentences("Defeated allies can't be revived."), tool.excludes) is None

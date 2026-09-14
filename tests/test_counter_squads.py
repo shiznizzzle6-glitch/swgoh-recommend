@@ -174,3 +174,16 @@ def test_ships_never_enter_a_squad():
 def test_too_few_eligible_units_yields_no_squads():
     tiny = Player(name="T", ally_code="1", units=[_unit("MACEWINDU", 7, 13, 5)])
     assert build_counter_squads(tiny, TOOLS) == []
+
+
+def test_squad_tool_index_respects_effect_direction():
+    """A squad must not be credited with a mechanic aimed at its own allies."""
+    from swgoh.recommend.counter_squads import _tool_index
+    from swgoh.recommend.counters import TOOLS_BY_KEY
+
+    # Morgan Elsbeth's "Defeated allies can't be revived" is a drawback, not
+    # revive denial; Grand Moff Tarkin's "Enemies can't be revived" is the tool.
+    units = [_unit("MORGANELSBETH", 7, 13, 5), _unit("GRANDMOFFTARKIN", 7, 13, 5)]
+    index = _tool_index(units, [TOOLS_BY_KEY["revive_block"]])
+    assert "revive_block" not in index.get("MORGANELSBETH", set())
+    assert "revive_block" in index.get("GRANDMOFFTARKIN", set())

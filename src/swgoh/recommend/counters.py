@@ -54,6 +54,10 @@ class Tool:
     label: str
     blurb: str  # what it's good for, in plain language
     patterns: tuple[str, ...]
+    # Wording that looks like a match but points the wrong way. Ability text
+    # doesn't mark direction, so "Dark Trooper can't be revived" (about himself)
+    # reads identically to "enemies can't be revived" without this.
+    excludes: tuple[str, ...] = ()
 
 
 TOOLS: tuple[Tool, ...] = (
@@ -163,7 +167,15 @@ TOOLS: tuple[Tool, ...] = (
         "revive_block",
         "Prevent revive",
         "Makes a kill stick against anything that revives.",
-        (r"can'?t be revived",),
+        # Must be aimed at the enemy. Several kits say a unit or its allies
+        # "can't be revived" as their own drawback, which is not a tool.
+        (
+            r"enem\w+[^.]{0,80}can'?t be revived",
+            r"can'?t be revived[^.]{0,40}enem\w+",
+            r"defeats?\s+(?:the\s+)?target[^.]{0,60}can'?t be revived",
+            r"defeated target can'?t be revived",
+        ),
+        excludes=(r"all(?:y|ies)[^.]{0,40}can'?t be revived",),
     ),
     Tool(
         "instant_defeat",
@@ -459,9 +471,19 @@ def _trim(sentence: str, pattern: str) -> str:
     return ("…" if start else "") + excerpt.strip() + "…"
 
 
-def _find(patterns: tuple[str, ...], sentences: list[str]) -> str | None:
-    """First sentence matching any pattern — the evidence for a match."""
+def _find(
+    patterns: tuple[str, ...],
+    sentences: list[str],
+    excludes: tuple[str, ...] = (),
+) -> str | None:
+    """First sentence matching any pattern — the evidence for a match.
+
+    A sentence matching `excludes` is skipped: the wording matches but points at
+    the wrong target (an ally, or the unit itself).
+    """
     for sentence in sentences:
+        if excludes and any(re.search(x, sentence, re.IGNORECASE) for x in excludes):
+            continue
         for pattern in patterns:
             if re.search(pattern, sentence, re.IGNORECASE):
                 return _trim(sentence, pattern)
@@ -500,7 +522,7 @@ def find_tool_bearers(player: Player, tool: Tool) -> list[ToolBearer]:
     """Units whose abilities provide `tool`, best-equipped first."""
     bearers: list[ToolBearer] = []
     for unit, ability in _roster_abilities(player):
-        quote = _find(tool.patterns, _sentences(ability["d"]))
+        quote = _find(tool.patterns, _sentences(ability["d"]), tool.excludes)
         if not quote:
             continue
         needs_zeta, needs_omicron = _learned_flags(unit.skills, ability)

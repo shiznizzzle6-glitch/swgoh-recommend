@@ -30,7 +30,7 @@ from ..factions import factions_of
 from ..models import Player, Unit
 from ..names import display_name
 from ..ships import is_ship
-from .counters import TOOLS_BY_KEY, Tool
+from .counters import TOOLS_BY_KEY, Tool, _find, _sentences
 
 SQUAD_SIZE = 5
 
@@ -180,13 +180,20 @@ def _matches(patterns: tuple[str, ...], text: str) -> bool:
 
 
 def _tool_index(units: list[Unit], tools: list[Tool]) -> dict[str, set[str]]:
-    """base_id -> tool keys that unit's kit provides."""
+    """base_id -> tool keys that unit's kit provides.
+
+    Matches sentence-by-sentence through the same finder the Counter page uses,
+    so a tool's direction-disqualifying `excludes` apply here too — otherwise a
+    squad takes credit for a mechanic that's pointed at its own allies.
+    """
     index: dict[str, set[str]] = {}
     for unit in units:
-        blob = "\n".join(a["d"] for a in abilities_of(unit.base_id))
-        if not blob:
+        sentences: list[str] = []
+        for ability in abilities_of(unit.base_id):
+            sentences.extend(_sentences(ability["d"]))
+        if not sentences:
             continue
-        found = {t.key for t in tools if _matches(t.patterns, blob)}
+        found = {t.key for t in tools if _find(t.patterns, sentences, t.excludes)}
         if found:
             index[unit.base_id] = found
     return index
