@@ -310,3 +310,14 @@ def test_global_modifier_scope_is_preserved():
     mods = {m["name"]: m for m in modifier_entries(trial(2))}
     assert mods["Perilous Escape"]["global"] is True   # applies to both teams
     assert mods["The Code"]["global"] is False         # enemy only
+
+
+def test_tool_bearers_list_each_unit_once():
+    """A kit providing the same tool on two abilities shouldn't take two slots."""
+    player = Player(
+        name="T", ally_code="1",
+        units=[Unit(base_id="CAPTAINREX", name="Rex", stars=7, gear_level=13, relic_level=7)],
+    )
+    for tool in TOOLS:
+        ids = [b.base_id for b in find_tool_bearers(player, tool)]
+        assert len(ids) == len(set(ids)), tool.key

@@ -582,7 +582,12 @@ def find_tool_bearers(player: Player, tool: Tool) -> list[ToolBearer]:
         )
     # Prefer units you can actually field, and a learned counter over a locked one.
     bearers.sort(key=lambda b: (not (b.needs_zeta or b.needs_omicron), b.readiness), reverse=True)
-    return bearers
+    # One row per unit: a kit that provides the same tool on two abilities would
+    # otherwise take two of the listed slots and read like a duplicate.
+    best: dict[str, ToolBearer] = {}
+    for b in bearers:
+        best.setdefault(b.base_id, b)
+    return list(best.values())
 
 
 def search_abilities(player: Player, query: str) -> list[ToolBearer]:
