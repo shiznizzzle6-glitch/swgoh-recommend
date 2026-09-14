@@ -380,3 +380,21 @@ def test_conflicting_stat_advice_is_surfaced_not_hidden():
 
 def test_no_threat_means_no_stat_targets():
     assert analyze_counters(_roster()).stat_needs == []
+
+
+def test_damage_triggered_stacks_detected_and_warns_against_aoe():
+    """The Code: every instance of damage you deal stacks the whole enemy team,
+    so area damage and assists are the fastest way to lose the fight."""
+    threats = {t.key: t for t, _ in detect_threats(THE_CODE)}
+    assert "damage_triggered_stacks" in threats
+    avoid = " ".join(threats["damage_triggered_stacks"].avoid).lower()
+    assert "area-of-effect" in avoid or "area damage" in avoid
+    assert "assist" in avoid
+    assert "focus one target" in avoid
+
+
+def test_damage_triggered_stacks_prefers_burst_tools():
+    threats = {t.key: t for t, _ in detect_threats(THE_CODE)}
+    use = threats["damage_triggered_stacks"].use
+    assert "instant_defeat" in use
+    assert "defense_pen" in use

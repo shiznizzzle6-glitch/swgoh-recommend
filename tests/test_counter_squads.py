@@ -421,3 +421,13 @@ def test_evaluate_squad_with_nothing_recognised():
     assert v.squad is None
     assert len(v.unresolved) == 2
     assert not v.fieldable
+
+
+def test_aoe_and_assist_kits_flagged_against_damage_triggered_stacks():
+    """Phoenix-style assist kits are the worst possible pick when damage itself
+    is what stacks the enemy."""
+    from swgoh.recommend.counter_squads import _liability_index
+
+    units = [_unit(b, 7, 13, 5) for b in ("EZRABRIDGERS3", "SABINEWRENS3", "CHOPPERS3")]
+    flagged = _liability_index(units, {"damage_triggered_stacks"})
+    assert flagged, "no Phoenix kit flagged as an assist/AoE liability"

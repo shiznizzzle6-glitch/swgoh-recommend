@@ -92,6 +92,18 @@ LIABILITIES: tuple[Liability, ...] = (
         (r"to assist", r"assist[s]?\b"),
         2,
     ),
+    Liability(
+        "damage_triggered_stacks",
+        "assist / multi-hit kit — every separate hit stacks them further",
+        (r"to assist", r"assist[s]?\b"),
+        2,
+    ),
+    Liability(
+        "damage_triggered_stacks",
+        "area damage — hitting five enemies stacks all five at once",
+        (r"damage to all enemies", r"all enemies[^.]{0,40}damage"),
+        1,
+    ),
 )
 
 

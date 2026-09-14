@@ -395,6 +395,24 @@ THREATS: tuple[Threat, ...] = (
         avoid=("Don't spam multi-hit basics into a counter-heavy team — you're handing them free turns.",),
     ),
     Threat(
+        "damage_triggered_stacks",
+        "Your damage is what makes them stronger",
+        (
+            r"whenever[^.;]{0,60}takes damage[^.;]{0,80}gain(?:s)? a stack",
+            r"takes damage[^.;]{0,60}all[^.;]{0,40}gain(?:s)? a stack",
+            r"whenever[^.;]{0,50}(?:is|are) damaged[^.;]{0,60}stack",
+        ),
+        "Every instance of damage you deal hands the whole enemy team another stack — so a long "
+        "fight makes them tankier, not weaker. Multi-hit attacks, assists and area damage each "
+        "count separately, which is why a grinding team feeds it fastest.",
+        use=("instant_defeat", "defense_pen", "ability_block", "stun", "tm_removal"),
+        avoid=(
+            "Don't bring area-of-effect damage — hitting five enemies stacks all five of them at once.",
+            "Don't bring assist-callers or multi-hit attackers; each separate hit is another stack.",
+            "Don't spread damage across the team — focus one target with your biggest single hits and finish it.",
+        ),
+    ),
+    Threat(
         "turn_meter_gain",
         "Gains bonus Turn Meter",
         (r"gain[s]? \d+% Turn Meter", r"bonus Turn Meter"),
