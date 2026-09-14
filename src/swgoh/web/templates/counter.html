@@ -116,6 +116,7 @@
               {% if m.is_leader %}<span class="pill" style="color:var(--accent);border-color:rgba(255,213,74,.5)">Leader</span>{% endif %}
               <span class="who">{{ m.unit_name }}</span>
               <span class="gear">{{ m.gear_label }} · {{ m.stars }}★</span>
+              <span class="gear" {% if m.base_speed is none %}style="opacity:.7"{% endif %}>⚡ {{ m.speed_label }}</span>
               <span class="txt">
                 {% if m.tools %}{{ m.tools|join(' · ') }}{% else %}<em>no counter tool — included for synergy/investment</em>{% endif %}
               </span>
@@ -134,6 +135,27 @@
           {% endif %}
         </article>
       {% endfor %}
+    {% endif %}
+
+    {% if report.donors %}
+      <article class="squad" style="border-color:rgba(255,213,74,.4)">
+        <div class="top">
+          <span class="nm">⚡ Speed mods you could move</span>
+          <span class="tag">turn order decides this fight</span>
+        </div>
+        <p class="note" style="margin:.2rem 0 .6rem">
+          These are equipped on units <em>not</em> in the top squad. When everyone is slowed by a flat
+          penalty, moving Speed you already own beats farming for more.
+        </p>
+        {% for d in report.donors %}
+          <div class="bearer">
+            <span class="who">{{ d.owner_name }}</span>
+            <span class="gear">R{{ d.owner_relic }}</span>
+            <span class="ab">{{ d.label }}</span>
+            <span class="tag">{{ d.set_name }}</span>
+          </div>
+        {% endfor %}
+      </article>
     {% endif %}
 
     {% if report.steps %}

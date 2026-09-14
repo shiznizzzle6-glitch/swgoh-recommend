@@ -488,6 +488,8 @@ class CounterReport:
     squads: list = field(default_factory=list)  # list[CounterSquad]
     min_relic: int = 0
     modifiers: list[dict] = field(default_factory=list)  # name/scope/text per modifier
+    donors: list = field(default_factory=list)  # list[ModDonor] — speed mods to move
+    speed_matters: bool = False  # a speed-race modifier is in play
 
     @property
     def analysed(self) -> bool:
@@ -715,17 +717,22 @@ def analyze_counters(
 
     # Assemble squads from the tools the detected threats actually call for,
     # ordered so the most-wanted tool leads.
-    from .counter_squads import build_counter_squads
+    from .counter_squads import build_counter_squads, find_mod_donors
 
     wanted: dict[str, int] = {}
     for threat, _ in detect_threats(report.threat_text):
         for key in threat.use:
             wanted[key] = wanted.get(key, 0) + 1
     ranked = [k for k, _ in sorted(wanted.items(), key=lambda kv: kv[1], reverse=True)]
+    threat_keys = {s.key for s in report.steps}
     report.squads = build_counter_squads(
-        player,
-        ranked,
-        threat_keys={s.key for s in report.steps},
-        min_relic=report.min_relic,
+        player, ranked, threat_keys=threat_keys, min_relic=report.min_relic
     )
+
+    # When turn order decides the fight, moving Speed mods off the bench is
+    # faster than farming, so surface the best donors for the top squad.
+    report.speed_matters = "speed_race" in threat_keys
+    if report.speed_matters and report.squads:
+        squad_ids = {m.base_id for m in report.squads[0].members}
+        report.donors = find_mod_donors(player, squad_ids)
     return report

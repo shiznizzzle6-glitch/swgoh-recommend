@@ -213,3 +213,74 @@ def test_speed_race_favours_faster_units():
     picked = {m.base_id for m in racing[0].members}
     # At least two of the three fast units should make the cut.
     assert len(picked & {u.base_id for u in fast}) >= 2
+
+
+# --- speed breakdown (base from the stats export, mods live) ---
+def test_speed_label_explains_the_number():
+    from swgoh.recommend.counter_squads import SquadMember
+
+    known = SquadMember("X", "X", False, 7, 13, 5, 0, 0.5, base_speed=143, mod_speed=91)
+    assert known.total_speed == 234
+    assert "234" in known.speed_label and "143 base" in known.speed_label and "91 mods" in known.speed_label
+
+    unknown = SquadMember("Y", "Y", False, 7, 13, 5, 0, 0.5, base_speed=None, mod_speed=38)
+    assert unknown.total_speed is None
+    assert "base unknown" in unknown.speed_label
+    assert "38" in unknown.speed_label
+
+
+def test_base_speed_lookup_is_honest_about_gaps():
+    from swgoh.stats import base_speed, covered_units
+
+    assert covered_units() > 100
+    assert base_speed("MACEWINDU")  # covered by the export
+    assert base_speed("NOT_A_REAL_UNIT_ID") is None
+
+
+def test_mod_and_total_speed_use_live_mods():
+    from swgoh.models import Mod, SecondaryStat
+    from swgoh.stats import base_speed, mod_speed, total_speed
+
+    u = _unit("MACEWINDU", 7, 13, 5)
+    assert mod_speed(u) == 0
+    u.mods = [
+        Mod(slot=2, set_name="Speed", rarity=6, level=15, tier=5,
+            primary_name="Speed", primary_value=30.0,
+            secondaries=[SecondaryStat("Speed", 11.0)])
+    ]
+    assert mod_speed(u) == 41
+    assert total_speed(u) == base_speed("MACEWINDU") + 41
+
+
+# --- mod donors ---
+def test_mod_donors_exclude_the_squad_and_rank_by_speed():
+    from swgoh.models import Mod, SecondaryStat
+    from swgoh.recommend.counter_squads import find_mod_donors
+
+    def with_speed(base_id: str, speed: float) -> Unit:
+        u = _unit(base_id, 7, 13, 5)
+        u.mods = [
+            Mod(slot=2, set_name="Speed", rarity=6, level=15, tier=5,
+                primary_name="Speed", primary_value=speed, secondaries=[])
+        ]
+        return u
+
+    player = Player(
+        name="T", ally_code="1",
+        units=[with_speed("MACEWINDU", 30), with_speed("HERMITYODA", 25), with_speed("JAWA", 12)],
+    )
+    donors = find_mod_donors(player, squad_ids={"MACEWINDU"})
+    assert all(d.owner_base_id != "MACEWINDU" for d in donors)   # no self-donation
+    assert [d.owner_base_id for d in donors] == ["HERMITYODA", "JAWA"]  # fastest first
+    assert donors[0].is_speed_arrow
+
+
+def test_mod_donors_ignore_slow_mods():
+    from swgoh.models import Mod
+    from swgoh.recommend.counter_squads import find_mod_donors
+
+    u = _unit("HERMITYODA", 7, 13, 5)
+    u.mods = [Mod(slot=1, set_name="Health", rarity=6, level=15, tier=5,
+                  primary_name="Offense", primary_value=5.88, secondaries=[])]
+    player = Player(name="T", ally_code="1", units=[u])
+    assert find_mod_donors(player, squad_ids=set()) == []

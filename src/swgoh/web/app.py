@@ -569,6 +569,9 @@ def api_counter(
                             "relic_level": m.relic_level,
                             "power": m.power,
                             "investment": m.investment,
+                            "base_speed": m.base_speed,
+                            "mod_speed": m.mod_speed,
+                            "total_speed": m.total_speed,
                             "tools": m.tools,
                             "liabilities": m.liabilities,
                         }
@@ -576,6 +579,19 @@ def api_counter(
                     ],
                 }
                 for sq in report.squads
+            ],
+            "speed_matters": report.speed_matters,
+            "donors": [
+                {
+                    "owner": d.owner_name,
+                    "owner_base_id": d.owner_base_id,
+                    "owner_relic": d.owner_relic,
+                    "slot": d.slot_name,
+                    "set": d.set_name,
+                    "speed": d.speed,
+                    "speed_arrow": d.is_speed_arrow,
+                }
+                for d in report.donors
             ],
             "query": report.query,
             "matches": [bearer_json(b) for b in report.matches],

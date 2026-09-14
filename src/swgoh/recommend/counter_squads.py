@@ -30,6 +30,7 @@ from ..factions import factions_of
 from ..models import Player, Unit
 from ..names import display_name
 from ..ships import is_ship
+from ..stats import base_speed, mod_speed
 from .counters import TOOLS_BY_KEY, Tool, _find, _sentences
 
 SQUAD_SIZE = 5
@@ -104,12 +105,25 @@ class SquadMember:
     relic_level: int
     power: int
     investment: float
+    base_speed: int | None = None  # None when the stats export doesn't cover it
+    mod_speed: float = 0.0
     tools: list[str] = field(default_factory=list)  # tool labels this unit brings
     liabilities: list[str] = field(default_factory=list)
 
     @property
     def gear_label(self) -> str:
         return f"R{self.relic_level}" if self.relic_level else f"G{self.gear_level}"
+
+    @property
+    def total_speed(self) -> float | None:
+        return None if self.base_speed is None else self.base_speed + self.mod_speed
+
+    @property
+    def speed_label(self) -> str:
+        """"265 (143 base + 91 mods)" — the why behind the number."""
+        if self.base_speed is None:
+            return f"+{self.mod_speed:g} from mods (base unknown)"
+        return f"{self.total_speed:g} ({self.base_speed} base + {self.mod_speed:g} mods)"
 
 
 @dataclass
@@ -246,6 +260,8 @@ def _member(
         relic_level=unit.relic_level,
         power=unit.power,
         investment=round(_investment(unit, max_power), 3),
+        base_speed=base_speed(unit.base_id),
+        mod_speed=mod_speed(unit),
         tools=sorted(TOOLS_BY_KEY[k].label for k in keys if k in TOOLS_BY_KEY),
         liabilities=list(liabilities.get(unit.base_id, [])),
     )
@@ -288,14 +304,21 @@ def build_counter_squads(
     # a flat speed penalty widens the gap between fast and slow rather than
     # closing it, so mod speed is worth weighting explicitly.
     racing = "speed_race" in (threat_keys or set())
-    mod_speed = {u.base_id: sum(m.speed for m in u.mods) for u in eligible}
-    fastest = max(mod_speed.values(), default=0)
+    # Base Speed comes from the stats export and doesn't cover newer units. Rather
+    # than score those as zero — which would bury exactly the recent, fast kits —
+    # stand in the roster median so only the live mod half distinguishes them.
+    known = [b for b in (base_speed(u.base_id) for u in eligible) if b is not None]
+    median_base = sorted(known)[len(known) // 2] if known else 0
+    speed = {
+        u.base_id: (base_speed(u.base_id) or median_base) + mod_speed(u) for u in eligible
+    }
+    fastest = max(speed.values(), default=0)
 
     def unit_value(base_id: str) -> float:
         """Standalone worth: how fieldable, plus how many needed tools it brings."""
         value = invest[base_id] + 0.12 * len(tools.get(base_id, set()))
         if racing and fastest:
-            value += 0.20 * (mod_speed.get(base_id, 0) / fastest)
+            value += 0.20 * (speed.get(base_id, 0) / fastest)
         return value
 
     leaders = sorted(
@@ -386,3 +409,57 @@ def build_counter_squads(
         if len(final) >= limit:
             break
     return final
+
+
+@dataclass
+class ModDonor:
+    """A speed mod sitting on a unit you aren't fielding."""
+
+    owner_base_id: str
+    owner_name: str
+    owner_relic: int
+    slot_name: str
+    set_name: str
+    speed: float
+    is_speed_arrow: bool
+
+    @property
+    def label(self) -> str:
+        arrow = " (Speed arrow)" if self.is_speed_arrow else ""
+        return f"{self.slot_name}{arrow} · +{self.speed:g} Speed"
+
+
+def find_mod_donors(
+    player: Player,
+    squad_ids: set[str],
+    limit: int = 8,
+    min_speed: float = 10.0,
+) -> list[ModDonor]:
+    """Speed mods equipped on units outside the squad, best first.
+
+    When turn order decides the fight, the fastest route to more Speed usually
+    isn't farming — it's moving mods you already own off units that aren't in
+    this fight. Donors are ranked by the Speed they'd free up, and units already
+    in the squad are excluded (moving a mod within the squad gains nothing).
+    """
+    donors: list[ModDonor] = []
+    for unit in player.units:
+        if unit.base_id in squad_ids or is_ship(unit.base_id):
+            continue
+        for mod in unit.mods:
+            if mod.speed < min_speed:
+                continue
+            donors.append(
+                ModDonor(
+                    owner_base_id=unit.base_id,
+                    owner_name=display_name(unit.base_id),
+                    owner_relic=unit.relic_level,
+                    slot_name=mod.slot_name,
+                    set_name=mod.set_name,
+                    speed=mod.speed,
+                    is_speed_arrow=mod.slot == 2 and mod.primary_name == "Speed",
+                )
+            )
+    # Most Speed first; prefer taking from less-invested units on ties.
+    donors.sort(key=lambda d: (d.speed, -d.owner_relic), reverse=True)
+    return donors[:limit]
