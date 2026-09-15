@@ -65,6 +65,8 @@ def main() -> None:
                 "i": str(a.get("base_id", "")),
                 "n": a.get("name", ""),
                 "k": kind_of(str(a.get("base_id", ""))),
+                # Max tier, so a roster export can show "level 6 of 8".
+                "m": int(a.get("tier_max") or 0),
                 "z": bool(a.get("is_zeta")),
                 "o": bool(a.get("is_omicron")),
                 "d": desc,

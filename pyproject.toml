@@ -20,6 +20,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# Only needed by scripts/export_roster.py; the web app and container don't use it.
+export = ["openpyxl>=3.1"]
 
 [project.scripts]
 swgoh-web = "swgoh.web.app:main"
